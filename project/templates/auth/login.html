@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Login</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <!-- <div class="panel-heading">
+        <div class="panel-title">
+        Log in to the site
+        </div>
+      </div> -->
+      <div class="panel-body">
+        <h5>
+        Log in to the site
+        </h5>
+        <form method="post" name="login">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Your e-mail:</label>
+            {% for error in form.email.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.email(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            {% for error in form.password.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.password(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <div class="checkbox check-success">
+              {{ form.remember_me }}
+              <label for="remember_me">Remember me</label>
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.user_type }}
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+        <p>
+            Forgot your password?
+            <a href="{{ url_for('auth.forgot_password') }}">Click here</a>
+        </p>
+        <p>
+            New user?
+            <a href="{{ url_for('auth.register') }}">Click here to register</a>
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block page_js %}
+  <script type="text/javascript">
+    $('input#user_type').val('');
+  </script>
+{% endblock %}

@@ -1,0 +1,88 @@
+<div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+  <table class="table table-hover dataTable no-footer" id="basicTable" role="grid">
+    <thead>
+      <tr role="row">
+        <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">STATUS</th>
+        <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending" aria-sort="ascending">PATIENT</th>
+        <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="{% if current_user.user_type == 'provider' %}Payer{% else %}Provider{% endif %}: activate to sort column ascending">{% if current_user.user_type == 'provider' %}PAYER{% else %}PROVIDER{% endif %}</th>
+        <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Turn Around Time: activate to sort column ascending">TIME</th>
+        {% if current_user.user_type == 'payer' %}
+        <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Policy: activate to sort column ascending">POLICY#</th>
+<th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Type: activate to sort column ascending">TYPE</th>
+{% endif %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for gop in gops %}
+      <tr role="row">
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>
+              {% if gop.status and gop.status != 'pending' %}
+                  {% if gop.status == 'approved' %}
+                    <i class="glyphicon glyphicon-ok approved"></i><span class="approved" style="font-size:13px;"> Approved</span>
+                  {% elif gop.status == 'declined' %}
+                    <i class="glyphicon glyphicon-remove declined"></i><span class="declined" style="font-size:13px;"> Declined</span>
+                  {% elif gop.status == 'in review' %}
+                    <i class="glyphicon glyphicon-search review"></i><span class="review" style="font-size:13px;"> In review</span>
+                  {% endif %}
+              {% else %}
+                <i class="glyphicon glyphicon-hourglass pending"></i><span class="pending" style="font-size:13px;"> Pending</span>
+              {% endif %}
+            </p>
+          </a>
+        </td>
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>{{ gop.patient.name }}</p>
+          </a>
+        </td>
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>
+              {% if current_user.user_type == 'provider' %}
+                {{ gop.payer.company }}
+              {% else %}
+                {{ gop.provider.company }}
+              {% endif %}
+            </p>
+          </a>
+        </td>
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>
+              {% if gop.turnaround_time() %}
+                {{ gop.turnaround_time() }}
+              {% endif %}
+            </p>
+          </a>
+        </td>
+        {% if current_user.user_type == 'payer' %}
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>
+              {% if gop.patient.policy_number %}
+                {{ gop.patient.policy_number }}
+              {% else %}
+                Unknown
+              {% endif %}
+            </p>
+          </a>
+        </td>
+        <td class="v-align-middle">
+          <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+            <p>
+              {% if gop.reason %}
+                {{ gop.reason|title }}
+              {% else %}
+                Unknown
+              {% endif %}
+            </p>
+          </a>
+        </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>

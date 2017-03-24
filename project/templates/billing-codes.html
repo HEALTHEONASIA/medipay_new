@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Billing codes{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">Billing codes</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size: 18px;">Billing codes
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">ID</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Room and Board: activate to sort column descending" aria-sort="ascending">Room and Board</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Doctor visit fee: activate to sort column ascending">Doctor visit fee</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Doctor consultation fee: activate to sort column ascending">Doctor consultation fee</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Specialist visit fee: activate to sort column ascending">Specialist visit fee</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Specialist consultation fee: activate to sort column ascending">Specialist consultation fee</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Medicines: activate to sort column ascending">Medicines</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Administration fee: activate to sort column ascending">Administration fee</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for bill_code in bill_codes %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.id }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.room_and_board }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.doctor_visit_fee }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.doctor_consultation_fee }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.specialist_visit_fee }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.specialist_consultation_fee }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.medicines }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                    {% endif %}
+                        <p>{{ bill_code.administration_fee }}</p>
+                      </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row m-t-10">
+          <div class="col-md-12" style="text-align: center;">
+            {% if user %}
+              <a href="{{ url_for('main.user_billing_code_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('main.user_billing_code_add_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+            {% else %}
+              <a href="{{ url_for('main.billing_code_add') }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('main.billing_code_add_csv') }}" class="btn btn-primary">Bulk Upload</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

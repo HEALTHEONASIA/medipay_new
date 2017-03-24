@@ -1,0 +1,41 @@
+{% if icd_codes %}
+    {% for icd_code in icd_codes %}
+        <tr role="row" class="odd">
+            <td class="v-align-middle sorting_0">
+              <p data-id="{{ icd_code.id }}">
+              {% if query in icd_code.code %}
+                {{ icd_code.code.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
+              {% else %}
+                {{ icd_code.code }}
+              {% endif %}
+              </p>
+            </td>
+            <td class="v-align-middle">
+              <p>
+              {% if query in icd_code.common_term %}
+                {{ icd_code.common_term.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
+              {% else %}
+                {{ icd_code.common_term }}
+              {% endif %}
+              </p>
+            </td>
+            <td class="v-align-middle">
+              <p>
+              {% if query in icd_code.description %}
+                {{ icd_code.description.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
+              {% else %}
+                {{ icd_code.description }}
+              {% endif %}
+              </p>
+            </td>
+        </tr>
+    {% endfor %}
+{% else %}
+    <tr role="row" class="odd">
+        <td class="v-align-middle sorting_1" colspan="3">
+          <p style="text-align: center;">
+            No ICD Data Found.
+          </p>
+        </td>
+    </tr>
+{% endif %}

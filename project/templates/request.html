@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+{% block title %}Request GOP{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{ url_for('main.index') }}">GOP Request</a>
+    </li>
+    <li>
+      <a href="#" class="active">{{ gop.patient.name }}</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <style>
+    #medical-details-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      width: 60%;
+      height: 80%;
+      background: #fff;
+      overflow-y: scroll;
+      z-index: 1000;
+      padding: 2%;
+    }
+    #medical-details-popup button {
+      margin-top: 41px;
+    }
+    @media (max-width: 992px) {
+      #medical-details-popup button {
+        margin-top: 0;
+      }
+    }
+    #medical-details-popup-bg {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      background: rgba(0,0,0,.4);
+    }
+  </style>
+  <div id="search-title-row" class="row" style="display: none;">
+    <div class="col-md-12">
+      <h4 id="search-title"></h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 request-details">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-4">
+              <h5 style="margin-top: 0;" class="gop-title">
+                GOP Request #{{ gop.id }} {% if gop.final %}(FINAL){% else %}(INITIAL){% endif %}
+                {% if gop.state == 'closed' %}<br>
+                  <span style="color: #f55753;">
+                    (Closed)<br>
+                    <span style="font-size: 14px;">Reason: {{ gop.reason_close }}</span>
+                  </span>
+                {% endif %}
+              </h5>
+            </div>
+            <div class="col-md-4">
+              <h5 style="margin-top: 0;">
+                {{ gop.patient.name }}
+              </h5>
+              <p>
+                {{ gop.payer.company }}<br>
+                {% if gop.patient.policy_number %}
+                  {{ gop.patient.policy_number }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="col-sm-4">
+              <h5 style="margin-top: 0; {% if gop.status and gop.status != 'pending' %} {% if gop.status == 'approved' %}color: #187A30;{% elif gop.status == 'declined' %}color: #EA1A22;{% elif gop.status == 'in review' %}color: #FF8C00;{% endif %}{% else %}color: #000000;{% endif %}" class="request-status">
+                <span class="bold">
+                  {% if gop.state == 'closed' %}
+                    <i class="glyphicon glyphicon-remove declined"></i>
+                    <span style="color: #000000;">CLOSED</span>
+                  {% else %}
+                    {% if gop.status and gop.status != 'pending' %}
+                      {% if gop.status == 'approved' %}
+                        <i class="glyphicon glyphicon-ok approved"></i>
+                      {% elif gop.status == 'declined' %}
+                        <i class="glyphicon glyphicon-remove declined"></i>
+                      {% elif gop.status == 'in review' %}
+                        <i class="glyphicon glyphicon-search review"></i>
+                      {% endif %}
+                      {{ gop.status|upper }}
+                    {% else %}
+                        <i class="glyphicon glyphicon-hourglass pending"></i> PENDING
+                    {% endif %}
+                  {% endif %}
+                </span>
+              </h5>
+              <p>
+              {% if gop.status and gop.status != 'pending' %}
+                {% if current_user.user_type == 'provider' or current_user.role == 'admin' %}
+                  {% if gop.status == 'approved' %}
+                    Approved
+                  {% elif gop.status == 'declined' %}
+                    Rejected
+                  {% elif gop.status == 'in review' %}
+                    Reviewed
+                  {% endif %}
+                  {% if gop.stamp_author %}
+                    By {{ gop.stamp_author }}
+                  {% endif %}
+                  {% if gop.reason_decline %}
+                    <br>Reason: {{ gop.reason_decline }}
+                  {% endif %}
+                  <br>
+                {% endif %}
+                {% if gop.timestamp_edited %}
+                  {{ gop.timestamp_edited.strftime('%I:%M%p %d/%m/%Y') }}
+                {% else %}
+                  {{ gop.timestamp_edited }}
+                {% endif %}
+              {% endif %}
+              </p>
+            </div>
+          </div>
+            <h5>Patient</h5>
+            <div class="row">
+              <div class="col-md-4">
+                {% if gop.patient.photo == "/static/uploads/" %}
+                  <img style="max-width: 100%;" src="/static/img/person-solid.png">
+                {% else %}
+                  <img style="max-width: 100%;" src="{{ gop.patient.photo }}">
+                {% endif %}
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Name</label>
+                  <p>{{ gop.patient.name }}</p>
+                </div>
+                <div class="form-group">
+                  <label>Date of birth</label>
+                  <p>
+                    {% if gop.patient.dob %}
+                      {{ gop.patient.dob.strftime('%d/%m/%Y') }}
+                    {% else %}
+                      {{ gop.patient.dob }}
+                    {% endif %}
+                  </p>
+                </div>
+                <div class="form-group">
+                  <label>Patient Phone Nr.</label>
+                  <p>{{ gop.patient.tel }}</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Gender</label>
+                  <p>{{ gop.patient.gender|capitalize }}</p>
+                </div>
+                <div class="form-group">
+                  <label>Medical Record Nr.</label>
+                  <p>{{ gop.patient_medical_no }}</p>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 request-details">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-12">
+              {% if form and gop.state != 'closed' and gop.status != 'approved' and gop.status != 'declined' %}
+                <form method="post" name="approve">
+                  {{ form.hidden_tag() }}
+                  <div class="form-group" style="text-align: right;">
+                    <div class="row">
+                      <div class="col-md-8" style="text-align: right;">
+                        {{ form.submit_approve(class_="btn btn-success", id="approve") }}&nbsp;
+                        {{ form.submit_decline(class_="btn btn-danger", id="decline") }}
+                        <div class="btn btn-warning m-t-5" id="further-info-required">Further Info Required</div>
+                      </div>
+                      <div class="col-md-4">
+                        {% for error in form.reason_decline.errors %}
+                          <div><span class="help" style="color: #f55753;">[{{ error }}]</span></div>
+                        {% endfor %}
+                        {{ form.status }}
+                        {{ form.reason_decline(class_="form-control", placeholder="Reason..") }}
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Admission date</label>
+                <p>{{ gop.admission_date.strftime('%d/%m/%Y') }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Requested by</label>
+                <p>
+                  {% if gop.provider.pic %}
+                    {{ gop.provider.pic }}
+                  {% else %}
+                    Unnamed
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+            {% if current_user.role != 'admin' %}
+              {% if current_user.user_type == 'provider' %}
+                <div class="col-md-4">
+                  {% if gop.status == 'approved' or gop.status == 'in review' or not gop.status %}
+                    {% if gop.status == 'approved' and not gop.final and gop.state != 'closed' %}
+                      <a href="{{ url_for('main.request_page_edit', gop_id=gop.id, final=1) }}" class="btn btn-primary m-b-5" style="padding: 2px 4px;">
+                        <i class="fa fa-paste"></i> <span class="bold">Send FINAL</span>
+                      </a>
+                    {% endif %}
+                    <a href="{{ url_for('main.request_page_download', gop_id=gop.id) }}" class="btn btn-primary btn-xs m-b-5" style="padding: 2px 4px;">
+                      <i class="fa fa-cloud-download"></i> <span class="bold">Download</span>
+                    </a>
+                  {% elif gop.status == 'declined' and gop.state != 'closed' %}
+                    <a href="{{ url_for('main.request_page_edit', gop_id=gop.id) }}" class="btn btn-info btn-xs m-b-5" style="padding: 2px 4px;">
+                      <i class="fa fa-paste"></i> <span class="bold">Edit</span>
+                    </a>
+                    <a href="{{ url_for('main.request_page_resend', gop_id=gop.id) }}" class="btn btn-success btn-xs m-b-5" type="button" style="padding: 2px 5px;">
+                      <i class="fa fa-cloud-upload"></i> <span class="bold">Resend</span>
+                    </a>
+                  {% endif %}
+
+                  {% if gop.state != 'closed' %}
+                    <a href="{{ url_for('main.request_page_close', gop_id=gop.id, reason='') }}" id="close" class="btn btn-danger btn-xs m-b-5" style="padding: 2px 4px;">
+                      <i class="fa fa-times"></i> <span class="bold">Close</span>
+                    </a>
+                    <div id="reason-close-list-bg"></div>
+                    <div id="reason-close-list">
+                      <div>Closing reason:</div>
+                      <button class="btn btn-primary btn-xs">Cancel</button>
+                      <button class="btn btn-primary btn-xs">Discharged</button>
+                      <button class="btn btn-primary btn-xs m-t-5">No Show</button>
+                    </div>
+                  {% endif %}
+                  
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Admission time</label>
+                <p>{{ gop.admission_time.strftime('%I:%M %p') }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Time requested</label>
+                <p>{{ gop.timestamp.strftime('%I:%M %p') }}</p>
+              </div>
+            </div>
+          </div>
+          <h5>Cost Estimation</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Room price</label>
+                <p>{{ '{:,.2f}'.format(gop.room_price) }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Room type</label>
+                <p>{{ gop.room_type|upper }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Doctor Fee</label>
+                <p>{{ '{:,.2f}'.format(gop.doctor_fee) }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Surgery Fee</label>
+                <p>{{ '{:,.2f}'.format(gop.surgery_fee) }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Medication Fee</label>
+                <p>{{ '{:,.2f}'.format(gop.medication_fee) }}</p>
+              </div>
+            </div>
+            <div class="col-md-4" style="border: 1px solid #933432;">
+              <div class="form-group" style="color: #933432;">
+                <label>Total</label>
+                <p><strong style="font-size: 14px; line-height: 12px;">
+                {% if gop.quotation %}
+                  {{ '{:,.2f}'.format(gop.quotation) }}
+                {% else %}
+                  0.00
+                {% endif %}
+                </strong></p>
+              </div>
+            </div>
+          </div>
+          <h5>Medical Details</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Doctor name</label>
+                <p>{{ gop.doctor_name }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Plan of action</label>
+                <p>{{ gop.patient_action_plan }}</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>ICD list</label>
+                <!-- <p>{#{ gop.icd_codes }#}</p> -->
+                {% if icd_codes|length > 0 %}
+                  <p>
+                  {% for icd_code in icd_codes %}
+                    {{ icd_code.code }}: {{ icd_code.common_term }}<br>
+                  {% endfor %}
+                  </p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>More details</label>
+                <p><a href="#" id="medical-details-popup-btn">Show more medical details</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="medical-details-popup-bg"></div>
+  <div id="medical-details-popup">
+    <div class="row">
+      <div class="col-md-12">
+        <h5>Patient's medical details</h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Symptoms</label>
+          <p>{{ gop.medical_details.symptoms }}</p>
+        </div>
+        <div class="form-group">
+          <label>Temperature</label>
+          <p>{{ gop.medical_details.temperature }}</p>
+        </div>
+        <div class="form-group">
+          <label>Heart rate</label>
+          <p>{{ gop.medical_details.heart_rate }}</p>
+        </div>
+        <div class="form-group">
+          <label>Respiration</label>
+          <p>{{ gop.medical_details.respiration }}</p>
+        </div>
+        <div class="form-group">
+          <label>Blood pressure</label>
+          <p>{{ gop.medical_details.blood_pressure }}</p>
+        </div>
+        <div class="form-group">
+          <label>Physical finding</label>
+          <p>{{ gop.medical_details.physical_finding }}</p>
+        </div>
+        <div class="form-group">
+          <label>Health history</label>
+          <p>{{ gop.medical_details.health_history }}</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Previously admitted</label>
+          <p>{{ gop.medical_details.previously_admitted }}</p>
+        </div>
+        <div class="form-group">
+          <label>Diagnosis</label>
+          <p>{{ gop.medical_details.diagnosis }}</p>
+        </div>
+        <div class="form-group">
+          <label>In patient indication</label>
+          <p>{{ gop.medical_details.in_patient }}</p>
+        </div>
+        <div class="form-group">
+          <label>Test results</label>
+          <p>{{ gop.medical_details.test_results }}</p>
+        </div>
+        <div class="form-group">
+          <label>Current therapy</label>
+          <p>{{ gop.medical_details.current_therapy }}</p>
+        </div>
+        <div class="form-group">
+          <label>Treatment plan</label>
+          <p>{{ gop.medical_details.treatment_class }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group pull-right">
+          <button class="btn btn-primary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block page_js %}
+  {% if current_user.user_type == 'payer' %}
+    <div id="user-prompt-bg"></div>
+    <div id="user-prompt" data-validated="false" data-set-url="{{ url_for('main.request_set_stamp_author', gop_id=gop.id) }}">
+      <div class="form-group">
+        <label>Please, enter your full name</label>
+        <input type="text" class="form-control">
+        <span class="btn btn-primary m-t-10">Confirm</span>
+      </div>
+    </div>
+  {% endif %}
+  <script type="text/javascript">
+    if (typeof(String.prototype.trim) === "undefined") {
+      String.prototype.trim = function() {
+        return String(this).replace(/^\s+|\s+$/g, '');
+      };
+    }
+    var getUrlParameter = function getUrlParameter(sParam) {
+      var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+          sParameterName = sURLVariables[i].split('=');
+          if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+          }
+        }
+    };
+    $('#medical-details-popup-btn').click(function(e) {
+      e.preventDefault();
+      $('#medical-details-popup-bg').fadeIn();
+      $('#medical-details-popup').fadeIn();
+    });
+    $('#medical-details-popup-bg').click(function() {
+      $(this).fadeOut();
+      $('#medical-details-popup').fadeOut();
+    });
+    $('#medical-details-popup button').click(function(e) {
+      e.preventDefault();
+      $('#medical-details-popup-bg').fadeOut();
+      $('#medical-details-popup').fadeOut();
+    });
+    $('input#approve').click(function() {
+      $('input[name="status"]').val('approved');
+    });
+    $('input#decline').click(function() {
+      $('input[name="status"]').val('declined');
+    });
+    $('#further-info-required').click(function() {
+      $('input#reason_decline').val('Further info required');
+      $('input#decline').click();
+    });
+    $('form[name="approve"] .btn').click(function(e) {
+      var userPrompt = $('#user-prompt');
+      if (userPrompt.attr('data-validated') != "true") {
+        e.preventDefault();
+        userPrompt.attr('data-called-by', $(this).attr('id'));
+        userPrompt.fadeIn();
+        $('#user-prompt-bg').fadeIn();
+      }
+    });
+    $('#user-prompt-bg').click(function() {
+      $('#user-prompt-bg').fadeOut();
+      $('#user-prompt').fadeOut();
+    });
+    $('#user-prompt .btn').click(function() {
+      var fullNameField = $('#user-prompt input');
+      var fullName = fullNameField.val().trim();
+      var calledBy = $('#user-prompt').attr('data-called-by');
+      var setUrl = $('#user-prompt').attr('data-set-url');
+
+      if (calledBy.length == 0) {
+        console.log('Error: wrong caller id.');
+        return false;
+      }
+
+      if (fullName.length > 0) {
+        $.get(setUrl, {'name': fullName}, function(data) {
+          if (data == 'SUCCESS') {
+            $('#user-prompt').attr('data-validated', "true");
+            $('#user-prompt-bg').click();
+            $('#' + calledBy).click();
+          } else if (data == 'ERROR') {
+            console.log('Error: server error.');
+            alert('Error: server error. Try again later.');
+          }
+        });
+      } else {
+        fullNameField.parent().addClass('has-error');
+        fullNameField.attr('aria-invalid', true);
+        console.log('ValidationError: the wrong value is entered.');
+      }
+    });
+    $('a#close').click(function(e) {
+      e.preventDefault();
+      $('#reason-close-list').fadeIn();
+    });
+    $('#reason-close-list button').click(function() {
+      var reason = $(this).text();
+      var href = $('a#close').attr('href');
+      window.location = href + reason;
+    });
+    var query = getUrlParameter('query');
+    if (query && query.length != 0 && $('.request-details')) {
+      $('.request-details p').each(function() {
+        var $this = $(this);
+        var $thisText = $this.text().toLowerCase();
+        query = query.toLowerCase();
+        $('#search-title').text('Search by query "' + query + '"');
+        $('#search-title-row').show();
+        if ($thisText.indexOf(query) != -1) {
+          var found = $this.text().substr($thisText.indexOf(query), query.length);
+          $this.html($this.text().replace(found, '<span style="background: #ff0; color: #000;">' + found + '</span>'));
+        }
+      });
+    }
+  </script>
+{% endblock %}

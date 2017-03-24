@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Setup{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">Setup</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>{% if user %}User #{{ user.id }} {% endif %}Setup</h5>
+        <h5>1-TAP</h5>
+        <form method="post" name="provider-setup">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Serial Number</label>
+            {% for error in form.serial_number.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.serial_number(class_="form-control") }}
+          </div>
+          <h5>Server</h5>
+          <div class="row">
+            <div class="col-sm-9">
+              <div class="form-group">
+                <label>Server URL</label>
+                {% for error in form.server_url.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.server_url(class_="form-control") }}
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label>Port</label>
+                {% for error in form.server_port.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.server_port(class_="form-control") }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Module Name</label>
+            {% for error in form.module_name.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.module_name(class_="form-control") }}
+          </div>
+          <h5>Proxy</h5>
+          <div class="row">
+            <div class="col-sm-9">
+              <div class="form-group">
+                <label>Proxy URL</label>
+                {% for error in form.proxy_url.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.proxy_url(class_="form-control") }}
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label>Port</label>
+                {% for error in form.proxy_port.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.proxy_port(class_="form-control") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-9">
+              <div class="form-group">
+                <label>Username</label>
+                {% for error in form.username.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.username(class_="form-control") }}
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="form-group">
+                <label>Password</label>
+                {% for error in form.password.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.password(class_="form-control") }}
+              </div>
+            </div>
+          </div>
+          <h5>HIS</h5>
+          <div class="form-group">
+            <label>Request URL</label>
+            {% for error in form.request_url.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+            {{ form.request_url(class_="form-control") }}
+          </div>
+          <h5>Preferences</h5>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label>Default Path</label>
+                {% for error in form.default_path.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.default_path(class_="form-control") }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Language</label>
+            {% for error in form.language.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            <div class="select-field-outer">
+              {{ form.language(class_="form-control") }}
+            </div>
+          </div>
+          <div class="form-group">
+            <button style="margin-top: 25px;" class="btn btn-primary" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Payer Form{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings_payers', user_id=user.id) }}">Payers</a>
+      {% else %}
+        <a href="{{ url_for('main.settings_payers') }}">Payers</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">Payer Form</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>
+        {% if user %}User #{{ user.id }} {% endif %}Payer Form
+        </h5>
+        <form method="post" name="provider-payer">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Company</label>
+            {% for error in form.company.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.company(class_="form-control", placeholder="Payor Company Name") }}
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            {% for error in form.payer_type.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            <div class="select-field-outer">
+              {{ form.payer_type(class_="form-control") }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Contract reference number</label>
+            {% for error in form.contract_number.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.contract_number(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            {% for error in form.pic_email.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.pic_email(class_="form-control", placeholder="pic@email.com") }}
+          </div>
+          <div class="form-group">
+            <label>Email 2</label>
+            {% for error in form.pic_alt_email.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.pic_alt_email(class_="form-control", placeholder="alt-pic@email.com") }}
+          </div>
+          <div class="form-group">
+            <label>PIC</label>
+            {% for error in form.pic.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.pic(class_="form-control", placeholder="Pic Full Name") }}
+          </div>
+          <div class="form-group">
+            <label>Telephone</label>
+            {% for error in form.tel.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.tel(class_="form-control", placeholder="+111222333444") }}
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            {% for error in form.country.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            <div class="select-field-outer">
+              {{ form.country(class_="form-control") }}
+            </div>
+          </div>
+          <div class="form-group" id="other-country" style="{% if form.other_country.data and form.country.data == 'Other' %}display: block;{% endif %}">
+            <label>Other country</label>
+            {% for error in form.other_country.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.other_country(class_="form-control") }}
+          </div>
+          {{ form.current_payer_id }}
+          {{ form.current_user_id }}
+          <div class="form-group">
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block page_js %}
+  <script type="text/javascript">
+    $('select#country').change(function() {
+      if ($(this).find('option:selected').val() == 'Other') {
+        $('#other-country').fadeIn();
+      } else {
+        $('#other-country').fadeOut();
+      }
+    });
+  </script>
+{% endblock %}

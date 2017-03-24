@@ -1,0 +1,15 @@
+<p>
+    The user {{ current_user.email }} 
+    {% if current_user.user_type == 'provider' %}
+        {% if current_user.provider.company %}
+            ({{ current_user.provider.company }})
+        {% endif %}
+    {% elif current_user.user_type == 'payer' %}
+        {% if current_user.payer.company %}
+            ({{ current_user.payer.company }})
+        {% endif %}
+    {% endif %}
+    has requested an upgrade to the Premium account.
+</p>
+<p>The email for invoice is {{ email_invoice }}</p>
+<p>Go to the <a href="{{ root[:-1] }}{{ url_for('main.user_settings_user_setup', user_id=current_user.id) }}">user's settings</a> to change the user's account role.</p>

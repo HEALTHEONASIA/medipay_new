@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">{% if user != current_user %}User #{{ user.id }} {% endif %}Settings</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-9">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>
+          {% if user != current_user %}User #{{ user.id }} {% endif %}{% if user.name %}{{ user.name }} {% endif %}{{ user.user_type|capitalize }} settings
+        </h5>
+        {% if user.user_type == 'provider' %}
+        <form method="post" name="change-provider-info">
+        {% elif user.user_type == 'payer' %}
+        <form method="post" name="change-payer-info">
+        {% endif %}
+          {{ form.hidden_tag() }}
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Company</label>
+                {% for error in form.company.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.company(class_="form-control", placeholder="Your Company Name") }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                {% if user.user_type == 'provider' %}
+                  <label>PIC</label>
+                {% elif user.user_type == 'payer' %}
+                  <label>PIC (Claims Team / Manager)</label>
+                {% endif %}
+                {% for error in form.pic.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.pic(class_="form-control", placeholder="PIC Full Name") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+                {% if user.user_type == 'provider' %}
+                  <div class="form-group">
+                    <label>Provider type</label>
+                    {% for error in form.provider_type.errors %}
+                      <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                    {% endfor %}
+                    {{ form.provider_type(class_="form-control", placeholder="Hospital, etc.") }}
+                  </div>
+                {% elif user.user_type == 'payer' %}
+                  <div class="form-group">
+                    <label>Payer type</label>
+                    {% for error in form.payer_type.errors %}
+                      <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                    {% endfor %}
+                    <div class="select-field-outer">
+                      {{ form.payer_type(class_="form-control") }}
+                    </div>
+                  </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>PIC email</label>
+                {% for error in form.pic_email.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.pic_email(class_="form-control", placeholder="pic@email.com") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Country</label>
+                {% for error in form.country.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                <div class="select-field-outer">
+                  {{ form.country(class_="form-control") }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>PIC alt. email</label>
+                {% for error in form.pic_alt_email.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.pic_alt_email(class_="form-control", placeholder="alt-pic@email.com") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group" id="other-country" style="{% if form.other_country.data and form.country.data == 'Other' %}display: block;{% endif %}">
+                <label>Other country</label>
+                {% for error in form.other_country.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.other_country(class_="form-control") }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Telephone</label>
+                {% for error in form.tel.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.tel(class_="form-control", placeholder="+111222333444") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Street name</label>
+                {% for error in form.street_name.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.street_name(class_="form-control", placeholder="Street Name st.") }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Street number</label>
+                {% for error in form.street_number.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.street_number(class_="form-control", placeholder="99") }}
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>State</label>
+                {% for error in form.state.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.state(class_="form-control", placeholder="ST") }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Postcode</label>
+                {% for error in form.postcode.errors %}
+                  <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.postcode(class_="form-control", placeholder="012345") }}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.save(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    {% if user.user_type == 'provider' %}
+      <div class="panel panel-default">
+        <div class="panel-body">
+        {% if user != current_user %}
+          <a href="{{ url_for('main.user_settings_payers', user_id=user.id) }}" class="btn btn-primary btn-block">
+        {% else %}
+          <a href="{{ url_for('main.settings_payers') }}" class="btn btn-primary btn-block">
+        {% endif %}
+            <span class="pull-right"><i class="pg-menu"></i></span>
+            Payer Setup
+          </a>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body">
+        {% if user != current_user %}
+          <a href="{{ url_for('main.user_billing_codes', user_id=user.id) }}" class="btn btn-primary btn-block">
+        {% else %}
+          <a href="{{ url_for('main.billing_codes') }}" class="btn btn-primary btn-block">
+        {% endif %}
+            <span class="pull-right"><i class="pg-menu"></i></span>
+            Billing Code Setup
+          </a>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body">
+        {% if current_user != user %}
+          <a href="{{ url_for('main.user_doctors', user_id=user.id) }}" class="btn btn-primary btn-block">
+        {% else %}
+          <a href="{{ url_for('main.doctors') }}" class="btn btn-primary btn-block">
+        {% endif %}
+            <span class="pull-right"><i class="pg-menu"></i></span>
+            Doctor Setup
+          </a>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body">
+        {% if current_user != user %}
+          <a href="{{ url_for('main.user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+        {% else %}
+          <a href="{{ url_for('main.setup') }}" class="btn btn-primary btn-block">
+        {% endif %}
+            <span class="pull-right"><i class="pg-menu"></i></span>
+            System Setup
+          </a>
+        </div>
+      </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-body">
+      {% if user != current_user %}
+        <a href="{{ url_for('main.user_settings_user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+      {% else %}
+        <a href="{{ url_for('main.settings_user_setup') }}" class="btn btn-primary btn-block">
+      {% endif %}
+          <span class="pull-right"><i class="pg-menu"></i></span>
+          User Setup
+        </a>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        {% if current_user != user %}
+          <a href="{{ url_for('main.user_settings_account', user_id=user.id) }}" class="btn btn-primary btn-block">
+        {% else %}
+          <a href="{{ url_for('main.settings_account') }}" class="btn btn-primary btn-block">
+        {% endif %}
+          <span class="pull-right"><i class="pg-menu"></i></span>
+          Account Setup
+        </a>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body" style="text-align: center;">
+        <div>
+          {% if user.api_key %}
+            Your API Key:<br><strong id="api-key">{{ user.api_key }}</strong>
+          {% else %}
+            &nbsp;Your API Key:<br><strong id="api-key">not set</strong>
+          {% endif %}
+        </div>
+        <div class="m-t-5">
+          <button id="generate-api-key" class="btn btn-success">Generate API key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block page_js %}
+  <script type="text/javascript">
+    $('select#country').change(function() {
+      if ($(this).find('option:selected').val() == 'Other') {
+        $('#other-country').fadeIn();
+      } else {
+        $('#other-country').fadeOut();
+      }
+    });
+    $('button#generate-api-key').click(function(e) {
+      e.preventDefault();
+      $('#api-key').fadeOut(function() {
+        $('#api-key').text('');
+      });
+      $.get('/generate-api-key', function(data) {
+        $('#api-key').fadeIn(function() {
+          $('#api-key').text(data);
+        });
+      });
+    });
+  </script>
+{% endblock %}

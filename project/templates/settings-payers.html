@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Payers{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">Payers</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size: 18px;">{% if user %}User #{{ user.id }} {% endif %}Payers
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Company: activate to sort column descending" aria-sort="ascending">Company</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Type: activate to sort column ascending">Type</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Contract number: activate to sort column ascending">Contract number</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Email 2: activate to sort column ascending">Email 2</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="PIC: activate to sort column ascending">PIC</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Telephone: activate to sort column ascending">Telephone</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Country: activate to sort column ascending">Country</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for payer in payers %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.company }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.payer_type }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                        <p>{{ payer.contract(user).number }}</p>
+                      </a>
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                        <p>{{ payer.contract().number }}</p>
+                      </a>
+                    {% endif %}
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.pic_email }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.pic_alt_email }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.pic }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.tel }}</p>
+                      </a>
+                  </td>
+                  <td class="v-align-middle">
+                    {% if user %}
+                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                    {% else %}
+                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                    {% endif %}
+                        <p>{{ payer.country }}</p>
+                      </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row m-t-10">
+          <div class="col-md-12" style="text-align: center;">
+            {% if user %}
+              <a href="{{ url_for('main.user_settings_payer_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('main.user_settings_payer_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+            {% else %}
+              <a href="{{ url_for('main.settings_payer_add') }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('main.settings_payer_csv') }}" class="btn btn-primary">Bulk Upload</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

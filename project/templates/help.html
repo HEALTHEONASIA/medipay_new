@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block extraheader %}
+<!--
+Javascript Addition Section
+Will Be Populated Before Body Tag
+-->
+{% endblock %}
+{% block title %}Help{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+    <ul class="breadcrumb">
+        <li>
+            <a href="{{ url_for('main.index') }}">Home</a>
+        </li>
+        <li>
+            <a href="#" class="active">Help</a>
+        </li>
+    </ul>
+{% endblock %}
+{% block page_content %}
+
+<style>
+.Help-Item{
+    font-size:18px;
+    padding-bottom: 5px;
+    color: #3a8fc8;
+    cursor: pointer;
+}
+
+.modal-top-padding{
+    padding-top: 10px !important;
+}
+
+#Video-Frame{
+    height:315px; 
+    width:545px;
+} 
+
+@media (max-width: 768px){
+    
+    #Video-Frame{
+        height:auto; 
+        width:auto;
+    }
+}
+</style>
+
+<div class="continer">
+    <div class="row">
+        <div class="col-xs-12">
+            <h1>Tel: +62 813 8822 1999</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Tutorial Videos</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Topic 1</h3>
+            <ul class="list-unstyled">
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 1</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 2</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 3</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 4</a></li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h3>Topic 2</h3>
+            <ul class="list-unstyled">
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 1</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 2</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 3</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 4</a></li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <h3>Topic 3</h3>
+            <ul class="list-unstyled">
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 1</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 2</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 3</a></li>
+                <li class="Help-Item"><a data-toggle="modal" data-target="#VideoModal" video-source="https://www.youtube.com/embed/TD4h9Fdn3-o">Help List Item 4</a></li>
+            </ul>
+        </div>
+    </div> <!-- Row -->
+</div> <!-- Container -->
+
+<!-- Modal -->
+<div class="modal fade" id="VideoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header modal-top-padding">
+        <div class="row">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        </div>
+        <div class="modal-body">
+        <iframe id="Video-Frame" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{% endblock %}
+{% block page_js %}
+  <script type="text/javascript">
+$(document).ready(function(){
+    $('.Help-Item').click(function(e){
+        $('#Video-Frame').attr("src", $(this).children('a').attr("video-source"));
+    });
+});
+  </script>
+{% endblock %}

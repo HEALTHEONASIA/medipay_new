@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}500 - Internal server error{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">500 - Internal server error</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-12">
+      <h1>500 - Server error. Please, try again later.</h1>
+    </div>
+  </div>
+{% endblock %}

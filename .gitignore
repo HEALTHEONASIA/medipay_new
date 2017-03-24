@@ -1,0 +1,15 @@
+venv/*
+*/__pycache__/*
+__pycache__/*
+*/*/__pycache__/*
+*/*/*/__pycache__/*
+project/app.db
+migrations/*
+project/db_repository/*
+project/static/uploads/*
+*/*.pyc
+*/*/*/.pyc
+*.pyc
+.idea/
+*config_mysql.py
+*config_mail.py

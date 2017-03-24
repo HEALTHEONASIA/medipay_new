@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block sidebar %}{% endblock %}
+{% block extraheader %}
+    <style>
+        .header .header-inner {
+            height: 15px;
+        }
+        .btn-link.toggle-sidebar {
+            display: none!important;
+        }
+        @media (max-width: 991px) {
+            .header .header-inner {
+                height: 15px!important;
+            }
+        }
+        @media (max-width: 767px) {
+            .header .header-inner {
+                height: 4px!important;
+            }
+        }
+    </style>
+{% endblock %}
+{% block page_content %}
+<style>
+.Payor-Modal {
+    top:17%;
+    right:48%;
+    outline: none;
+}
+.Payor-Modal .modal-dialog {
+    width:45%;
+}
+.Provider-Modal {
+    top:17%;
+    left:48%;
+    outline: none;
+}
+.Provider-Modal .modal-dialog {
+    width:45%;
+}
+@media (max-width: 768px) {
+    .Provider-Modal {
+        top:20%;
+        left:0;
+        outline: none;
+    }
+    .Provider-Modal .modal-dialog {
+        width:auto;
+    }
+    .Payor-Modal {
+        top:20%;
+        right:0;
+        outline: none;
+    }
+    .Payor-Modal .modal-dialog {
+        width:auto;
+    }
+}
+</style>
+ <!-- Modal -->
+<div class="modal fade" id="Login_Modal" role="dialog">
+    <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header" style="padding-top: 10px; padding-bottom: 10px;">
+            <div class="row">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+        </div>
+        <!-- Modal Body-->
+        <div class="modal-body">
+        <h4 class="modal-title">Log in to the site</h4>
+        <form method="post" name="login">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Your e-mail:</label>
+            {% for error in form.email.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.email(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            {% for error in form.password.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.password(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <div class="checkbox check-success">
+              {{ form.remember_me }}
+              <label for="remember_me">Remember me</label>
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.user_type }}
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+        <p>
+            Forgot your password?
+            <a href="{{ url_for('auth.forgot_password') }}">Click here</a>
+        </p>
+        <p>
+            New user?
+            <a href="{{ url_for('auth.register') }}">Click here to register</a>
+        </p>
+     
+        </div> <!-- End Modal Body -->
+        
+    </div> <!-- End Modal Content -->
+    </div> <!-- End Modal Dialog -->
+</div>
+ <!-- End Modal -->
+<div class="row home-page">
+    <div class="col-md-6">
+        <a data-toggle="modal" data-target="#Login_Modal" class="inner payor">
+            <h1><span>Payor</span></h1>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a data-toggle="modal" data-target="#Login_Modal" class="inner provider">
+            <h1><span>Medical Provider</span></h1>
+        </a>
+    </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script type="text/javascript">
+   $(document).ready(function() {
+       $('.payor').click(function() {
+            $('input#user_type').val('payer');
+            $('h4.modal-title').text('Log in as a payor');
+            $('#Login_Modal').addClass('Payor-Modal');
+            $('#Login_Modal').removeClass('Provider-Modal');
+        });
+        $('.provider').click(function() {
+            $('input#user_type').val('provider');
+            $('h4.modal-title').text('Log in as a provider');
+            $('#Login_Modal').addClass('Provider-Modal');
+            $('#Login_Modal').removeClass('Payor-Modal');
+        });
+    });
+</script>
+{% endblock %}

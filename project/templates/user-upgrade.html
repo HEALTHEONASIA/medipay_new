@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Setup{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{ url_for('main.settings') }}">Settings</a>
+    </li>
+    <li>
+      <a href="#" class="active">Upgrade to Premium</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>
+        Upgrade to the Premium
+        </h5>
+        <form method="post" name="user-upgrade">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Enter the email where we should send the invoice to</label>
+            {% for error in form.email.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.email(class_="form-control", placeholder="your@email.com") }}
+          </div>
+          <div class="form-group">
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

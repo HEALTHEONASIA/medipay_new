@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}User Setup{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">User Setup</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>{% if user %}User #{{ user.id }} {% endif %}User Setup</h5>
+        <form method="post" name="user-setup">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Name</label>
+            {% for error in form.name.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.name(class_="form-control", placeholder="Your Full Name") }}
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            {% for error in form.email.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.email(class_="form-control", placeholder="your@email.com") }}
+          </div>
+          {% if form.role %}
+            <div class="form-group">
+              <label>Role</label>
+              {% for error in form.role.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="radio radio-success">
+              {% for subfield in form.role %}
+                {{ subfield }}
+                {{ subfield.label }}
+              {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          {% if form.premium %}
+            <div class="form-group">
+              <label>Premium</label>
+              {% for error in form.premium.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="radio radio-success">
+              {% for subfield in form.premium %}
+                {{ subfield }}
+                {{ subfield.label }}
+              {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          <div class="form-group">
+            {{ form.current_user_id }}
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Billing Code Form{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.settings') }}">Settings</a>
+      {% endif %}
+    </li>
+    <li>
+      {% if user %}
+        <a href="{{ url_for('main.user_billing_codes', user_id=user.id) }}">Settings</a>
+      {% else %}
+        <a href="{{ url_for('main.billing_codes') }}">Billing codes</a>
+      {% endif %}
+    </li>
+    <li>
+      <a href="#" class="active">Edit</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <h5>
+        {% if user %}User #{{ user.id }} {% endif %}Billing code
+        </h5>
+        <form method="post" name="billing-code">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Room and board</label>
+            {% for error in form.room_and_board.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.room_and_board(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Doctor visit fee</label>
+            {% for error in form.doctor_visit_fee.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.doctor_visit_fee(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Doctor consultation fee</label>
+            {% for error in form.doctor_consultation_fee.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.doctor_consultation_fee(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Specialist visit fee</label>
+            {% for error in form.specialist_visit_fee.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.specialist_visit_fee(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Specialist consultation fee</label>
+            {% for error in form.specialist_consultation_fee.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.specialist_consultation_fee(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Medicines</label>
+            {% for error in form.medicines.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.medicines(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            <label>Administration fee</label>
+            {% for error in form.administration_fee.errors %}
+              <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.administration_fee(class_="autonumeric form-control", placeholder="1,234.00", **{'data-a-dec': '.', 'data-a-sep': ','}) }}
+          </div>
+          <div class="form-group">
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

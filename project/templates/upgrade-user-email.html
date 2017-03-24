@@ -1,0 +1,18 @@
+<h3>
+    Hello,
+    {% if current_user.user_type == 'provider' %}
+        {% if current_user.provider.pic %}
+            {{ current_user.provider.pic }}.
+        {% else %}
+            {{ current_user.email }}.
+        {% endif %}
+    {% elif current_user.user_type == 'payer' %}
+        {% if current_user.payer.pic %}
+            {{ current_user.payer.pic }}.
+        {% else %}
+            {{ current_user.email }}.
+        {% endif %}
+    {% endif %}<br>
+    Thank you for your upgrade request. We are reviewing it and will notify you about results on this e-mail.
+</h3>
+<a href="{{ root[:-1] }}{{ url_for('main.index') }}">Medipay</a>

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Closed GOPs{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{ url_for('main.index') }}">All GOPs</a>
+    </li>
+    <li>
+      <a href="#" class="active">{{ by }}</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<style>
+.reduce-padding td{
+   padding-top: 7px !important;
+   padding-bottom: 0px !important;
+   padding-left: 5px !important;
+   padding-right: 5px !important;
+}
+
+</style>
+  <div class="panel panel-transparent">
+    <div class="panel-heading">
+      <div class="panel-title" style="font-size: 18px;">All GOPS {% if by %} > {{ by }}{% endif %}
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+          <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+            <thead>
+              <tr role="row">
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="status: activate to sort column ascending">Status</th>
+                {% if by == 'provider' or by == 'status' %}
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Provider: activate to sort column ascending">Provider</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending">Patient</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Payer: activate to sort column ascending">Payer</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Country: activate to sort column ascending">Country</th>
+                {% elif by == 'payer' %}
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Payer: activate to sort column ascending">Payer</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending">Patient</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Provider: activate to sort column ascending">Provider</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Country: activate to sort column ascending">Country</th>
+                {% else %}
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Country: activate to sort column ascending">Country</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending">Patient</th>                
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Provider: activate to sort column ascending">Provider</th>                
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Payer: activate to sort column ascending">Payer</th>
+                {% endif %}
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">Created Time</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Edited Time: activate to sort column ascending">Edited Time</th>
+                <th tabindex="0" rowspan="1" colspan="1">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for gop in gops %}
+              <tr role="row">
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                    <p>
+                      {% if gop.status and gop.status != 'pending' %}
+                        {% if gop.status == 'approved' %}
+                          <i class="glyphicon glyphicon-ok approved"></i><span class="approved" style="font-size:13px;">Approved</span>
+                        {% elif gop.status == 'declined' %}
+                          <i class="glyphicon glyphicon-remove declined"></i><span class="declined" style="font-size:13px;">Declined</span>
+                        {% elif gop.status == 'in review' %}
+                          <i class="glyphicon glyphicon-search review"></i><span class="review" style="font-size:13px;">In review</span>
+                        {% endif %}
+                      {% else %}
+                        <i class="glyphicon glyphicon-hourglass pending"></i><span class="pending" style="font-size:13px;">Pending</span>
+                      {% endif %}
+                    </p>
+                  </a>
+                </td>
+                {% if by == 'provider' or by == 'status' %}
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.company }}</p></a>
+                </td>
+                <td class="v-align-middle sorting_1">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.patient.name }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.payer.company }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.country }}</p></a>
+                </td>
+                {% elif by == 'payer' %}
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.payer.company }}</p></a>
+                </td>
+                <td class="v-align-middle sorting_1">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.patient.name }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.company }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.country }}</p></a>
+                </td>
+                {% else %}
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.country }}</p></a>
+                </td>
+                <td class="v-align-middle sorting_1">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.patient.name }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.provider.company }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.payer.company }}</p></a>
+                </td>
+                {% endif %}
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.timestamp %}{{ gop.timestamp }}{% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.timestamp_edited %}{{ gop.timestamp_edited }}{% else %}No Edits{% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.turnaround_time() %} {{ gop.turnaround_time() }} {% endif %}</p></a>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if pagination %}
+        <div id="pagination">
+          {%- for page in pagination.iter_pages() %}
+            {% if page %}
+              {% if page != pagination.page %}
+                <a href="{{ url_for('main.requests_sorted', by=by, page=page) }}">{{ page }}</a>
+              {% else %}
+                <strong>{{ page }}</strong>
+              {% endif %}
+            {% else %}
+              <span>...</span>
+            {% endif %}
+          {%- endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+(function($) {
+    'use strict';
+    var initBasicTable = function() {
+        var table = $('#basicTable');
+        var settings = {
+            "sDom": "t",
+            "destroy": true,
+            "paging": false,
+            "scrollCollapse": true,
+            "columnDefs": [ {
+                            "targets": 7,
+                            "orderable": false
+                          } ],
+            // "aoColumnDefs": [{
+            //     'bSortable': false,
+            //     'aTargets': [0]
+            // }],
+            "order": [
+                [{% if by == 'provider' %}1,
+                 {% elif by == 'payer' %}1,
+                 {% elif by == 'country' %}1,
+                 {% else %}0,{% endif %}
+                "desc"]
+            ]
+        };
+        table.dataTable(settings);
+        $('#basicTable input[type=checkbox]').click(function() {
+            if ($(this).is(':checked')) {
+                $(this).closest('tr').addClass('selected');
+            } else {
+                $(this).closest('tr').removeClass('selected');
+            }
+        });
+    }
+    initBasicTable();
+})(window.jQuery);
+</script>
+{% endblock %}

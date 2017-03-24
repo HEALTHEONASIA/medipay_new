@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Register</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <!-- <div class="panel-heading">
+        <div class="panel-title">
+        Log in to the site
+        </div>
+      </div> -->
+      <div class="panel-body">
+        <h5>
+        Register on the site
+        </h5>
+        <form method="post" name="register">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            <label>Your e-mail:</label>
+            {% for error in form.email.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.email(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            {% for error in form.password.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.password(class_="form-control") }}
+          </div>
+          <div class="form-group">
+            <label>Password again</label>
+            {% for error in form.password2.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.password2(class_="form-control") }}
+          </div>
+          <!-- <div class="form-group">
+            <label>Account type</label>
+            <span class="help">You will edit your organization's info right after registration</span>
+            <div class="radio radio-success">
+              <input type="radio" value="provider" name="user_type" id="provider">
+              <label for="provider">Provider</label>
+              <input type="radio" value="payer" name="user_type" id="payer">
+              <label for="payer">Payer</label>
+            </div>
+          </div> -->
+          <div class="form-group">
+            <label>Account type</label>
+            {% for error in form.user_type.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+            {% endfor %}
+            <span class="help">You will edit your organization's info right after registration</span>
+            <div class="radio radio-success">
+              {% for subfield in form.user_type %}
+                {{ subfield }}
+                {{ subfield.label }}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            {{ form.submit(class_="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

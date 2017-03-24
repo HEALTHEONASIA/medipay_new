@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block kpi_values %}
+  {% if (current_user.is_authenticated and current_user.user_type == 'provider') or (current_user.is_authenticated and current_user.user_type == 'payer') %}
+    <div class="kpi-block pull-right hidden-sm hidden-xs">
+      <div class="col-md-3 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">APPROVED <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-check" style="color: #187a30"></i> {{ approved_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-check icon-font-size" style="color: #187a30"></i> {{ approved_count }}</div></div>
+      </div>
+      <div class="col-md-3 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">PENDING <span class="hidden-md hidden-lg"><i class="glyphicon glyphicon-hourglass" style="color: #000;"></i> {{ pending_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="glyphicon glyphicon-hourglass icon-font-size" style="color: #000; font-size: 14px; margin-top: 3px;"></i> {{ pending_count }}</div></div>
+      </div>
+      <div class="col-md-3 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">IN-REVIEW <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-search" style="color: #fef100"></i> {{ in_review_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-search icon-font-size" style="/*color: #fef100;*/color: orange; font-size: 15px; margin-top: 3px;"></i> <span style="position: relative; top: 1px;">{{ in_review_count }}</span></div></div>
+      </div>
+      <div class="col-md-3 breadcrumb-font-size remove-right-padding">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">REJECTED <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-times" style="color: #ea1a22;"></i> {{ rejected_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-times icon-font-size" style="color: #ea1a22; font-size: 19px; margin-top: 1px;"></i> {{ rejected_count }}</div></div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block breadcrumb %}
+<div class="container breadcrumb" style="padding-top: 0px; padding-bottom: 0px;">
+  <div class="row">
+  {% if current_user.is_authenticated and current_user.user_type ==  'provider' %}  
+    <div class="breadcrumb-padding-top-left-text">
+      <a href="{% if current_user.user_type == 'provider' %}{{ url_for('main.request_form') }}{% endif %}">
+        <p class="Gop-inline" style="">
+          Request <br> a GOP
+        </p>
+      </a>
+      <!-- {{ current_user.provider.company }} -->
+    </div>
+  {% elif current_user.is_authenticated and current_user.user_type == 'payer' %}
+    <!-- <div class="col-md-8 breadcrumb-padding-top-left-text">{{ current_user.payer.company }}</div> -->
+  {% else %}
+    <div class="col-md-12">Home</div>
+  {% endif %}
+
+  {% if (current_user.is_authenticated and current_user.user_type == 'provider') or (current_user.is_authenticated and current_user.user_type == 'payer') %}
+    <div class="hidden-md hidden-lg">
+      <div class="col-md-1 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">APPROVED <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-check" style="color: #187a30"></i> {{ approved_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-check icon-font-size" style="color: #187a30"></i> {{ approved_count }}</div></div>
+      </div>
+      <div class="col-md-1 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">PENDING <span class="hidden-md hidden-lg"><i class="glyphicon glyphicon-hourglass" style="color: #000;"></i> {{ pending_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="glyphicon glyphicon-hourglass icon-font-size" style="color: #000;"></i> {{ pending_count }}</div></div>
+      </div>
+      <div class="col-md-1 breadcrumb-font-size remove-right-padding vertical-divider">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">IN-REVIEW <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-search" style="color: #fef100"></i> {{ in_review_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-search icon-font-size" style="color: #fef100"></i> {{ in_review_count }}</div></div>
+      </div>
+      <div class="col-md-1 breadcrumb-font-size remove-right-padding">
+        <div class="row"><div class="col-md-12 remove-left-padding remove-right-padding">REJECTED <span class="hidden-md hidden-lg"><i class="fs-14 fa fa-times" style="color: #ea1a22;"></i> {{ rejected_count }}</span></div></div>
+        <div class="row hidden-sm hidden-xs"><div class="col-md-12 add-left-padding remove-right-padding icon-text-font-size"><i class="fa fa-times icon-font-size" style="color: #ea1a22;"></i> {{ rejected_count }}</div></div>
+      </div>
+    </div>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block Index_Page_Request1 %}
+  {% if current_user.role != 'admin' %}
+    {% if current_user.is_authenticated and current_user.user_type ==  'provider' %}
+      <a href="{% if current_user.user_type == 'provider' %}{{ url_for('main.request_form') }}{% endif %}">
+        <p class="Gop-inline" style="">
+          Request <br> a GOP
+        </p>
+      </a>
+    {% elif current_user.is_authenticated and current_user.user_type == 'payer' %}
+      <p class="inline" style="color: #7b7d82; font-size: 16px; font-family: 'Montserrat'; padding-left: 30px;">{{ current_user.payer.company }}</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+{% block page_content %}
+<style>
+    .reduce-padding td {
+        padding-top: 7px !important;
+        padding-bottom: 0px !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+</style>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">	
+      <div class="panel-heading text-center">
+  		  {% if current_user.role == 'admin' %}
+    		  <div class="panel-title" style="font-size: 36px;">
+    			  Global Dashboard
+          </div>
+  		  {% else %}
+    		  <div class="panel-title" style="font-size: 36px;">
+    			  Guarantee of Payment
+          </div>
+  		  {% endif %}
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body">
+        {% if current_user.role == 'admin' %}
+          {% if approved_count > 0 or rejected_count > 0 or in_review_count > 0 or pending_count > 0 %}
+            <div class="row pie-charts">
+              <div class="row">
+              <div class="col-md-6">
+                  <div id="sparkline-pie-by-status" class="sparkline-chart m-t-10 m-b-10"></div>
+                  <h4 class="text-center">By Status</h4>
+              </div>
+              <div class="col-md-6">
+                  <div id="sparkline-pie-by-provider" class="sparkline-chart m-t-10 m-b-10"></div>
+                  <h4 class="text-center">By Provider</h4>
+              </div>
+              </div>
+              <div class="row">
+              <div class="col-md-6">
+                  <div id="sparkline-pie-by-country" class="sparkline-chart m-t-10 m-b-10"></div>
+                  <h4 class="text-center">By Country</h4>
+              </div>
+              <div class="col-md-6">
+                  <div id="sparkline-pie-by-payer" class="sparkline-chart m-t-10 m-b-10"></div>
+                  <h4 class="text-center">By Payer</h4>
+              </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        <div class="table-responsive">
+            <div class="pull-right">
+                <span class="label label-default"><a href="{{ url_for('main.index', status='approved') }}">Approved</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status='declined') }}">Declined</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status='in_review') }}">In Review</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status='pending') }}">Pending</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status='initial') }}">Initial</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status='final') }}">Final</a></span>
+                <span class="label label-default"><a href="{{ url_for('main.index', status=None) }}">No Filter</a></span>
+            </div>
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">STATUS</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending" aria-sort="ascending">PATIENT</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="{% if current_user.user_type == 'provider' %}Payer{% else %}Provider{% endif %}: activate to sort column ascending">{% if current_user.user_type == 'provider' %}PAYER{% else %}PROVIDER{% endif %}</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">CREATED TIME</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Edited Time: activate to sort column ascending">EDITED TIME</th>
+                  <th tabindex="0" rowspan="1" colspan="1">TIME</th>
+                  {% if current_user.user_type == 'payer' %}
+                    <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Policy: activate to sort column ascending">POLICY#</th>
+                    <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Type: activate to sort column ascending">TYPE</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+              <tr role="row" class="raw" style="display: none;">
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                {% if current_user.user_type == 'payer' %}
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="#"><p></p></a>
+                </td>
+                {% endif %}
+              </tr>
+              {% for gop in gops %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.status and gop.status != 'pending' %}
+                            {% if gop.status == 'approved' %}
+                              <i class="glyphicon glyphicon-ok approved"></i><span class="approved" style="font-size:13px;"> Approved {% if current_user.user_type == 'provider' or current_user.user_type == 'payer' %} {% if gop.final %}- Final {% else %}- Intial {% endif %} {% endif %} </span>
+                            {% elif gop.status == 'declined' %}
+                              <i class="glyphicon glyphicon-remove declined"></i><span class="declined" style="font-size:13px;"> Declined</span>
+                            {% elif gop.status == 'in review' %}
+                              <i class="glyphicon glyphicon-search review"></i><span class="review" style="font-size:13px;"> In review {% if current_user.user_type == 'payer' %} {% if gop.final %}- Final {% else %}- Intial {% endif %} {% endif %}</span>
+                            {% endif %}
+                        {% else %}
+                          <i class="glyphicon glyphicon-hourglass pending"></i><span class="pending" style="font-size:13px;"> Pending {% if current_user.user_type == 'provider' or current_user.user_type == 'payer' %} {% if gop.final %}- Final {% else %}- Intial {% endif %} {% endif %} </span>
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>{{ gop.patient.name }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if current_user.user_type == 'provider' %}
+                          {{ gop.payer.company }}
+                        {% else %}
+                          {{ gop.provider.company }}
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.timestamp %}
+                          {{ gop.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                 <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.timestamp_edited %}
+                          {{ gop.timestamp_edited.strftime('%d-%m-%Y %H:%M:%S') }}
+                          {% else %}
+                            No Edits
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.turnaround_time() %}
+                            {{ gop.turnaround_time() }}
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                  {% if current_user.user_type == 'payer' %}
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.policy_number %}
+                          {{ gop.policy_number }}
+                        {% else %}
+                          Unknown
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                      <p>
+                        {% if gop.reason %}
+                          {{ gop.reason|title }}
+                        {% else %}
+                          Unknown
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% if pagination %}
+          <div id="pagination">
+            {%- for page in pagination.iter_pages() %}
+              {% if page %}
+                {% if page != pagination.page %}
+                  <a href="{{ url_for('main.index', page=page, status=status) }}">{{ page }}</a>
+                {% else %}
+                  <strong>{{ page }}</strong>
+                {% endif %}
+              {% else %}
+                <span>...</span>
+              {% endif %}
+            {%- endfor %}
+          </div>
+        {% endif %}
+        {% if current_user.role == 'admin' %}
+          <div class="row">
+            <div class="col-md-6">
+              <h4>DASHBOARD</h4>
+              <div class="form-group">
+                <div class="select-field-outer">
+                  <select class="form-control filter" id="by-country">
+                    <option value="0">BY COUNTRY</option>
+                    {% for el in by_country_count %}
+                      <!-- <option value="{{ el[0] }}">{{ el[0] }} ({{ el[1] }})</option> -->
+                      <option value="{{ el[0] }}">{{ el[0] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="select-field-outer">
+                  <select class="form-control filter" id="by-provider">
+                    <option value="0">BY PROVIDER</option>
+                    {% for el in by_provider_count %}
+                      <!-- <option value="{{ el[0] }}">{{ el[0] }} ({{ el[1] }})</option> -->
+                      <option value="{{ el[0] }}">{{ el[0] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="select-field-outer">
+                  <select class="form-control filter" id="by-payer">
+                    <option value="0">BY PAYER</option>
+                    {% for el in by_payer_count %}
+                      <!-- <option value="{{ el[0] }}">{{ el[0] }} ({{ el[1] }})</option> -->
+                      <option value="{{ el[0] }}">{{ el[0] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="select-field-outer">
+                  <select class="form-control filter" id="by-status">
+                    <option value="0">BY STATUS</option>
+                    <!-- <option value="approved">Approved ({{ approved_count }})</option>
+                    <option value="declined">Rejected ({{ rejected_count }})</option>
+                    <option value="in review">In Review ({{ in_review_count }})</option>
+                    <option value="pending">Pending ({{ pending_count }})</option> -->
+                    <option value="approved">Approved</option>
+                    <option value="declined">Rejected</option>
+                    <option value="in review">In Review</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h4>CRITICAL AREAS</h4>
+              <div class="checkbox check-success">
+                <input type="checkbox" checked="checked" value="pending" id="checkbox2">
+                <label for="checkbox2">SENT BUT NOT VIEWED</label>
+              </div>
+              <div class="checkbox check-success">
+                <input type="checkbox" checked="checked" value="pending" id="checkbox3">
+                <label for="checkbox3">IN REVIEW</label>
+              </div>
+              <div class="checkbox check-success">
+                <input type="checkbox" checked="checked" value="pending" id="checkbox4">
+                <label for="checkbox4">DECLINE CASES</label>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+<!--
+  <div class="col-md-3">
+    {% if current_user.role != 'admin' %}
+      <div class="panel panel-transparent">
+        <a href="{% if current_user.user_type == 'provider' %}{{ url_for('main.request_form') }}{% else %}#{% endif %}" class="panel-body" style="display: block; background: #48b0f7; padding: 50px 30px 70px;">
+          <span style="color: #fff;">{{ (' ' + today.strftime('%d %b')).replace(' 0', '') }}</span>
+          <h3 style="line-height: 28px; margin: 0; color: #fff; font-weight: bold;">
+            {% if current_user.user_type == 'provider' %}Request{% else %}Send{% endif %}<br>a GOP!
+          </h3>
+          <span style="color: #000;font-size: 14px;">(Gurantee of Payment)</span>
+        </a>
+      </div>
+      <div class="panel panel-transparent">
+        <div class="panel-body" style="background: #e2e2e2;">
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-7">
+                <label style="margin-top: 9px;">
+                  <i class="fs-14 fa fa-check" style="color: #187a30"></i>&nbsp;&nbsp;Approved
+                </label>
+              </div>
+              <div class="col-md-5">
+                <input type="text" style="color: #000;" class="form-control" value="{{ approved_count }}" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-7">
+                <label style="margin-top: 9px;">
+                  <i class="fs-14 fa fa-search" style="color: #fef100"></i>&nbsp;&nbsp;In Review
+                </label>
+              </div>
+              <div class="col-md-5">
+                <input type="text" style="color: #000;" class="form-control" value="{{ in_review_count }}" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-7">
+                <label style="margin-top: 9px;">
+                  <i class="glyphicon glyphicon-hourglass" style="color: #000;"></i>&nbsp;&nbsp;Pending
+                </label>
+              </div>
+              <div class="col-md-5">
+                <input type="text" style="color: #000;" class="form-control" value="{{ pending_count }}" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-7">
+                <label style="margin-top: 9px;">
+                  <i class="fs-14 pg-close" style="color: #ea1a22;"></i>&nbsp;Rejected
+                </label>
+              </div>
+              <div class="col-md-5">
+                <input type="text" style="color: #000;" class="form-control" value="{{ rejected_count }}" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-md-7">
+                <label style="margin-top: 9px;">TOTAL</label>
+              </div>
+              <div class="col-md-5">
+                <input type="text" style="color: #000;" class="form-control" value="{{ total_count }}" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+-->
+</div>
+{% endblock %}
+{% block page_js %}
+<script>
+(function($) {
+    'use strict';
+       var initBasicTable = function() {
+        var table = $('#basicTable');
+          var settings = {
+              "sDom": "t",
+              "destroy": true,
+              "paging": false,
+              "scrollCollapse": true,
+              "columnDefs": [ {
+                            "targets": 5,
+                            "orderable": false
+                          } ],
+            //  "aoColumnDefs": [{
+            //       'bSortable': false,
+            //       'aTargets': [0]
+            //   }],
+              "order": [
+                  [3, "desc"]
+              ]
+          };
+          table.dataTable(settings);
+          $('#basicTable input[type=checkbox]').click(function() {
+              if ($(this).is(':checked')) {
+                  $(this).closest('tr').addClass('selected');
+              } else {
+                  $(this).closest('tr').removeClass('selected');
+              }
+          });
+      }
+    initBasicTable();
+})(window.jQuery);
+
+
+</script>
+  {% if current_user.role == 'admin' %}
+    <script>
+      var byStatusCount = [
+        {{ approved_count }},
+        {{ rejected_count }},
+        {{ in_review_count }},
+        {{ pending_count }}
+      ];
+
+      var byCountryLabel = {
+        {% for el in by_country_count %}
+          {{ loop.index - 1 }}: "{{ el[0] }}: {{ el[1] }}",
+        {% endfor %}
+      };
+      var byCountryCount = [
+        {% for el in by_country_count %}
+          {{ el[1] }},
+        {% endfor %}
+      ];
+
+      var byProviderLabel = {
+        {% for el in by_provider_count %}
+          {{ loop.index - 1 }}: "{{ el[0] }}: {{ el[1] }}",
+        {% endfor %}
+      };
+      var byProviderCount = [
+        {% for el in by_provider_count %}
+          {{ el[1] }},
+        {% endfor %}
+      ];
+
+      var byPayerLabel = {
+        {% for el in by_payer_count %}
+          {{ loop.index - 1 }}: "{{ el[0] }}: {{ el[1] }}",
+        {% endfor %}
+      };
+      var byPayerCount = [
+        {% for el in by_payer_count %}
+          {{ el[1] }},
+        {% endfor %}
+      ];
+
+      $('select.filter').change(function() {
+        var byCountry = $('select#by-country option:selected').val();
+        var byProvider = $('select#by-provider option:selected').val();
+        var byPayer = $('select#by-payer option:selected').val();
+        var byStatus = $('select#by-status option:selected').val();
+        var query = '?';
+        if (byCountry != 0) {
+          query += 'country=' + byCountry + '&';
+        }
+        if (byProvider != 0) {
+          query += 'provider=' + byProvider + '&';
+        }
+        if (byPayer != 0) {
+          query += 'payer=' + byPayer + '&';
+        }
+        if (byStatus != 0) {
+          query += 'status=' + byStatus;
+        }
+        console.log(query);
+        $.get('/requests/filter' + query, function(data) {
+          console.log(data);
+          $('.table-responsive').html(data);
+          initBasicTable();
+        });
+      })
+
+    </script>
+    <script src="/static/js/index-charts.js"></script>
+  {% endif %}
+    <script>
+      // Here is a test JS pagination
+      // $('#pagination a').click(function(e) {
+      //   e.preventDefault();
+      //   var $this = $(this);
+      //   var page = $this.text();
+      //   $.get('/get-gops', {'page': page}, function(data) {
+      //     // console.log(data);
+      //     for (var key in data) {
+      //       var obj = data[key];
+      //       console.log(obj['id'],
+      //                   obj['status'],
+      //                   obj['patient_name'],
+      //                   obj['payer_company'],
+      //                   obj['turnaround_time']);
+      //       var origRowHtml = $('tr.raw');
+      //       var rowHtml = origRowHtml.clone();
+      //       var statusCol = rowHtml.find('td:first p');
+      //       var patientCol = rowHtml.find('td:nth-child(2) p');
+      //       var payerCol = rowHtml.find('td:nth-child(3) p');
+      //       var timeCol = rowHtml.find('td:nth-child(4) p');
+      //       {% if current_user.user_type  %}
+      //         var policyNumberCol = rowHtml.find('td:nth-child(5) p');
+      //         var reasonCol = rowHtml.find('td:last-child p');
+
+      //         policyNumberCol.text(obj['policy_number']);
+      //         reasonCol.text(obj['reason']);
+      //       {% endif %}
+
+      //       statusCol.text(obj['status']);
+      //       patientCol.text(obj['patient_name']);
+      //       payerCol.text(obj['payer_company']);
+      //       timeCol.text(obj['turnaround_time']);
+
+      //       console.log(rowHtml);
+      //       $('#basicTable tbody').html('');
+      //       $('#basicTable tbody').append(origRowHtml);
+      //       rowHtml.css('display', 'table-row');
+      //       $('#basicTable tbody').append(rowHtml);
+      //     }
+      //   });
+      // });
+    </script>
+
+{% endblock %}

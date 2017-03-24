@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Users</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <div class="panel panel-transparent">
+    <div class="panel-heading">
+      <div class="panel-title" style="font-size: 18px;">Users
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+          <table class="table table-hover dataTable no-footer" id="basicTableUsers" role="grid">
+            <thead>
+              <tr role="row">
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Email: activate to sort column ascending">Email</th>
+                <th class="sorting_asc" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Account Type: activate to sort column descending" aria-sort="ascending">Account Type</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Company: activate to sort column ascending">Company</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+              {% if user.role != 'admin' %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                      <p>{{ user.email }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle sorting_1">
+                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                      <p>{{ user.user_type|capitalize }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                      <p>
+                        {% if user.user_type == 'provider' %}
+                          {{ user.provider.company }}
+                        {% elif user.user_type == 'payer' %}
+                          {{ user.payer.company }}
+                        {% endif %}
+                      </p>
+                    </a>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if pagination %}
+        <div id="pagination">
+          {%- for page in pagination.iter_pages() %}
+            {% if page %}
+              {% if page != pagination.page %}
+                <a href="{{ url_for('main.users', page=page) }}">{{ page }}</a>
+              {% else %}
+                <strong>{{ page }}</strong>
+              {% endif %}
+            {% else %}
+              <span>...</span>
+            {% endif %}
+          {%- endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

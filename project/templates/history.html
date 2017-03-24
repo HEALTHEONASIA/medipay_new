@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Closed GOPs{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('main.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Closed GOPs</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<style>
+.reduce-padding td{
+   padding-top: 7px !important;
+   padding-bottom: 0px !important;
+   padding-left: 5px !important;
+   padding-right: 5px !important;
+}
+
+</style>
+  <div class="panel panel-transparent">
+    <div class="panel-heading">
+      <div class="panel-title" style="font-size: 18px;">Closed GOPS
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+      <div class="table-responsive">
+        <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+          <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+            <thead>
+              <tr role="row">
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="status: activate to sort column ascending">Status</th>
+                <th class="sorting_asc" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending" aria-sort="ascending">Patient</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Payer: activate to sort column ascending">Payer</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">Created Time</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">Edited Time</th>
+                <th tabindex="0" rowspan="1" colspan="1">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for gop in gops %}
+              <!-- <tr role="row" class="odd"> -->
+              <!-- <tr role="row" class="even"> -->
+              <tr role="row">
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
+                    <p>
+                      {% if gop.state == 'closed' %}
+                        <i class="glyphicon glyphicon-remove declined"></i><span class="declined" style="font-size:13px;"> Closed</span>
+                      {% endif %}
+                    </p>
+                  </a>
+                </td>
+                <td class="v-align-middle sorting_1">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.patient.name }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.payer.company }}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.timestamp %}{{ gop.timestamp }}{% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.timestamp_edited %}{{ gop.timestamp_edited }}{% else %}No Edits{% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.turnaround_time() %} {{ gop.turnaround_time() }} {% endif %}</p></a>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if pagination %}
+        <div id="pagination">
+          {%- for page in pagination.iter_pages() %}
+            {% if page %}
+              {% if page != pagination.page %}
+                <a href="{{ url_for('main.history', page=page) }}">{{ page }}</a>
+              {% else %}
+                <strong>{{ page }}</strong>
+              {% endif %}
+            {% else %}
+              <span>...</span>
+            {% endif %}
+          {%- endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+(function($) {
+    'use strict';
+    var initBasicTable = function() {
+        var table = $('#basicTable');
+        var settings = {
+            "sDom": "t",
+            "destroy": true,
+            "paging": false,
+            "scrollCollapse": true,
+            "columnDefs": [ {
+                            "targets": 5,
+                            "orderable": false
+                          } ],
+            // "aoColumnDefs": [{
+            //     'bSortable': false,
+            //     'aTargets': [0]
+            // }],
+            "order": [
+                [{% if by == 'provider' %}1,
+                 {% elif by == 'payer' %}1,
+                 {% elif by == 'country' %}1,
+                 {% else %}0,{% endif %}
+                "desc"]
+            ]
+        };
+        table.dataTable(settings);
+        $('#basicTable input[type=checkbox]').click(function() {
+            if ($(this).is(':checked')) {
+                $(this).closest('tr').addClass('selected');
+            } else {
+                $(this).closest('tr').removeClass('selected');
+            }
+        });
+    }
+    initBasicTable();
+})(window.jQuery);
+</script>
+{% endblock %}
