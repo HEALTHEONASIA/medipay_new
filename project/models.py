@@ -103,7 +103,7 @@ class Member(ColsMapMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     photo = db.Column(db.String(255)) # url to the photo from '/uploads'
     name = db.Column(db.String(64))
-    sex = db.Column(db.String(20))
+    gender = db.Column(db.String(20))
     dob = db.Column(db.DateTime, default=datetime.now())
     telephone = db.Column(db.String(80))
     email = db.Column(db.String(64))
@@ -246,49 +246,6 @@ class Claim(ColsMapMixin, db.Model):
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
     member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
     terminal_id = db.Column(db.Integer, db.ForeignKey('terminal.id'))
-
-    def update_medipay(self):
-        # the function creates/updates a Medipay GOP request
-        if not self.guarantee_of_payment:
-            patient = Patient(
-                name=self.member.name,
-                dob=self.member.dob,
-                policy_number=self.member.client_policy_number
-            )
-            gop = GuaranteeOfPayment(
-                    provider=current_user.provider,
-                    patient=patient,
-                    patient_action_plan=self.member.action,
-                    admission_date=datetime.now(),
-                    admission_time=datetime.now(),
-                    reason=self.member.plan_type,
-                    status='draft',
-                    patient_medical_no=self.member.card_number,
-                    timestamp=datetime.now(),
-                    quotation=self.amount,
-                    room_price=0.0,
-                    doctor_fee=0.0,
-                    surgery_fee=0.0,
-                    medication_fee=0.0,
-                    claim=self
-                )
-        else:
-            gop = self.guarantee_of_payment
-            gop.patient = gop.patient
-            gop.patient.name = self.member.name
-            gop.patient.dob = self.member.dob
-            gop.policy_number = self.member.client_policy_number
-            gop.patient_action_plan = self.member.action
-            admission_date = datetime.now()
-            admission_time = datetime.now()
-            reason = self.member.plan_type
-            status = 'draft'
-            patient_medical_no = self.member.card_number
-            timestamp = datetime.now()
-            quotation = self.amount
-
-        db.session.add(gop)
-        db.session.commit()
 
     @classmethod
     def for_months_filter(cls, query_object, months, _type='all'):
