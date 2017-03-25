@@ -105,7 +105,7 @@ class Member(ColsMapMixin, db.Model):
     name = db.Column(db.String(64))
     dob = db.Column(db.DateTime, default=datetime.now())
     gender = db.Column(db.String(20))
-    telephone = db.Column(db.String(80))
+    tel = db.Column(db.String(80))
     policy_number = db.Column(db.Integer)
     national_id = db.Column(db.String(127))
     email = db.Column(db.String(64))
