@@ -117,7 +117,7 @@ class Member(ColsMapMixin, db.Model):
     exit_date = db.Column(db.DateTime)
     product = db.Column(db.String(255))
     plan = db.Column(db.String(127))
-    client_policy_number = db.Column(db.Integer)
+    policy_number = db.Column(db.Integer)
     client_id_number = db.Column(db.String(127))
     card_number = db.Column(db.String(127))
     plan_type = db.Column(db.String(80))
