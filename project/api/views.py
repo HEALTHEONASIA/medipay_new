@@ -424,10 +424,10 @@ def request_add_json():
             'patient_medical_no': None,
             'admission_time': None,
             'admission_date': None,
-            'patient_name': None,
-            'patient_gender': None,
-            'patient_dob': None,
-            'patient_tel': None,
+            'member_name': None,
+            'member_gender': None,
+            'member_dob': None,
+            'member_tel': None,
             # 'patient_id': None,
             'policy_number': None,
             'reason': None,
@@ -468,8 +468,8 @@ def request_add_json():
             return 'Error: the "reason" is wrong, must be one of the' \
                 + ' following parameteres: %s' % ' '.join(reasons)
 
-        if row['patient_gender'] not in genders:
-            return 'Error: the "patient_gender" is wrong, must be the one' \
+        if row['member_gender'] not in genders:
+            return 'Error: the "member_gender" is wrong, must be the one' \
                 + ' of the following parameteres: %s' % ' '.join(genders)
 
         try:
@@ -501,10 +501,10 @@ def request_add_json():
             row['admission_time'], '%m/%d/%Y %I:%M %p')
         admission_time = admission_date
 
-        dob = datetime.strptime(row['patient_dob'], '%m/%d/%Y')
+        dob = datetime.strptime(row['member_dob'], '%m/%d/%Y')
 
-        patient = models.Patient(name=row['patient_name'], dob=dob,
-                gender=row['patient_gender'], tel=row['patient_tel'])
+        member = models.Member(name=row['member_name'], dob=dob,
+                gender=row['member_gender'], tel=row['member_tel'])
 
         gop = models.GuaranteeOfPayment(
                 provider_id=user.provider.id,
@@ -616,7 +616,7 @@ def request_edit_json():
         gop = models.GuaranteeOfPayment.query.filter_by(id=row['id'],
                                             provider=user.provider).first()
 
-        dob = datetime.strptime(row['patient_dob'], '%m/%d/%Y')
+        dob = datetime.strptime(row['member_dob'], '%m/%d/%Y')
         admission_date = datetime.strptime(row['admission_date'] + ' ' + \
             row['admission_time'], '%m/%d/%Y %I:%M %p')
         admission_time = admission_date
@@ -636,8 +636,8 @@ def request_edit_json():
             return 'Error: the "reason" is wrong, must be one of the' \
                 + ' following parameteres: %s' % ' '.join(reasons)
 
-        if row['patient_gender'] not in genders:
-            return 'Error: the "patient_gender" is wrong, must be one' \
+        if row['member_gender'] not in genders:
+            return 'Error: the "member_gender" is wrong, must be one' \
                 + ' of the following parameteres: %s' % ' '.join(genders)
 
         # if the price is set in the wrong format, set it to zero
@@ -677,10 +677,10 @@ def request_edit_json():
             row['patient_medical_no'] = None
 
         # update the patient info
-        gop.patient.name = row['patient_name']
-        gop.patient.dob = dob
-        gop.patient.gender = row['patient_gender']
-        gop.patient.tel = row['patient_tel']
+        gop.member.name = row['member_name']
+        gop.member.dob = dob
+        gop.member.gender = row['member_gender']
+        gop.member.tel = row['member_tel']
 
         for icd_code_id in row['icd_codes']:
             icd_code = models.ICDCode.query.get(int(icd_code_id))

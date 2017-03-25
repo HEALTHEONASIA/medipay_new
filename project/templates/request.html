@@ -10,7 +10,7 @@
       <a href="{{ url_for('main.index') }}">GOP Request</a>
     </li>
     <li>
-      <a href="#" class="active">{{ gop.patient.name }}</a>
+      <a href="#" class="active">{{ gop.member.name }}</a>
     </li>
   </ul>
 {% endblock %}
@@ -74,12 +74,12 @@
             </div>
             <div class="col-md-4">
               <h5 style="margin-top: 0;">
-                {{ gop.patient.name }}
+                {{ gop.member.name }}
               </h5>
               <p>
                 {{ gop.payer.company }}<br>
-                {% if gop.patient.policy_number %}
-                  {{ gop.patient.policy_number }}
+                {% if gop.member.policy_number %}
+                  {{ gop.member.policy_number }}
                 {% endif %}
               </p>
             </div>
@@ -135,36 +135,36 @@
             <h5>Patient</h5>
             <div class="row">
               <div class="col-md-4">
-                {% if gop.patient.photo == "/static/uploads/" %}
+                {% if gop.member.photo == "/static/uploads/" %}
                   <img style="max-width: 100%;" src="/static/img/person-solid.png">
                 {% else %}
-                  <img style="max-width: 100%;" src="{{ gop.patient.photo }}">
+                  <img style="max-width: 100%;" src="{{ gop.member.photo }}">
                 {% endif %}
               </div>
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Name</label>
-                  <p>{{ gop.patient.name }}</p>
+                  <p>{{ gop.member.name }}</p>
                 </div>
                 <div class="form-group">
                   <label>Date of birth</label>
                   <p>
-                    {% if gop.patient.dob %}
-                      {{ gop.patient.dob.strftime('%d/%m/%Y') }}
+                    {% if gop.member.dob %}
+                      {{ gop.member.dob.strftime('%d/%m/%Y') }}
                     {% else %}
-                      {{ gop.patient.dob }}
+                      {{ gop.member.dob }}
                     {% endif %}
                   </p>
                 </div>
                 <div class="form-group">
                   <label>Patient Phone Nr.</label>
-                  <p>{{ gop.patient.tel }}</p>
+                  <p>{{ gop.member.tel }}</p>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">
                   <label>Gender</label>
-                  <p>{{ gop.patient.gender|capitalize }}</p>
+                  <p>{{ gop.member.gender|capitalize }}</p>
                 </div>
                 <div class="form-group">
                   <label>Medical Record Nr.</label>

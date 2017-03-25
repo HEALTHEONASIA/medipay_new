@@ -84,20 +84,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-class Patient(db.Model):
-    __tablename__ = 'patient'
-    id = db.Column(db.Integer, primary_key=True)
-    photo = db.Column(db.String(255))
-    name = db.Column(db.String(50))
-    dob = db.Column(db.Date, default=datetime.now())
-    gender = db.Column(db.String(8))
-    tel = db.Column(db.String(20))
-    policy_number = db.Column(db.Integer)
-    national_id = db.Column(db.String(127))
-    guarantees_of_payment = db.relationship('GuaranteeOfPayment',
-                                            backref='patient', lazy='dynamic')
-
-
 class Member(ColsMapMixin, db.Model):
     __tablename__ = 'member'
     id = db.Column(db.Integer, primary_key=True)
@@ -128,6 +114,8 @@ class Member(ColsMapMixin, db.Model):
     raiting = db.Column(db.String(50))
     device_uid = db.Column(db.String(127))
     claims = db.relationship('Claim', backref='member', lazy='dynamic')
+    guarantees_of_payment = db.relationship('GuaranteeOfPayment',
+                                            backref='member', lazy='dynamic')
 
     def age(self):
         difference_in_years = relativedelta(datetime.now(),
@@ -342,7 +330,7 @@ class GuaranteeOfPayment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
     payer_id = db.Column(db.Integer, db.ForeignKey('payer.id'))
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'))
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
     icd_codes = db.relationship('ICDCode', secondary=custom_icd_codes,
         backref=db.backref('guarantee_of_payments', lazy='dynamic'))
     patient_action_plan = db.Column(db.Text)

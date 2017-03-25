@@ -4,7 +4,7 @@
         <strong>GOP Request {% if gop.final %}(FINAL){% else %}(INITIAL){% endif %}</strong>
     </td>
     <td style="vertical-align: top; font-size: 16px; padding: 10px; border-top: 1px solid #999;">
-        {{ gop.patient.name }}
+        {{ gop.member.name }}
     </td>
     <td style="vertical-align: top; padding: 10px; border-top: 1px solid #999; border-right: 1px solid #999;">
         <h5 style="font-size: 16px; margin-bottom: 0; margin-top: 0; {% if gop.status %} {% if gop.status == 'approved' %}color:#187A30;{% elif gop.status == 'declined' %}color:#EA1A22;{% elif gop.status == 'pending' %}color:#000000;{% elif gop.status == 'in review' %}color:#FF8C00;{% endif %}{% else %}color:#FF8C00;{% endif %}">
@@ -59,25 +59,25 @@
 </tr>
 <tr>
     <td rowspan="3" style="vertical-align: top; padding: 10px; border-left: 1px solid #999;">
-        {% if gop.patient.photo == "/static/uploads/" %}
+        {% if gop.member.photo == "/static/uploads/" %}
             <img style="max-width: 100%;" src="{{ root }}/static/img/person-solid.png">
         {% else %}
-            <img style="max-width: 100%;" src="{{ root }}{{ gop.patient.photo }}">
+            <img style="max-width: 100%;" src="{{ root }}{{ gop.member.photo }}">
         {% endif %}
     </td>
     <td style="vertical-align: top; padding: 10px;">
         <div><strong>NAME</strong></div>
-        <div>{{ gop.patient.name }}</div>
+        <div>{{ gop.member.name }}</div>
     </td>
     <td style="vertical-align: top; padding: 10px; border-right: 1px solid #999;">
         <div><strong>GENDER</strong></div>
-        <div>{{ gop.patient.gender|capitalize }}</div>
+        <div>{{ gop.member.gender|capitalize }}</div>
     </td>
 </tr>
 <tr>
     <td style="vertical-align: top; padding: 10px;">
         <div><strong>DATE OF BIRTH</strong></div>
-        <div>{{ gop.patient.dob.strftime('%m/%d/%Y') }}</div>
+        <div>{{ gop.member.dob.strftime('%m/%d/%Y') }}</div>
     </td>
     <td style="vertical-align: top; padding: 10px; border-right: 1px solid #999;">
         <div><strong>MEDICAL RECORD NR.</strong></div>
@@ -87,7 +87,7 @@
 <tr>
     <td style="vertical-align: top; padding: 10px;">
         <div><strong>PATIENT PHONE NR.</strong></div>
-        <div>{{ gop.patient.tel }}</div>
+        <div>{{ gop.member.tel }}</div>
     </td>
     <td style="vertical-align: top; border-right: 1px solid #999;"></td>
 </tr>

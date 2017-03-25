@@ -175,13 +175,13 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label>Photo</label>
-                {% for error in form.patient_photo.errors %}
+                {% for error in form.member_photo.errors %}
                   <span class="help" style="color: #f55753;">[{{ error }}]</span>
                 {% endfor %}
-                {% if patient_photo and patient_photo|length > 0 %}
-                  <img style="display: block; max-width: 50%; margin-bottom: 10px;" src="{{ patient_photo }}">
+                {% if member_photo and member_photo|length > 0 %}
+                  <img style="display: block; max-width: 50%; margin-bottom: 10px;" src="{{ member_photo }}">
                 {% endif %}
-                {{ form.patient_photo }}
+                {{ form.member_photo }}
               </div>
             </div>
           </div>

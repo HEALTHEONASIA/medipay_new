@@ -328,42 +328,26 @@ def request_form():
         else:
             previously_admitted = None
 
-        filename = secure_filename(form.patient_photo.data.filename)
+        filename = secure_filename(form.member_photo.data.filename)
 
         if filename and allowed_file(filename):
             filename = str(random.randint(100000, 999999)) + filename
-            form.patient_photo.data.save(
+            form.member_photo.data.save(
                 os.path.join(config['development'].UPLOAD_FOLDER, filename))
 
         if not filename:
             filename = ''
 
-        patient = models.Patient.query.filter_by(
+        member = models.Member.query.filter_by(
             national_id=form.national_id.data).first()
 
-        if not patient:
+        if not member:
             if filename:
                 photo_filename = '/static/uploads/' + filename
             else:
                 photo_filename = '/static/img/person-solid.png'
 
-            medical_details = models.MedicalDetails(
-                symptoms=form.medical_details_symptoms.data,
-                temperature=form.medical_details_temperature.data,
-                heart_rate=form.medical_details_heart_rate.data,
-                respiration=form.medical_details_respiration.data,
-                blood_pressure=form.medical_details_blood_pressure.data,
-                physical_finding=form.medical_details_physical_finding.data,
-                health_history=form.medical_details_health_history.data,
-                previously_admitted=previously_admitted,
-                diagnosis=form.medical_details_diagnosis.data,
-                in_patient=form.medical_details_in_patient.data,
-                test_results=form.medical_details_test_results.data,
-                current_therapy=form.medical_details_current_therapy.data,
-                treatment_plan=form.medical_details_treatment_plan.data
-            )
-
-            patient = models.Patient(
+            member = models.Member(
                 name=form.name.data,
                 dob=dob,
                 gender=form.gender.data,
@@ -371,6 +355,22 @@ def request_form():
                 tel=form.tel.data,
                 photo=photo_filename,
                 policy_number=form.policy_number.data)
+
+        medical_details = models.MedicalDetails(
+            symptoms=form.medical_details_symptoms.data,
+            temperature=form.medical_details_temperature.data,
+            heart_rate=form.medical_details_heart_rate.data,
+            respiration=form.medical_details_respiration.data,
+            blood_pressure=form.medical_details_blood_pressure.data,
+            physical_finding=form.medical_details_physical_finding.data,
+            health_history=form.medical_details_health_history.data,
+            previously_admitted=previously_admitted,
+            diagnosis=form.medical_details_diagnosis.data,
+            in_patient=form.medical_details_in_patient.data,
+            test_results=form.medical_details_test_results.data,
+            current_therapy=form.medical_details_current_therapy.data,
+            treatment_plan=form.medical_details_treatment_plan.data
+        )
 
         # try to convert the values to float or, if error, convert to zero
         room_price = to_float_or_zero(form.room_price.data)
@@ -383,7 +383,7 @@ def request_form():
         gop = models.GuaranteeOfPayment(
                 provider=current_user.provider,
                 payer=payer,
-                patient=patient,
+                member=member,
                 patient_action_plan=form.patient_action_plan.data,
                 doctor_name=models.Doctor.query.get(int(form.doctor_name.data)).name,
                 admission_date=admission_date,
@@ -589,7 +589,7 @@ def request_page_download(gop_id):
         return redirect(url_for('main.index'))
 
     csv_file_name = '%d_%s_GOP_Request' % (gop_id,
-                                    gop.patient.name.replace(' ', '_'))
+                                    gop.member.name.replace(' ', '_'))
 
     data = []
     # prepring the data to be written in csv
@@ -621,13 +621,13 @@ def request_page_download(gop_id):
         data.append(['Time Stamp','Unknown'])
 
     data.append(['Patient Details'])
-    if gop.patient.policy_number:
-        data.append(['Policy Number',gop.patient.policy_number])
+    if gop.member.policy_number:
+        data.append(['Policy Number',gop.member.policy_number])
     data.append(['Medical Record Number',gop.patient_medical_no])
-    data.append(['Patient Name',gop.patient.name])
-    data.append(['Date Of Birth Name',gop.patient.dob.strftime('%m/%d/%Y')])
-    data.append(['Gender',gop.patient.gender.title()])
-    data.append(['Telephone Number',gop.patient.tel])
+    data.append(['Patient Name',gop.member.name])
+    data.append(['Date Of Birth Name',gop.member.dob.strftime('%m/%d/%Y')])
+    data.append(['Gender',gop.member.gender.title()])
+    data.append(['Telephone Number',gop.member.tel])
 
     data.append(['Cost Estimation'])
     data.append(['Addmission Date',gop.admission_date.strftime('%m/%d/%Y')])
@@ -772,10 +772,10 @@ def request_page_edit(gop_id):
         payer = models.Payer.query.get(form.payer.data)
         gop.payer = payer
 
-        filename = secure_filename(form.patient_photo.data.filename)
+        filename = secure_filename(form.member_photo.data.filename)
         if filename and allowed_file(filename):
             filename = str(random.randint(100000, 999999)) + filename
-            form.patient_photo.data.save(
+            form.member_photo.data.save(
                 os.path.join(config['development'].UPLOAD_FOLDER, filename))
 
         if not filename:
@@ -809,15 +809,15 @@ def request_page_edit(gop_id):
             form.medical_details_treatment_plan.data
 
         # update the patient info
-        gop.patient.name = form.name.data
-        gop.patient.dob = dob
-        gop.patient.national_id = form.national_id.data
-        gop.patient.gender = form.gender.data
-        gop.patient.tel = form.tel.data
-        gop.patient.policy_number = form.policy_number.data
+        gop.member.name = form.name.data
+        gop.member.dob = dob
+        gop.member.national_id = form.national_id.data
+        gop.member.gender = form.gender.data
+        gop.member.tel = form.tel.data
+        gop.member.policy_number = form.policy_number.data
 
         if filename:
-            gop.patient.photo = '/static/uploads/' + filename
+            gop.member.photo = '/static/uploads/' + filename
 
         for icd_code_id in form.icd_codes.data:
             icd_code = models.ICDCode.query.get(int(icd_code_id))
@@ -927,14 +927,14 @@ def request_page_edit(gop_id):
     form.medical_details_treatment_plan.data = \
         gop.medical_details.treatment_plan
 
-    form.name.data = gop.patient.name
-    form.national_id.data = gop.patient.national_id
-    form.current_national_id.data = gop.patient.national_id
+    form.name.data = gop.member.name
+    form.national_id.data = gop.member.national_id
+    form.current_national_id.data = gop.member.national_id
     # convert the datetime python object to the string representation
-    form.dob.data = gop.patient.dob.strftime('%d/%m/%Y')
-    form.gender.data = gop.patient.gender
-    form.tel.data = gop.patient.tel
-    form.policy_number.data = gop.patient.policy_number
+    form.dob.data = gop.member.dob.strftime('%d/%m/%Y')
+    form.gender.data = gop.member.gender
+    form.tel.data = gop.member.tel
+    form.policy_number.data = gop.member.policy_number
     form.patient_action_plan.data = gop.patient_action_plan
     # convert the datetime python object to the string representation
     form.admission_date.data = gop.admission_date.strftime('%d/%m/%Y')
@@ -948,7 +948,7 @@ def request_page_edit(gop_id):
     form.quotation.data = gop.quotation
     
     return render_template('request-form.html', form=form,
-        patient_photo=gop.patient.photo, bill_codes=gop.provider.billing_codes,
+        member_photo=gop.member.photo, bill_codes=gop.provider.billing_codes,
         gop_id=gop.id, final=final, icd_code_id_name_web=icd_code_id_name_web)
 
 
@@ -2725,9 +2725,9 @@ def search():
         or query in str(gop.doctor_fee) \
         or query in str(gop.surgery_fee) \
         or query in str(gop.medication_fee) \
-        or query in gop.patient.name.lower() \
-        or query in gop.patient.gender.lower() \
-        or query in str(gop.patient.tel) \
+        or query in gop.member.name.lower() \
+        or query in gop.member.gender.lower() \
+        or query in str(gop.member.tel) \
         or (gop.payer.company and query in gop.payer.company.lower()):
             found['results'].append(gop.id)
             continue
@@ -2874,7 +2874,7 @@ def get_gops():
             gops = gops.group_by(models.GuaranteeOfPayment.status)
 
         elif sort == 'patient':
-            gops = gops.group_by(models.GuaranteeOfPayment.patient.name)
+            gops = gops.group_by(models.GuaranteeOfPayment.member.name)
 
         elif sort == 'payer':
             gops = gops.group_by(models.GuaranteeOfPayment.payer.company)
