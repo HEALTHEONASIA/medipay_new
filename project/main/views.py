@@ -339,7 +339,7 @@ def request_form():
             filename = ''
 
         patient = models.Patient.query.filter_by(
-            patient_id=form.patient_id.data).first()
+            national_id=form.national_id.data).first()
 
         if not patient:
             if filename:
@@ -367,7 +367,7 @@ def request_form():
                 name=form.name.data,
                 dob=dob,
                 gender=form.gender.data,
-                patient_id=form.patient_id.data,
+                national_id=form.national_id.data,
                 tel=form.tel.data,
                 photo=photo_filename,
                 policy_number=form.policy_number.data)
@@ -811,7 +811,7 @@ def request_page_edit(gop_id):
         # update the patient info
         gop.patient.name = form.name.data
         gop.patient.dob = dob
-        gop.patient.patient_id = form.patient_id.data
+        gop.patient.national_id = form.national_id.data
         gop.patient.gender = form.gender.data
         gop.patient.tel = form.tel.data
         gop.patient.policy_number = form.policy_number.data
@@ -928,8 +928,8 @@ def request_page_edit(gop_id):
         gop.medical_details.treatment_plan
 
     form.name.data = gop.patient.name
-    form.patient_id.data = gop.patient.patient_id
-    form.current_patient_id.data = gop.patient.patient_id
+    form.national_id.data = gop.patient.national_id
+    form.current_national_id.data = gop.patient.national_id
     # convert the datetime python object to the string representation
     form.dob.data = gop.patient.dob.strftime('%d/%m/%Y')
     form.gender.data = gop.patient.gender

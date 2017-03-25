@@ -147,12 +147,11 @@ class GOPForm(BaseForm):
     tel = StringField('Patient phone nr.', validators=[Required(),
                                                        validate_phone])
 
-    current_patient_id = HiddenField('Current Patient ID')
+    current_national_id = HiddenField('Current national ID')
 
     patient_action_plan = TextAreaField('Plan of action',
                                         validators=[Required()])
-    patient_id = StringField('Patient ID', validators=[Required(),
-                                                       validate_numeric])
+    national_id = StringField('Patient ID', validators=[Required()])
     patient_photo = FileField('Patient photo')
     medical_details_symptoms = StringField('Symptoms')
     medical_details_temperature = StringField('Temperature')
@@ -208,9 +207,9 @@ class GOPForm(BaseForm):
                                                      validate_empty_fee])
     submit = SubmitField('Submit')
 
-    def validate_patient_id(self, field):
-        if field.data != self.current_patient_id.data and \
-          Patient.query.filter_by(patient_id=field.data).first():
+    def validate_national_id(self, field):
+        if field.data != self.current_national_id.data and \
+          Patient.query.filter_by(national_id=field.data).first():
             raise ValidationError('Patient ID already exists.')
 
     def validate_patient_photo(self, field):

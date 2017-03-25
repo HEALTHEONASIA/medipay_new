@@ -87,7 +87,7 @@ def load_user(user_id):
 class Patient(db.Model):
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, unique=True, index=True)
+    national_id = db.Column(db.String(127))
     photo = db.Column(db.String(255))
     name = db.Column(db.String(50))
     dob = db.Column(db.Date, default=datetime.now())

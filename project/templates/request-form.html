@@ -225,11 +225,11 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label>Patient ID</label>
-                {% for error in form.patient_id.errors %}
+                {% for error in form.national_id.errors %}
                   <span class="help" style="color: #f55753;">[{{ error }}]</span>
                 {% endfor %}
-                {{ form.patient_id(class_="form-control") }}
-                {{ form.current_patient_id }}
+                {{ form.national_id(class_="form-control") }}
+                {{ form.current_national_id }}
               </div>
             </div>
           </div>
