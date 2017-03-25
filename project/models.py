@@ -87,13 +87,13 @@ def load_user(user_id):
 class Patient(db.Model):
     __tablename__ = 'patient'
     id = db.Column(db.Integer, primary_key=True)
-    national_id = db.Column(db.String(127))
     photo = db.Column(db.String(255))
     name = db.Column(db.String(50))
     dob = db.Column(db.Date, default=datetime.now())
     gender = db.Column(db.String(8))
     tel = db.Column(db.String(20))
     policy_number = db.Column(db.Integer)
+    national_id = db.Column(db.String(127))
     guarantees_of_payment = db.relationship('GuaranteeOfPayment',
                                             backref='patient', lazy='dynamic')
 
@@ -103,9 +103,11 @@ class Member(ColsMapMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     photo = db.Column(db.String(255)) # url to the photo from '/uploads'
     name = db.Column(db.String(64))
-    gender = db.Column(db.String(20))
     dob = db.Column(db.DateTime, default=datetime.now())
+    gender = db.Column(db.String(20))
     telephone = db.Column(db.String(80))
+    policy_number = db.Column(db.Integer)
+    national_id = db.Column(db.String(127))
     email = db.Column(db.String(64))
     address = db.Column(db.String(127))
     address_additional = db.Column(db.String(127))
@@ -117,8 +119,6 @@ class Member(ColsMapMixin, db.Model):
     exit_date = db.Column(db.DateTime)
     product = db.Column(db.String(255))
     plan = db.Column(db.String(127))
-    policy_number = db.Column(db.Integer)
-    client_id_number = db.Column(db.String(127))
     card_number = db.Column(db.String(127))
     plan_type = db.Column(db.String(80))
     remarks = db.Column(db.String(255))
