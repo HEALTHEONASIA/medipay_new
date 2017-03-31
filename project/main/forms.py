@@ -64,18 +64,18 @@ def validate_comma_sep_dec(form, field):
     field.data = field.data.replace(',' ,'').replace('-','')
     try:
         field.data = float(field.data)
+        if field.data < 0:
+            raise ValidationError('Fee cannot be less than 0')
     except ValueError:
         field.data = 0.0
-        raise ValidationError('Fee Cannot Be Zero')
         
 def validate_empty_fee(form, field):
     try:
         field.data = float(field.data)
-        if field.data <= 0:
-            raise ValidationError('Fee Cannot Be Zero')
+        if field.data < 0:
+            raise ValidationError('Fee cannot be less than 0')
     except ValueError:
         field.data = 0.0
-        raise ValidationError('Fee Cannot Be Zero')
 
 class ChangeProviderInfoForm(BaseForm):
     company = StringField('Company')
