@@ -54,6 +54,7 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(80))
     provider = db.relationship('Provider', uselist=False, backref='user')
     payer = db.relationship('Payer', uselist=False, backref='user')
+    member = db.relationship('Member', uselist=False, backref='user')
     password_hash = db.Column(db.String(128))
     bad_logins = db.Column(db.Integer)
     last_attempt = db.Column(db.DateTime)
@@ -113,6 +114,7 @@ class Member(ColsMapMixin, db.Model):
     patient_type = db.Column(db.String(50))
     raiting = db.Column(db.String(50))
     device_uid = db.Column(db.String(127))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     claims = db.relationship('Claim', backref='member', lazy='dynamic')
     guarantees_of_payment = db.relationship('GuaranteeOfPayment',
                                             backref='member', lazy='dynamic')
