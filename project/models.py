@@ -204,6 +204,7 @@ class Terminal(ColsMapMixin, db.Model):
     version = db.Column(db.String(40))
     last_update = db.Column(db.DateTime)
     remarks = db.Column(db.String(100))
+    device_uid = db.Column(db.String(127))
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
     claims = db.relationship('Claim', backref='terminal', lazy='dynamic')
 
