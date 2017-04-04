@@ -237,6 +237,7 @@ class Claim(ColsMapMixin, db.Model):
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
     member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
     terminal_id = db.Column(db.Integer, db.ForeignKey('terminal.id'))
+    new_claim = db.Column(db.SmallInteger, default=0)
 
     @classmethod
     def for_months_filter(cls, query_object, months, _type='all'):
