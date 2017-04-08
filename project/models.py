@@ -127,8 +127,10 @@ class Member(ColsMapMixin, db.Model):
                                             self.dob).years
         return difference_in_years
 
-    def medical_record(self, provider=current_user.provider):
-        if not provider:
+    def medical_record(self, provider=None):
+        if not provider and current_user and current_user.get_type() == 'provider':
+            provider = current_user.provider
+        else:
             return None
 
         medical_record = self.medical_records.filter_by(
@@ -143,8 +145,10 @@ class Member(ColsMapMixin, db.Model):
             db.session.add(medical_record)
             return medical_record
 
-    def policy(self, payer=current_user.payer):
-        if not payer:
+    def policy(self, payer=None):
+        if not payer and current_user and current_user.get_type() == 'payer':
+            payer = current_user.payer
+        else:
             return None
 
         policy = self.policies.filter_by(payer=payer).first()
