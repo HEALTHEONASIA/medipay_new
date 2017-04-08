@@ -116,6 +116,9 @@ class Member(ColsMapMixin, db.Model):
     device_uid = db.Column(db.String(127))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     claims = db.relationship('Claim', backref='member', lazy='dynamic')
+    medical_records = db.relationship('MedicalRecord', backref='member',
+                                      lazy='dynamic')
+    policies = db.relationship('Policy', backref='member', lazy='dynamic')
     guarantees_of_payment = db.relationship('GuaranteeOfPayment',
                                             backref='member', lazy='dynamic')
 
@@ -123,6 +126,37 @@ class Member(ColsMapMixin, db.Model):
         difference_in_years = relativedelta(datetime.now(),
                                             self.dob).years
         return difference_in_years
+
+    def medical_record(self, provider=current_user.provider):
+        if not provider:
+            return None
+
+        medical_record = self.medical_records.filter_by(
+            provider=provider).first()
+
+        if medical_record:
+            return medical_record
+        else:
+            medical_record = MedicalRecord(member=self,
+                                           provider=provider,
+                                           number=None)
+            db.session.add(medical_record)
+            return medical_record
+
+    def policy(self, payer=current_user.payer):
+        if not payer:
+            return None
+
+        policy = self.policies.filter_by(payer=payer).first()
+
+        if policy:
+            return policy
+        else:
+            policy = Policy(member=self,
+                            payer=payer,
+                            number=None)
+            db.session.add(policy)
+            return policy
 
 
 custom_payers = db.Table('custom_payers',
@@ -164,6 +198,8 @@ class Provider(db.Model):
     payers = db.relationship('Payer', secondary=custom_payers,
         backref=db.backref('providers', lazy='dynamic'))
     contracts = db.relationship('Contract', backref='provider', lazy='dynamic')
+    medical_records = db.relationship('MedicalRecord', backref='provider',
+                                      lazy='dynamic')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     terminals = db.relationship('Terminal', backref='provider', lazy='dynamic')
     claims = db.relationship('Claim', backref='provider', lazy='dynamic')
@@ -295,6 +331,22 @@ class Contract(db.Model):
     payer_id = db.Column(db.Integer, db.ForeignKey('payer.id'))
 
 
+class Policy(db.Model):
+    __tablename__ = 'policy'
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(50))
+    payer_id = db.Column(db.Integer, db.ForeignKey('payer.id'))
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
+
+
+class MedicalRecord(db.Model):
+    __tablename__ = 'medical_record'
+    id = db.Column(db.Integer, primary_key=True)
+    number = db.Column(db.String(50))
+    provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
+    member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
+
+
 class Payer(db.Model):
     __tablename__ = 'payer'
     id = db.Column(db.Integer, primary_key=True)
@@ -312,6 +364,7 @@ class Payer(db.Model):
     guarantees_of_payment = db.relationship('GuaranteeOfPayment',
                                             backref='payer', lazy='dynamic')
     contracts = db.relationship('Contract', backref='payer', lazy='dynamic')
+    policies = db.relationship('Policy', backref='payer', lazy='dynamic')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def contract(self, user=current_user):
