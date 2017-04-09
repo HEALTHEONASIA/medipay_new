@@ -22,7 +22,7 @@ def login_required(roles=["any"], types=["any"]):
                return login_manager.unauthorized()
             urole = current_user.get_role()
             utype = current_user.get_type()
-            if (urole not in roles and "any" not in roles) and \
+            if (urole not in roles and "any" not in roles) or \
                (utype not in types and "any" not in types):
                 # return login_manager.unauthorized()
                 return redirect(url_for('main.index'))
@@ -38,10 +38,11 @@ def to_float_or_zero(value):
     return value
 
 class ColsMapMixin(object):
-    def columns(self):
+    @classmethod
+    def columns(cls):
         """Return the actual columns of a SQLAlchemy-mapped object"""
         return [prop.key for prop in \
-            class_mapper(self.__class__).iterate_properties \
+            class_mapper(cls).iterate_properties \
             if isinstance(prop, ColumnProperty)]
 
 
@@ -93,7 +94,7 @@ class Member(ColsMapMixin, db.Model):
     dob = db.Column(db.DateTime, default=datetime.now())
     gender = db.Column(db.String(20))
     tel = db.Column(db.String(80))
-    policy_number = db.Column(db.Integer)
+    policy_number = db.Column(db.String(127))
     national_id = db.Column(db.String(127))
     email = db.Column(db.String(64))
     address = db.Column(db.String(127))
@@ -242,7 +243,7 @@ class Terminal(ColsMapMixin, db.Model):
     model = db.Column(db.String(100))
     location = db.Column(db.String(100))
     version = db.Column(db.String(40))
-    last_update = db.Column(db.DateTime)
+    last_update = db.Column(db.DateTime, default=datetime.now())
     remarks = db.Column(db.String(100))
     device_uid = db.Column(db.String(127))
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
@@ -386,7 +387,7 @@ class Payer(db.Model):
             return None
 
 
-class GuaranteeOfPayment(db.Model):
+class GuaranteeOfPayment(ColsMapMixin ,db.Model):
     __tablename__ = 'guarantee_of_payment'
     id = db.Column(db.Integer, primary_key=True)
     provider_id = db.Column(db.Integer, db.ForeignKey('provider.id'))
@@ -413,7 +414,7 @@ class GuaranteeOfPayment(db.Model):
     reason_close = db.Column(db.String(127))
     stamp_author = db.Column(db.String(50))
     timestamp_edited = db.Column(db.DateTime, default=datetime.now())
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=datetime.now())
     medical_details = db.relationship('MedicalDetails', uselist=False,
                                       backref='guarantee_of_payment')
     claim = db.relationship('Claim', uselist=False,
@@ -442,7 +443,7 @@ class GuaranteeOfPayment(db.Model):
         return output
 
 
-class MedicalDetails(db.Model):
+class MedicalDetails(ColsMapMixin, db.Model):
     __tablename__ = 'medical_details'
     id = db.Column(db.Integer, primary_key=True)
     gop_id = db.Column(db.Integer, db.ForeignKey('guarantee_of_payment.id'))
