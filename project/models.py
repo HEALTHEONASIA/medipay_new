@@ -12,7 +12,8 @@ from werkzeug import check_password_hash, generate_password_hash
 
 from . import db, login_manager
 
-def login_required(roles=["any"], types=["any"]):
+def login_required(roles=["any"], types=["any"],
+                   deny_roles=[], deny_types=[]):
     """Overwritten login_required decorator,
     which includes roles checking"""
     def wrapper(fn):
@@ -23,7 +24,9 @@ def login_required(roles=["any"], types=["any"]):
             urole = current_user.get_role()
             utype = current_user.get_type()
             if (urole not in roles and "any" not in roles) or \
-               (utype not in types and "any" not in types):
+               (utype not in types and "any" not in types) or \
+               (urole in deny_roles or "any" in deny_roles) or \
+               (utype in deny_types or "any" in deny_types):
                 # return login_manager.unauthorized()
                 return redirect(url_for('main.index'))
             return fn(*args, **kwargs)
