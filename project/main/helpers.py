@@ -1,3 +1,7 @@
+import os, random, string
+from werkzeug.utils import secure_filename
+from .. import config
+
 def prepare_gop_dict(gop):
     """The function takes the GOP model object
     and convert it to the python dictionary"""
@@ -64,3 +68,29 @@ def prepare_gops_list(gops):
         results.append(prepare_gop_dict(gop))
 
     return results
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1] in config['production'].ALLOWED_EXTENSIONS
+
+def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+def photo_file_name_santizer(photo):
+    filename = secure_filename(photo.data.filename)
+
+    if filename and allowed_file(filename):
+        filename = str(random.randint(100000, 999999)) + filename
+        photo.data.save(
+            os.path.join(config['production'].UPLOAD_FOLDER, filename))
+
+    if not filename:
+        filename = ''
+
+    if filename:
+        photo_filename = '/static/uploads/' + filename
+    else:
+        photo_filename = '/static/img/person-solid.png'
+
+    return photo_filename

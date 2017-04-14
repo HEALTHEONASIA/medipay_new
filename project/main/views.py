@@ -8,7 +8,6 @@ import sys
 import re
 from datetime import datetime
 from sqlalchemy import or_,and_
-from werkzeug.utils import secure_filename
 from flask import render_template, flash, redirect, request, session, jsonify
 from flask import url_for, make_response, send_from_directory
 from flask_login import login_user, login_required, current_user
@@ -19,19 +18,13 @@ from .forms import GOPApproveForm, ProviderSetupForm, BillingCodeForm
 from .forms import EditAccountForm, DoctorForm, ProviderPayerSetupEditForm
 from .forms import ProviderPayerSetupAddForm, EditAccountAdminForm
 from .forms import UserSetupForm, UserSetupAdminForm, UserUpgradeForm
+from .helpers import photo_file_name_santizer, pass_generator
 from .. import models, db, config, mail, create_app
 from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
 from .helpers import prepare_gops_list
 from ..models import User
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1] in config['development'].ALLOWED_EXTENSIONS
-
-def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 def csv_ouput(csv_file_name, data):
     si = StringIO.StringIO()
@@ -328,25 +321,12 @@ def request_form():
         else:
             previously_admitted = None
 
-        filename = secure_filename(form.member_photo.data.filename)
-
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.member_photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
-
-        if not filename:
-            filename = ''
+        photo_filename = photo_file_name_santizer(form.member_photo)
 
         member = models.Member.query.filter_by(
             national_id=form.national_id.data).first()
 
         if not member:
-            if filename:
-                photo_filename = '/static/uploads/' + filename
-            else:
-                photo_filename = '/static/img/person-solid.png'
-
             member = models.Member(
                 name=form.name.data,
                 dob=dob,
@@ -772,14 +752,7 @@ def request_page_edit(gop_id):
         payer = models.Payer.query.get(form.payer.data)
         gop.payer = payer
 
-        filename = secure_filename(form.member_photo.data.filename)
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.member_photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
-
-        if not filename:
-            filename = ''
+        filename = photo_file_name_santizer(form.member_photo)
 
         # update patient's medical details
         gop.medical_details.symptoms = \
@@ -817,7 +790,7 @@ def request_page_edit(gop_id):
         gop.member.policy_number = form.policy_number.data
 
         if filename:
-            gop.member.photo = '/static/uploads/' + filename
+            gop.member.photo = filename
 
         for icd_code_id in form.icd_codes.data:
             icd_code = models.ICDCode.query.get(int(icd_code_id))
@@ -2173,19 +2146,7 @@ def doctor_add():
     form = DoctorForm()
 
     if form.validate_on_submit():
-        filename = secure_filename(form.photo.data.filename)
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
-
-        if not filename:
-            filename = ''
-
-        if filename:
-            photo_filename = '/static/uploads/' + filename
-        else:
-            photo_filename = '/static/img/person-solid.png'
+        photo_filename = photo_file_name_santizer(form.photo)
 
         doctor = models.Doctor(provider=current_user.provider,
                                name=form.name.data,
@@ -2216,19 +2177,7 @@ def user_doctor_add(user_id):
     form = DoctorForm()
 
     if form.validate_on_submit():
-        filename = secure_filename(form.photo.data.filename)
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
-
-        if not filename:
-            filename = ''
-
-        if filename:
-            photo_filename = '/static/uploads/' + filename
-        else:
-            photo_filename = '/static/img/person-solid.png'
+        photo_filename = photo_file_name_santizer(form.photo)
 
         doctor = models.Doctor(provider=user.provider,
                                name=form.name.data,
@@ -2363,18 +2312,9 @@ def doctor_edit(doctor_id):
     form = DoctorForm()
 
     if form.validate_on_submit():
-        filename = secure_filename(form.photo.data.filename)
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
+        photo_filename = photo_file_name_santizer(form.photo)
 
-        if not filename:
-            filename = ''
-
-        if filename:
-            photo_filename = '/static/uploads/' + filename
-            doctor.photo = photo_filename
+        doctor.photo = photo_filename
 
         doctor.name = form.name.data
         doctor.department = form.department.data
@@ -2417,18 +2357,7 @@ def user_doctor_edit(user_id, doctor_id):
     form = DoctorForm()
 
     if form.validate_on_submit():
-        filename = secure_filename(form.photo.data.filename)
-        if filename and allowed_file(filename):
-            filename = str(random.randint(100000, 999999)) + filename
-            form.photo.data.save(
-                os.path.join(config['development'].UPLOAD_FOLDER, filename))
-
-        if not filename:
-            filename = ''
-
-        if filename:
-            photo_filename = '/static/uploads/' + filename
-            doctor.photo = photo_filename
+        doctor.photo = photo_file_name_santizer(form.photo)
 
         doctor.name = form.name.data
         doctor.department = form.department.data
