@@ -19,12 +19,16 @@ from .forms import EditAccountForm, DoctorForm, ProviderPayerSetupEditForm
 from .forms import ProviderPayerSetupAddForm, EditAccountAdminForm
 from .forms import UserSetupForm, UserSetupAdminForm, UserUpgradeForm
 from .helpers import photo_file_name_santizer, pass_generator
+from .services import GuaranteeOfPaymentService, UserService
 from .. import models, db, config, mail, create_app
 from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
 from .helpers import prepare_gops_list
 from ..models import User
+
+gop_service = GuaranteeOfPaymentService()
+user_service = UserService()
 
 def csv_ouput(csv_file_name, data):
     si = StringIO.StringIO()
@@ -66,7 +70,6 @@ def index():
         return render_template('home.html', menu_unpin=True, form=form,
             hide_help_widget=True)
 
-    page = request.args.get('page')
     status = request.args.get('status',None)
 
     # if it is an admin account
@@ -86,8 +89,6 @@ def index():
         total_count = gops.count()
         pending_count = total_count - (approved_count + rejected_count + \
             in_review_count)
-        
-        pagination = gops.paginate()
 
         # count all GOP's by its providers' country
         by_country_count = db.session\
@@ -118,12 +119,7 @@ def index():
 
         today = datetime.now()
 
-        if page or pagination.pages > 1:
-            try:
-                page = int(page)
-            except (ValueError, TypeError):
-                page = 1
-            gops = gops.paginate(page=page).items
+        pagination, gops = gop_service.prepare_pagination(gops)
 
         context = {
             'gops': gops,
@@ -179,8 +175,6 @@ def index():
             and_(models.GuaranteeOfPayment.state == None,
             or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending'))).count()
         total_count = gops.count()
-        
-        pagination = gops.paginate()
 
     elif current_user.user_type == 'payer':
         if status == 'approved' or status == 'declined' or status == 'in_review':
@@ -223,17 +217,10 @@ def index():
             and_(models.GuaranteeOfPayment.state == None,
             or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending'))).count()
         total_count = gops.count()
-        
-        pagination = gops.paginate()
 
     today = datetime.now()
 
-    if page or pagination.pages > 1:
-        try:
-            page = int(page)
-        except (ValueError, TypeError):
-            page = 1
-        gops = gops.paginate(page=page).items
+    pagination, gops = gop_service.prepare_pagination(gops)
 
     context = {
         'gops': gops,
@@ -262,8 +249,6 @@ def requests_sorted(by):
     if current_user.role != 'admin':
         return redirect(url_for('main.index'))
 
-    page = request.args.get('page')
-
     allowed = ['provider', 'payer', 'status', 'country']
 
     if by not in allowed:
@@ -272,14 +257,7 @@ def requests_sorted(by):
     gops = models.GuaranteeOfPayment.query.filter(
             models.GuaranteeOfPayment.state == None)
 
-    pagination = gops.paginate()
-
-    if page or pagination.pages > 1:
-        try:
-            page = int(page)
-        except (ValueError, TypeError):
-            page = 1
-        gops = gops.paginate(page=page).items
+    pagination, gops = gop_service.prepare_pagination(gops)
 
     return render_template('requests-all.html', by=by, gops=gops,
                            pagination=pagination)
@@ -1005,8 +983,6 @@ def request_page_close(gop_id, reason):
 @login_required
 def history():
     # if it is admin, show him all the closed requests
-    page = request.args.get('page')
-
     if current_user.role == 'admin':
         gops = models.GuaranteeOfPayment.query.filter_by(state='closed')
         return render_template('history.html', gops=gops)
@@ -1018,14 +994,7 @@ def history():
         gops = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, state='closed')
 
-    pagination = gops.paginate()
-
-    if page or pagination.pages > 1:
-        try:
-            page = int(page)
-        except (ValueError, TypeError):
-            page = 1
-        gops = gops.paginate(page=page).items
+    pagination, gops = gop_service.prepare_pagination(gops)
 
 
     return render_template('history.html', gops=gops, pagination=pagination)
@@ -1038,17 +1007,9 @@ def users():
     if current_user.role != 'admin':
         return redirect(url_for('main.index'))
 
-    page = request.args.get('page')
-
     users = models.User.query.filter(models.User.id > 0)
-    pagination = users.paginate()
 
-    if page or pagination.pages > 1:
-        try:
-            page = int(page)
-        except (ValueError, TypeError):
-            page = 1
-        users = users.paginate(page=page).items
+    pagination, users = user_service.prepare_pagination(users)
 
     return render_template('users.html', users=users, pagination=pagination)
 
@@ -1306,8 +1267,6 @@ def settings_payer_add():
 
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
-        # flash('To add the payers you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To add the payers you need to be the admin.')
         return redirect(url_for('main.settings_payers'))
 
@@ -1429,8 +1388,6 @@ def settings_payer_edit(payer_id):
 
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
-        # flash('To edit the payers you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the payers you need to be the admin.')
         return redirect(url_for('main.payers'))
 
@@ -1560,8 +1517,6 @@ def settings_payer_csv():
 
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
-        # flash('To bulk upload the payers you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To bulk upload the payers you need to upgrade your account.')
         return redirect(url_for('main.payers'))
 
@@ -1726,8 +1681,6 @@ def billing_code_add():
 
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
-        # flash('To add the billing codes you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To add the billing codes you need to be the admin.')
         return redirect(url_for('main.billing_codes'))
 
@@ -1819,9 +1772,6 @@ def billing_code_add_csv():
 
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
-        # flash('To bulk upload the billing codes you need ' + \
-        #       'to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To bulk upload the billing codes you need to be the admin.')
         return redirect(url_for('main.billing_codes'))
 
@@ -1947,8 +1897,6 @@ def billing_code_edit(bill_id):
 
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
-        # flash('To edit the billing codes you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the billing codes you need to be the admin.')
         return redirect(url_for('main.billing_codes'))
 
@@ -2138,8 +2086,6 @@ def doctor_add():
 
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
-        # flash('To add the doctors you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To add the doctors you need to be the admin.')
         return redirect(url_for('main.doctors'))
 
@@ -2204,8 +2150,6 @@ def doctor_add_csv():
 
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
-        # flash('To bulk upload the doctors you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To bulk upload the doctors you need to be the admin.')
         return redirect(url_for('main.doctors'))
 
@@ -2298,8 +2242,6 @@ def doctor_edit(doctor_id):
 
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
-        # flash('To edit the doctors you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the doctors you need to be the admin.')
         return redirect(url_for('main.doctors'))
 
@@ -2391,8 +2333,6 @@ def setup():
 
     # only user_admin can edit its setup settings
     if current_user.role != 'user_admin':
-        # flash('To edit the setup settings you need to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the system settings you need to be the admin.')
         return redirect(url_for('main.settings'))
 
@@ -2488,9 +2428,6 @@ def settings_user_setup():
 
     # only user_admin can edit its user setup settings
     if current_user.role != 'user_admin':
-        # flash('To edit the user setup settings you need ' + \
-        #       'to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the user settings you need to be the admin.')
         return redirect(url_for('main.settings'))
 
@@ -2552,9 +2489,6 @@ def user_settings_user_setup(user_id):
 def settings_account():
     # only user_admin and admit can edit its account settings
     if current_user.role != 'user_admin' and current_user.role != 'admin':
-        # flash('To edit the account settings you need ' + \
-        #       'to upgrade your account.')
-        # return redirect(url_for('main.user_upgrade'))
         flash('To edit the account settings you need to be the admin.')
         return redirect(url_for('main.settings'))
 
@@ -2588,13 +2522,6 @@ def user_settings_account(user_id):
         db.session.add(user)
 
     return render_template('settings-account.html', form=form, user=user)
-
-
-@main.route('/help')
-@login_required
-def help():
-    name = current_user.email
-    return render_template('help.html', name=name)
 
 
 @main.app_errorhandler(404)
@@ -2666,9 +2593,7 @@ def search():
 
 @main.route('/icd-code/search', methods=['GET'])
 def icd_code_search():
-    found = []
-    query = request.args.get('query')
-    query = query.lower()
+    query = request.args.get('query').lower()
     
     if not query:
         return render_template('icd-code-search-results.html',
@@ -2676,14 +2601,15 @@ def icd_code_search():
 
     icd_codes = models.ICDCode.query.all()
 
+    result = []
+    fields = ['code', 'description', 'common_term']
+    find = lambda query, obj, attr: query in getattr(obj, attr).lower()
+    
     for icd_code in icd_codes:
-        if query in icd_code.code.lower() \
-        or query in icd_code.description.lower() \
-        or query in icd_code.common_term.lower():
-            found.append(icd_code)
-            continue
+        if any([find(query, icd_code, field) for field in fields]):
+            result.append(icd_code)
 
-    return render_template('icd-code-search-results.html', icd_codes=found,
+    return render_template('icd-code-search-results.html', icd_codes=result,
                                query=query)
 
 
@@ -2832,36 +2758,3 @@ def generate_api_key():
     db.session.add(current_user)
 
     return current_user.api_key or 'None'
-
-@main.route('/check-notification')
-@login_required
-def check_notifications():
-    """This view function provides the notifications functionality.
-    It compares the GOP request statuses from the user session varibale
-    with the current statuses of GOP requests from the database"""
-
-    notification = None
-    if current_user.user_type == 'payer':
-        pass
-    elif current_user.user_type == 'provider':
-        pass
-    else:
-        return jsonify({})
-    
-    # Send notification To The Required User
-    notification = models.Notification.query.filter_by(user_id=current_user.id).first()
-    if notification is None:
-        return jsonify({})
-
-    Message = notification.message
-    if Message is None:
-        return jsonify({})
-    
-    # After Notification Has Been Sent, Delete It From Table 
-    db.session.delete(notification)
-    db.session.commit()
-    
-    notification_message = {}
-    notification_message['msg'] = Message
-        
-    return jsonify(notification_message)
