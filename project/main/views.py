@@ -369,8 +369,6 @@ def request_form():
                 recipient_email = gop.payer.pic_alt_email
             else:
                 recipient_email = gop.payer.user.email
-            # getting payer id for sending notification    
-            notification_payer_id = gop.payer.user.id
             
         # if no, we register him, set the random password and send
         # the access credentials to him
@@ -382,8 +380,6 @@ def request_form():
                     user_type='payer',
                     payer=gop.payer)
             db.session.add(user)
-            # getting payer id for sending notification 
-            notification_payer_id = user.id
 
         msg = Message("Request for GOP - %s" % gop.provider.company,
                       sender=("MediPay",
@@ -400,16 +396,7 @@ def request_form():
             mail.send(msg)
         except Exception as e:
             pass
-        
-        # Creating notification message
-        notification_message = "Request for Intial GOP - %s" % gop.provider.company
-        notification_message = notification_message + "<BR>"
-        notification_message = notification_message + "<a href=/request/%s>Go To GOP</a>" %(str(gop.id))
-        
-        notification = models.Notification(message=notification_message,user_id=notification_payer_id)
-        db.session.add(notification)
-        db.session.commit()
-        
+
         flash('Your GOP request has been sent.')
         return redirect(url_for('main.index'))
 
@@ -459,21 +446,6 @@ def request_page(gop_id):
                 gop.timestamp_edited = datetime.now()
 
                 db.session.add(gop)
-                
-                # Creating notification message
-                if gop.status == 'approved':
-                    notification_message = "%s GOP Request %s" %(gop.payer.company,form.status.data)
-                elif gop.status == 'declined':
-                    notification_message = "%s GOP Request %s <BR> Reason: %s" %(gop.payer.company,form.status.data,form.reason_decline.data)
-                else:
-                    notification_message = "%s GOP Request %s" %(gop.payer.company,'In Review')
-                
-                notification_message = notification_message + "<BR>"
-                notification_message = notification_message + "<a href=/request/%s>Go To GOP</a>" %(str(gop.id))
-        
-                notification = models.Notification(message=notification_message,user_id=gop.provider.user.id)
-                db.session.add(notification)
-                db.session.commit()
                 
                 flash('The GOP request has been %s.' % form.status.data)
                 return redirect(url_for('main.index'))
@@ -792,15 +764,6 @@ def request_page_edit(gop_id):
                 mail.send(msg)
             except Exception as e:
                 pass
-            
-            # Creating notification message
-            notification_message = "Request for Final GOP - %s" % gop.provider.company
-            notification_message = notification_message + "<BR>"
-            notification_message = notification_message + "<a href=/request/%s>Go To GOP</a>" %(str(gop.id))
-        
-            notification = models.Notification(message=notification_message,user_id=gop.payer.user.id)
-            db.session.add(notification)
-            db.session.commit()
 
         flash('The GOP request has been updated.')
         return redirect(url_for('main.request_page', gop_id=gop.id))
