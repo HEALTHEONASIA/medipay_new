@@ -25,7 +25,7 @@ from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
 from .helpers import prepare_gops_list
-from ..models import User
+from ..models import User, login_required
 
 gop_service = GuaranteeOfPaymentService()
 user_service = UserService()
@@ -238,17 +238,14 @@ def index():
 
 
 @main.route('/static/uploads/<filename>')
-@login_required
+@login_required()
 def block_unauthenticated_url(filename):
     return send_from_directory(os.path.join('static','uploads'),filename)
 
 
 @main.route('/requests/by/<by>')
-@login_required
+@login_required(roles=['admin'])
 def requests_sorted(by):
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     allowed = ['provider', 'payer', 'status', 'country']
 
     if by not in allowed:
@@ -264,14 +261,8 @@ def requests_sorted(by):
 
 
 @main.route('/request', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def request_form():
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     payers = current_user.provider.payers
     form = GOPForm()
 
@@ -429,7 +420,7 @@ def request_form():
 
 
 @main.route('/request/<int:gop_id>', methods=['GET', 'POST'])
-@login_required
+@login_required()
 def request_page(gop_id):
     # prevents request page from crashing when the gop_id is larger than a integer
     if gop_id > sys.maxsize:
@@ -505,7 +496,7 @@ def request_page(gop_id):
 
 
 @main.route('/request/<int:gop_id>/set-stamp-author', methods=['GET'])
-@login_required
+@login_required()
 def request_set_stamp_author(gop_id):
     if current_user.user_type != 'payer':
         return 'ERROR'
@@ -529,12 +520,8 @@ def request_set_stamp_author(gop_id):
 
 
 @main.route('/request/<int:gop_id>/download', methods=['GET'])
-@login_required
+@login_required(types=['provider'])
 def request_page_download(gop_id):
-    # only providers can download the GOP's request
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     if not current_user.premium:
         flash('To download the GOP request you need to upgrade your account.')
         return redirect(url_for('main.user_upgrade'))
@@ -610,12 +597,8 @@ def request_page_download(gop_id):
 
 
 @main.route('/upgrade', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider', 'payer'])
 def user_upgrade():
-    # god user cannot upgrade the account
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
     # user cannot upgrade the account twice
     if current_user.premium:
         flash('Your account is already upgraded to Premium.')
@@ -660,15 +643,8 @@ def user_upgrade():
 
 
 @main.route('/request/<int:gop_id>/edit', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def request_page_edit(gop_id):
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers can edit the GOP's request details
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     gop = models.GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found or it is not the current user's GOP, 
@@ -904,15 +880,8 @@ def request_page_edit(gop_id):
 
 
 @main.route('/request/<int:gop_id>/resend', methods=['GET'])
-@login_required
+@login_required(types=['provider'])
 def request_page_resend(gop_id):
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers can resend the GOP's request
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     gop = models.GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
@@ -951,15 +920,8 @@ def request_page_resend(gop_id):
 
 
 @main.route('/request/<int:gop_id>/close/<reason>', methods=['GET'])
-@login_required
+@login_required(types=['provider'])
 def request_page_close(gop_id, reason):
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers can close the GOP's request
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     gop = models.GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
@@ -980,7 +942,7 @@ def request_page_close(gop_id, reason):
 
 
 @main.route('/history')
-@login_required
+@login_required()
 def history():
     # if it is admin, show him all the closed requests
     if current_user.role == 'admin':
@@ -1001,12 +963,8 @@ def history():
 
 
 @main.route('/users')
-@login_required
+@login_required(roles=['admin'])
 def users():
-    # only admins can see the list of users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     users = models.User.query.filter(models.User.id > 0)
 
     pagination, users = user_service.prepare_pagination(users)
@@ -1015,12 +973,8 @@ def users():
 
 
 @main.route('/settings', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider', 'payer'])
 def settings():
-    # admin does not have the settings
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
     if current_user.user_type == 'provider':
         form = ChangeProviderInfoForm()
         if form.validate_on_submit():
@@ -1115,12 +1069,8 @@ def settings():
 
 
 @main.route('/user/<int:user_id>/settings', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_settings(user_id):
-    # only admins can see the settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1221,28 +1171,16 @@ def user_settings(user_id):
 
 
 @main.route('/settings/payers')
-@login_required
+@login_required(types=['provider'])
 def settings_payers():
-    # admin does not have a payer setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have payer setup
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     payers = current_user.provider.payers
 
     return render_template('settings-payers.html', payers=payers)
 
 
 @main.route('/user/<int:user_id>/settings/payers')
-@login_required
+@login_required(roles=['admin'])
 def user_settings_payers(user_id):
-    # only admins can see the payer setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1255,16 +1193,8 @@ def user_settings_payers(user_id):
 
 
 @main.route('/settings/payer/add', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def settings_payer_add():
-    # admin does not have a payer setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have payer setup
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To add the payers you need to be the admin.')
@@ -1317,12 +1247,8 @@ def settings_payer_add():
 
 
 @main.route('/user/<int:user_id>/settings/payer/add', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_settings_payer_add(user_id):
-    # only admins can see the payer setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1376,16 +1302,8 @@ def user_settings_payer_add(user_id):
 
 
 @main.route('/settings/payer/<int:payer_id>/edit', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def settings_payer_edit(payer_id):
-    # admin does not have a payer setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have payer setup
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To edit the payers you need to be the admin.')
@@ -1443,12 +1361,8 @@ def settings_payer_edit(payer_id):
 
 @main.route('/user/<int:user_id>/settings/payer/<int:payer_id>/edit',
             methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_settings_payer_edit(user_id, payer_id):
-    # only admins can see the payer setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1506,15 +1420,8 @@ def user_settings_payer_edit(user_id, payer_id):
 
 
 @main.route('/settings/payer/csv', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def settings_payer_csv():
-    # admin does not have a payer setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To bulk upload the payers you need to upgrade your account.')
@@ -1570,12 +1477,8 @@ def settings_payer_csv():
 
 
 @main.route('/user/<int:user_id>/settings/payer/csv', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_settings_payer_csv(user_id):
-    # only admins can see the payer setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1634,28 +1537,16 @@ def user_settings_payer_csv(user_id):
 
 
 @main.route('/settings/billing-codes')
-@login_required
+@login_required(types=['provider'])
 def billing_codes():
-    # admin does not have a billing code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have billing codes
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     bill_codes = current_user.provider.billing_codes
 
     return render_template('billing-codes.html', bill_codes=bill_codes)
 
 
 @main.route('/user/<int:user_id>/settings/billing-codes')
-@login_required
+@login_required(roles=['admin'])
 def user_billing_codes(user_id):
-    # only admins can see the billing setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1669,16 +1560,8 @@ def user_billing_codes(user_id):
 
 
 @main.route('/settings/billing-code/add', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def billing_code_add():
-    # admin does not have a billing code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have billing codes
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To add the billing codes you need to be the admin.')
@@ -1717,12 +1600,8 @@ def billing_code_add():
 
 @main.route('/user/<int:user_id>/settings/billing-code/add',
             methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_billing_code_add(user_id):
-    # only admins can see the billing setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1761,15 +1640,8 @@ def user_billing_code_add(user_id):
 
 
 @main.route('/settings/billing-code/csv', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def billing_code_add_csv():
-    # admin does not have a billing code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To bulk upload the billing codes you need to be the admin.')
@@ -1824,12 +1696,8 @@ def billing_code_add_csv():
 
 @main.route('/user/<int:user_id>/settings/billing-code/csv',
             methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_billing_code_add_csv(user_id):
-    # only admins can see the billing setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -1885,16 +1753,8 @@ def user_billing_code_add_csv(user_id):
 
 
 @main.route('/settings/billing-code/<int:bill_id>', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def billing_code_edit(bill_id):
-    # admin does not have a billing code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have billing codes
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To edit the billing codes you need to be the admin.')
@@ -1950,12 +1810,8 @@ def billing_code_edit(bill_id):
 
 @main.route('/user/<int:user_id>/settings/billing-code/<int:bill_id>',
             methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_billing_code_edit(user_id, bill_id):
-    # only admins can see the billing setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2011,7 +1867,7 @@ def user_billing_code_edit(user_id, bill_id):
 
 
 @main.route('/billing-code/<int:bill_id>/get', methods=['GET'])
-@login_required
+@login_required()
 def billing_code_get(bill_id):
     if not current_user.is_authenticated or \
       current_user.user_type != 'provider':
@@ -2040,28 +1896,16 @@ def billing_code_get(bill_id):
 
 
 @main.route('/settings/doctors')
-@login_required
+@login_required(types=['provider'])
 def doctors():
-    # admin does not have a doctor code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have doctors
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     doctors = current_user.provider.doctors
 
     return render_template('doctors.html', doctors=doctors)
 
 
 @main.route('/user/<int:user_id>/settings/doctors')
-@login_required
+@login_required(roles=['admin'])
 def user_doctors(user_id):
-    # only admins can see the doctor setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2074,16 +1918,8 @@ def user_doctors(user_id):
 
 
 @main.route('/settings/doctor/add', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def doctor_add():
-    # admin does not have a doctor code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have doctors
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To add the doctors you need to be the admin.')
@@ -2108,12 +1944,8 @@ def doctor_add():
 
 
 @main.route('/user/<int:user_id>/settings/doctor/add', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_doctor_add(user_id):
-    # only admins can see the doctor setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2139,15 +1971,8 @@ def user_doctor_add(user_id):
 
 
 @main.route('/settings/doctor/csv', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def doctor_add_csv():
-    # admin does not have a doctor code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To bulk upload the doctors you need to be the admin.')
@@ -2184,12 +2009,8 @@ def doctor_add_csv():
 
 
 @main.route('/user/<int:user_id>/settings/doctor/csv', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_doctor_add_csv(user_id):
-    # only admins can see the doctor setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2230,16 +2051,8 @@ def user_doctor_add_csv(user_id):
 
 
 @main.route('/settings/doctor/<int:doctor_id>/edit', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def doctor_edit(doctor_id):
-    # admin does not have a doctor code setup
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have doctors
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To edit the doctors you need to be the admin.')
@@ -2278,12 +2091,8 @@ def doctor_edit(doctor_id):
 
 @main.route('/user/<int:user_id>/settings/doctor/<int:doctor_id>/edit',
             methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_doctor_edit(user_id, doctor_id):
-    # only admins can see the doctor setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2321,16 +2130,8 @@ def user_doctor_edit(user_id, doctor_id):
 
 
 @main.route('/setup', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def setup():
-    # admin does not have a setup section
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
-    # only providers have the setup section
-    if current_user.user_type != 'provider':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its setup settings
     if current_user.role != 'user_admin':
         flash('To edit the system settings you need to be the admin.')
@@ -2372,12 +2173,8 @@ def setup():
 
 
 @main.route('/user/<int:user_id>/setup', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_setup(user_id):
-    # only admins can see the setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2420,12 +2217,8 @@ def user_setup(user_id):
 
 
 @main.route('/settings/user-setup', methods=['GET', 'POST'])
-@login_required
+@login_required(types=['provider'])
 def settings_user_setup():
-    # admin does not have a user setup section
-    if current_user.role == 'admin':
-        return redirect(url_for('main.index'))
-
     # only user_admin can edit its user setup settings
     if current_user.role != 'user_admin':
         flash('To edit the user settings you need to be the admin.')
@@ -2449,12 +2242,8 @@ def settings_user_setup():
 
 
 @main.route('/user/<int:user_id>/settings/user-setup', methods=['GET', 'POST'])
-@login_required
+@login_required(roles=['admin'])
 def user_settings_user_setup(user_id):
-    # only admins can see the setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2485,9 +2274,9 @@ def user_settings_user_setup(user_id):
 
 
 @main.route('/settings/account', methods=['GET', 'POST'])
-@login_required
+@login_required()
 def settings_account():
-    # only user_admin and admit can edit its account settings
+    # only user_admin and admin can edit its account settings
     if current_user.role != 'user_admin' and current_user.role != 'admin':
         flash('To edit the account settings you need to be the admin.')
         return redirect(url_for('main.settings'))
@@ -2503,11 +2292,8 @@ def settings_account():
 
 
 @main.route('/user/<int:user_id>/settings/account', methods=['GET', 'POST'])
+@login_required(roles=['admin'])
 def user_settings_account(user_id):
-    # only admins can see the setup settings of other users
-    if current_user.role != 'admin':
-        return redirect(url_for('main.index'))
-
     user = models.User.query.get(user_id)
 
     if not user:
@@ -2614,12 +2400,8 @@ def icd_code_search():
 
 
 @main.route('/requests/filter', methods=['GET'])
-@login_required
+@login_required(roles=['admin'])
 def requests_filter():
-    # only admin account has filters
-    if current_user.role != 'admin':
-        return 'ERROR'
-
     country = request.args.get('country')
     provider = request.args.get('provider')
     payer = request.args.get('payer')
@@ -2667,7 +2449,7 @@ def requests_filter():
 
 
 @main.route('/get-gops', methods=['GET'])
-@login_required
+@login_required()
 def get_gops():
     page = request.args.get('page')
     sort = request.args.get('sort')
@@ -2750,7 +2532,7 @@ def get_gops():
 
 
 @main.route('/generate-api-key', methods=['GET'])
-@login_required
+@login_required()
 def generate_api_key():
     api_key = pass_generator(size=16)
 
