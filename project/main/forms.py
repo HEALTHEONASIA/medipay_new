@@ -220,20 +220,6 @@ class GOPForm(BaseForm):
               raise ValidationError("Only image files are allowed.")
 
 
-class ProviderSetupForm(BaseForm):
-    serial_number = StringField('Serial number', validators=[Required()])
-    server_url = StringField('Server url', validators=[URL()])
-    server_port = StringField('Port', validators=[validate_numeric])
-    module_name = StringField('Module name')
-    proxy_url = StringField('Proxy URL', validators=[URL()])
-    proxy_port = StringField('Port', validators=[validate_numeric])
-    username = StringField('Username')
-    password = PasswordField('Password')
-    request_url = StringField('Request URL', validators=[URL()])
-    default_path = StringField('Default path')
-    language = SelectField('Language', choices=[('english', 'English')])
-
-
 class ProviderPayerSetupEditForm(BaseForm):
     company = StringField('Name', validators=[Required()])
     payer_type = SelectField('Type', validators=[Required()],

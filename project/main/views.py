@@ -14,7 +14,7 @@ from flask_login import login_user, login_required, current_user
 from flask_mail import Message
 from . import main
 from .forms import ChangeProviderInfoForm, ChangePayerInfoForm, GOPForm, SingleCsvForm
-from .forms import GOPApproveForm, ProviderSetupForm, BillingCodeForm
+from .forms import GOPApproveForm, BillingCodeForm
 from .forms import EditAccountForm, DoctorForm, ProviderPayerSetupEditForm
 from .forms import ProviderPayerSetupAddForm, EditAccountAdminForm
 from .forms import UserSetupForm, UserSetupAdminForm, UserUpgradeForm
@@ -2100,39 +2100,7 @@ def setup():
         flash('To edit the system settings you need to be the admin.')
         return redirect(url_for('main.settings'))
 
-    form = ProviderSetupForm()
-
-    if form.validate_on_submit():
-        current_user.provider.setup_serial_number = form.serial_number.data
-        current_user.provider.setup_server_url = form.server_url.data
-        current_user.provider.setup_server_port = form.server_port.data
-        current_user.provider.setup_module_name = form.module_name.data
-        current_user.provider.setup_proxy_url = form.proxy_url.data
-        current_user.provider.setup_proxy_port = form.proxy_port.data
-        current_user.provider.setup_username = form.username.data
-        current_user.provider.setup_password = form.password.data
-        current_user.provider.setup_request_url = form.request_url.data
-        current_user.provider.setup_default_path = form.default_path.data
-        current_user.provider.setup_language = form.language.data
-        db.session.add(current_user)
-        flash('Data has been updated.')
-
-    if request.method != 'POST':
-        if current_user.provider.setup_language:
-            form.language.default = current_user.provider.setup_language
-            form.process()
-        form.serial_number.data = current_user.provider.setup_serial_number
-        form.server_url.data = current_user.provider.setup_server_url
-        form.server_port.data = current_user.provider.setup_server_port
-        form.module_name.data = current_user.provider.setup_module_name
-        form.proxy_url.data = current_user.provider.setup_proxy_url
-        form.proxy_port.data = current_user.provider.setup_proxy_port
-        form.username.data = current_user.provider.setup_username
-        form.password.data = current_user.provider.setup_password
-        form.request_url.data = current_user.provider.setup_request_url
-        form.default_path.data = current_user.provider.setup_default_path
-
-    return render_template('setup.html', form=form)
+    return render_template('setup.html')
 
 
 @main.route('/user/<int:user_id>/setup', methods=['GET', 'POST'])
@@ -2144,39 +2112,7 @@ def user_setup(user_id):
         flash('User #%d is not found.' % user_id)
         return redirect(url_for('main.index'))
 
-    form = ProviderSetupForm()
-
-    if form.validate_on_submit():
-        user.provider.setup_serial_number = form.serial_number.data
-        user.provider.setup_server_url = form.server_url.data
-        user.provider.setup_server_port = form.server_port.data
-        user.provider.setup_module_name = form.module_name.data
-        user.provider.setup_proxy_url = form.proxy_url.data
-        user.provider.setup_proxy_port = form.proxy_port.data
-        user.provider.setup_username = form.username.data
-        user.provider.setup_password = form.password.data
-        user.provider.setup_request_url = form.request_url.data
-        user.provider.setup_default_path = form.default_path.data
-        user.provider.setup_language = form.language.data
-        db.session.add(user)
-        flash('Data has been updated.')
-
-    if request.method != 'POST':
-        if user.provider.setup_language:
-            form.language.default = user.provider.setup_language
-            form.process()
-        form.serial_number.data = user.provider.setup_serial_number
-        form.server_url.data = user.provider.setup_server_url
-        form.server_port.data = user.provider.setup_server_port
-        form.module_name.data = user.provider.setup_module_name
-        form.proxy_url.data = user.provider.setup_proxy_url
-        form.proxy_port.data = user.provider.setup_proxy_port
-        form.username.data = user.provider.setup_username
-        form.password.data = user.provider.setup_password
-        form.request_url.data = user.provider.setup_request_url
-        form.default_path.data = user.provider.setup_default_path
-
-    return render_template('setup.html', form=form, user=user)
+    return render_template('setup.html', user=user)
 
 
 @main.route('/settings/user-setup', methods=['GET', 'POST'])

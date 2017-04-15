@@ -472,10 +472,3 @@ class ICDCode(db.Model):
     edc = db.Column(db.String(40))
     description = db.Column(db.String(80))
     common_term = db.Column(db.String(40))
-
-
-class Notification(db.Model):
-    __tablename__ = 'notification'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    message = db.Column(db.String(127))
