@@ -174,9 +174,9 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if user != current_user %}
-          <a href="{{ url_for('main.user_settings_payers', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.user_settings_payers', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
-          <a href="{{ url_for('main.settings_payers') }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.settings_payers') }}" class="btn btn-primary btn-block">
         {% endif %}
             <span class="pull-right"><i class="pg-menu"></i></span>
             Payer Setup
@@ -186,9 +186,9 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if user != current_user %}
-          <a href="{{ url_for('main.user_billing_codes', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.user_billing_codes', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
-          <a href="{{ url_for('main.billing_codes') }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.billing_codes') }}" class="btn btn-primary btn-block">
         {% endif %}
             <span class="pull-right"><i class="pg-menu"></i></span>
             Billing Code Setup
@@ -198,9 +198,9 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('main.user_doctors', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.user_doctors', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
-          <a href="{{ url_for('main.doctors') }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.doctors') }}" class="btn btn-primary btn-block">
         {% endif %}
             <span class="pull-right"><i class="pg-menu"></i></span>
             Doctor Setup
@@ -210,9 +210,9 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('main.user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
-          <a href="{{ url_for('main.setup') }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.setup') }}" class="btn btn-primary btn-block">
         {% endif %}
             <span class="pull-right"><i class="pg-menu"></i></span>
             System Setup
@@ -223,9 +223,9 @@
     <div class="panel panel-default">
       <div class="panel-body">
       {% if user != current_user %}
-        <a href="{{ url_for('main.user_settings_user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+        <a href="{{ url_for('account.user_settings_user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
       {% else %}
-        <a href="{{ url_for('main.settings_user_setup') }}" class="btn btn-primary btn-block">
+        <a href="{{ url_for('account.settings_user_setup') }}" class="btn btn-primary btn-block">
       {% endif %}
           <span class="pull-right"><i class="pg-menu"></i></span>
           User Setup
@@ -235,9 +235,9 @@
     <div class="panel panel-default">
       <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('main.user_settings_account', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.user_settings_account', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
-          <a href="{{ url_for('main.settings_account') }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('account.settings_account') }}" class="btn btn-primary btn-block">
         {% endif %}
           <span class="pull-right"><i class="pg-menu"></i></span>
           Account Setup
@@ -274,7 +274,7 @@
       $('#api-key').fadeOut(function() {
         $('#api-key').text('');
       });
-      $.get('/generate-api-key', function(data) {
+      $.get({{ url_for('account.generate_api_key') }}, function(data) {
         $('#api-key').fadeIn(function() {
           $('#api-key').text(data);
         });

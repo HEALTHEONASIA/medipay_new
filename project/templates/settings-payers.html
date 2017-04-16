@@ -8,9 +8,9 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
-        <a href="{{ url_for('main.settings') }}">Settings</a>
+        <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
     </li>
     <li>
@@ -48,74 +48,74 @@
                 <tr role="row">
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.company }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.payer_type }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                         <p>{{ payer.contract(user).number }}</p>
                       </a>
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                         <p>{{ payer.contract().number }}</p>
                       </a>
                     {% endif %}
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.pic_email }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.pic_alt_email }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.pic }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.tel }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.settings_payer_edit', payer_id=payer.id) }}">
+                      <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
                         <p>{{ payer.country }}</p>
                       </a>
@@ -129,11 +129,11 @@
         <div class="row m-t-10">
           <div class="col-md-12" style="text-align: center;">
             {% if user %}
-              <a href="{{ url_for('main.user_settings_payer_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.user_settings_payer_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.user_settings_payer_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.user_settings_payer_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
             {% else %}
-              <a href="{{ url_for('main.settings_payer_add') }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.settings_payer_csv') }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.settings_payer_add') }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.settings_payer_csv') }}" class="btn btn-primary">Bulk Upload</a>
             {% endif %}
           </div>
         </div>

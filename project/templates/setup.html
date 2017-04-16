@@ -8,9 +8,9 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
-        <a href="{{ url_for('main.settings') }}">Settings</a>
+        <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
     </li>
     <li>

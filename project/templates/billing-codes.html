@@ -8,9 +8,9 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
-        <a href="{{ url_for('main.settings') }}">Settings</a>
+        <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
     </li>
     <li>
@@ -48,72 +48,72 @@
                 <tr role="row">
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.id }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.room_and_board }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.doctor_visit_fee }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.doctor_consultation_fee }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.specialist_visit_fee }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.specialist_consultation_fee }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.medicines }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.user_billing_code_edit', user_id=user.id, bill_id=bill_code.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.billing_code_edit', bill_id=bill_code.id) }}">
+                      <a href="{{ url_for('account.billing_code_edit', bill_id=bill_code.id) }}">
                     {% endif %}
                         <p>{{ bill_code.administration_fee }}</p>
                       </a>
@@ -127,11 +127,11 @@
         <div class="row m-t-10">
           <div class="col-md-12" style="text-align: center;">
             {% if user %}
-              <a href="{{ url_for('main.user_billing_code_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.user_billing_code_add_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.user_billing_code_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.user_billing_code_add_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
             {% else %}
-              <a href="{{ url_for('main.billing_code_add') }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.billing_code_add_csv') }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.billing_code_add') }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.billing_code_add_csv') }}" class="btn btn-primary">Bulk Upload</a>
             {% endif %}
           </div>
         </div>

@@ -34,17 +34,17 @@
               {% if user.role != 'admin' %}
                 <tr role="row">
                   <td class="v-align-middle">
-                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                    <a href="{{ url_for('account.user_settings', user_id=user.id) }}">
                       <p>{{ user.email }}</p>
                     </a>
                   </td>
                   <td class="v-align-middle sorting_1">
-                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                    <a href="{{ url_for('account.user_settings', user_id=user.id) }}">
                       <p>{{ user.user_type|capitalize }}</p>
                     </a>
                   </td>
                   <td class="v-align-middle">
-                    <a href="{{ url_for('main.user_settings', user_id=user.id) }}">
+                    <a href="{{ url_for('account.user_settings', user_id=user.id) }}">
                       <p>
                         {% if user.user_type == 'provider' %}
                           {{ user.provider.company }}

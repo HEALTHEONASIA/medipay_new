@@ -8,9 +8,9 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('main.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
-        <a href="{{ url_for('main.settings') }}">Settings</a>
+        <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
     </li>
     <li>
@@ -44,36 +44,36 @@
                 <tr role="row">
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.doctor_edit', doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.doctor_edit', doctor_id=doctor.id) }}">
                     {% endif %}
                         <p>{{ doctor.name }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.doctor_edit', doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.doctor_edit', doctor_id=doctor.id) }}">
                     {% endif %}
                         <p>{{ doctor.department }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.doctor_edit', doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.doctor_edit', doctor_id=doctor.id) }}">
                     {% endif %}
                         <p>{{ doctor.doctor_type }}</p>
                       </a>
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('main.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.user_doctor_edit', user_id=user.id, doctor_id=doctor.id) }}">
                     {% else %}
-                      <a href="{{ url_for('main.doctor_edit', doctor_id=doctor.id) }}">
+                      <a href="{{ url_for('account.doctor_edit', doctor_id=doctor.id) }}">
                     {% endif %}
                         <p>
                           {% if doctor.photo %}
@@ -91,11 +91,11 @@
         <div class="row m-t-10">
           <div class="col-md-12 m-t-10" style="text-align: center;">
             {% if user %}
-              <a href="{{ url_for('main.user_doctor_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.user_doctor_add_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.user_doctor_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.user_doctor_add_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
             {% else %}
-              <a href="{{ url_for('main.doctor_add') }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('main.doctor_add_csv') }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('account.doctor_add') }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('account.doctor_add_csv') }}" class="btn btn-primary">Bulk Upload</a>
             {% endif %}
           </div>
         </div>
