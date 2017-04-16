@@ -18,7 +18,8 @@ from .forms import GOPApproveForm, BillingCodeForm
 from .forms import EditAccountForm, DoctorForm, ProviderPayerSetupEditForm
 from .forms import ProviderPayerSetupAddForm, EditAccountAdminForm
 from .forms import UserSetupForm, UserSetupAdminForm, UserUpgradeForm
-from .helpers import photo_file_name_santizer, pass_generator
+from .helpers import photo_file_name_santizer, pass_generator, csv_ouput
+from .helpers import to_float_or_zero, validate_email_address
 from .services import GuaranteeOfPaymentService, UserService
 from .. import models, db, config, mail, create_app
 from .. import auth
@@ -29,36 +30,6 @@ from ..models import User, login_required
 
 gop_service = GuaranteeOfPaymentService()
 user_service = UserService()
-
-def csv_ouput(csv_file_name, data):
-    si = StringIO.StringIO()
-    cw = csv.writer(si)
-    cw.writerows(data)
-    output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=%s.csv" %csv_file_name
-    output.headers["Content-type"] = "text/csv"
-    return output
-
-def validate_email_address(data):
-    """Returns True or False"""
-    if data:
-        match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
-          ,data)
-        if match == None:
-            return False
-
-        if len(data) < 1 or len(data) > 64:
-            return False
-
-        return True
-
-def to_float_or_zero(value):
-    try:
-        value = float(value)
-    except ValueError:
-        value = 0.0
-    return value
-
 
 @main.route('/', methods=['GET', 'POST'])
 def index():

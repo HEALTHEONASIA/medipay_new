@@ -94,3 +94,32 @@ def photo_file_name_santizer(photo):
         photo_filename = '/static/img/person-solid.png'
 
     return photo_filename
+
+def csv_ouput(csv_file_name, data):
+    si = StringIO.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(data)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=%s.csv" %csv_file_name
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+def to_float_or_zero(value):
+    try:
+        value = float(value)
+    except ValueError:
+        value = 0.0
+    return value
+
+def validate_email_address(data):
+    """Returns True or False"""
+    if data:
+        match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
+          ,data)
+        if match == None:
+            return False
+
+        if len(data) < 1 or len(data) > 64:
+            return False
+
+        return True
