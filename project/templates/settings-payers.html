@@ -8,7 +8,7 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('admin.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
         <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
@@ -48,7 +48,7 @@
                 <tr role="row">
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -57,7 +57,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -66,7 +66,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                         <p>{{ payer.contract(user).number }}</p>
                       </a>
                     {% else %}
@@ -77,7 +77,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -86,7 +86,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -95,7 +95,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -104,7 +104,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -113,7 +113,7 @@
                   </td>
                   <td class="v-align-middle">
                     {% if user %}
-                      <a href="{{ url_for('account.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
+                      <a href="{{ url_for('admin.user_settings_payer_edit', user_id=user.id, payer_id=payer.id) }}">
                     {% else %}
                       <a href="{{ url_for('account.settings_payer_edit', payer_id=payer.id) }}">
                     {% endif %}
@@ -129,8 +129,8 @@
         <div class="row m-t-10">
           <div class="col-md-12" style="text-align: center;">
             {% if user %}
-              <a href="{{ url_for('account.user_settings_payer_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
-              <a href="{{ url_for('account.user_settings_payer_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
+              <a href="{{ url_for('admin.user_settings_payer_add', user_id=user.id) }}" class="btn btn-primary">Add New</a>
+              <a href="{{ url_for('admin.user_settings_payer_csv', user_id=user.id) }}" class="btn btn-primary">Bulk Upload</a>
             {% else %}
               <a href="{{ url_for('account.settings_payer_add') }}" class="btn btn-primary">Add New</a>
               <a href="{{ url_for('account.settings_payer_csv') }}" class="btn btn-primary">Bulk Upload</a>

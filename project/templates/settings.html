@@ -174,7 +174,7 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if user != current_user %}
-          <a href="{{ url_for('account.user_settings_payers', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('admin.user_settings_payers', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
           <a href="{{ url_for('account.settings_payers') }}" class="btn btn-primary btn-block">
         {% endif %}
@@ -186,7 +186,7 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if user != current_user %}
-          <a href="{{ url_for('account.user_billing_codes', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('admin.user_billing_codes', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
           <a href="{{ url_for('account.billing_codes') }}" class="btn btn-primary btn-block">
         {% endif %}
@@ -198,7 +198,7 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('account.user_doctors', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('admin.user_doctors', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
           <a href="{{ url_for('account.doctors') }}" class="btn btn-primary btn-block">
         {% endif %}
@@ -210,7 +210,7 @@
       <div class="panel panel-default">
         <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('account.user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('admin.user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
           <a href="{{ url_for('account.setup') }}" class="btn btn-primary btn-block">
         {% endif %}
@@ -223,7 +223,7 @@
     <div class="panel panel-default">
       <div class="panel-body">
       {% if user != current_user %}
-        <a href="{{ url_for('account.user_settings_user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
+        <a href="{{ url_for('admin.user_settings_user_setup', user_id=user.id) }}" class="btn btn-primary btn-block">
       {% else %}
         <a href="{{ url_for('account.settings_user_setup') }}" class="btn btn-primary btn-block">
       {% endif %}
@@ -235,7 +235,7 @@
     <div class="panel panel-default">
       <div class="panel-body">
         {% if current_user != user %}
-          <a href="{{ url_for('account.user_settings_account', user_id=user.id) }}" class="btn btn-primary btn-block">
+          <a href="{{ url_for('admin.user_settings_account', user_id=user.id) }}" class="btn btn-primary btn-block">
         {% else %}
           <a href="{{ url_for('account.settings_account') }}" class="btn btn-primary btn-block">
         {% endif %}

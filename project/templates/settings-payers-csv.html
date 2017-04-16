@@ -8,14 +8,14 @@
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('account.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
+        <a href="{{ url_for('admin.user_settings', user_id=user.id) }}">User #{{ user.id }} Settings</a>
       {% else %}
         <a href="{{ url_for('account.settings') }}">Settings</a>
       {% endif %}
     </li>
     <li>
       {% if user %}
-        <a href="{{ url_for('account.user_settings_payers', user_id=user.id) }}">Payers</a>
+        <a href="{{ url_for('admin.user_settings_payers', user_id=user.id) }}">Payers</a>
       {% else %}
         <a href="{{ url_for('account.settings_payers') }}">Payers</a>
       {% endif %}
