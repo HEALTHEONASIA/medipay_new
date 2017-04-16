@@ -66,7 +66,7 @@
           {%- for page in pagination.iter_pages() %}
             {% if page %}
               {% if page != pagination.page %}
-                <a href="{{ url_for('main.users', page=page) }}">{{ page }}</a>
+                <a href="{{ url_for('admin.users', page=page) }}">{{ page }}</a>
               {% else %}
                 <strong>{{ page }}</strong>
               {% endif %}

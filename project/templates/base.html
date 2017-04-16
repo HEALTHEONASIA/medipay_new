@@ -109,25 +109,25 @@
                 <span class="icon-thumbnail"><i class="pg-servers"></i></span>
               </li>
               <li class="active">
-                <a href="{{ url_for('main.requests_sorted', by='provider') }}">
+                <a href="{{ url_for('admin.requests_sorted', by='provider') }}">
                   <span class="title">By Provider</span>
                 </a>
                 <span class="icon-thumbnail"><i class="pg-grid"></i></span>
               </li>
               <li class="active">
-                <a href="{{ url_for('main.requests_sorted', by='payer') }}">
+                <a href="{{ url_for('admin.requests_sorted', by='payer') }}">
                   <span class="title">By Payer</span>
                 </a>
                 <span class="icon-thumbnail"><i class="pg-grid"></i></span>
               </li>
               <li class="active">
-                <a href="{{ url_for('main.requests_sorted', by='status') }}">
+                <a href="{{ url_for('admin.requests_sorted', by='status') }}">
                   <span class="title">By Status</span>
                 </a>
                 <span class="icon-thumbnail"><i class="pg-grid"></i></span>
               </li>
               <li class="active m-b-30">
-                <a href="{{ url_for('main.requests_sorted', by='country') }}">
+                <a href="{{ url_for('admin.requests_sorted', by='country') }}">
                   <span class="title">By Country</span>
                 </a>
                 <span class="icon-thumbnail"><i class="pg-grid"></i></span>
@@ -164,7 +164,7 @@
               </li>
             {% if current_user.role == 'admin' %}
               <li class="active">
-                <a href="{{ url_for('main.users') }}">
+                <a href="{{ url_for('admin.users') }}">
                   <span class="title">Users</span>
                 </a>
                 <span class="icon-thumbnail"><i class="pg-contact_book"></i></span>

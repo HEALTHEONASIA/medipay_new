@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import render_template, flash, redirect, request, url_for
 from flask_login import current_user
 from . import admin
@@ -5,8 +6,123 @@ from ..account.forms import ChangeProviderInfoForm, ChangePayerInfoForm
 from ..account.forms import ProviderPayerSetupAddForm, ProviderPayerSetupEditForm
 from ..account.forms import SingleCsvForm, BillingCodeForm, DoctorForm
 from ..account.forms import UserSetupAdminForm, EditAccountAdminForm
+from ..main.services import GuaranteeOfPaymentService, UserService
 from .. import models, db
 from ..models import login_required
+
+gop_service = GuaranteeOfPaymentService()
+user_service = UserService()
+
+@admin.route('/', methods=['GET', 'POST'])
+@login_required(roles=['admin'])
+def index():
+    status = request.args.get('status',None)
+
+    gops = models.GuaranteeOfPayment.query.filter(
+            models.GuaranteeOfPayment.state == None)
+
+    in_review_count = models.GuaranteeOfPayment.query.filter_by(
+        status='in review').filter(
+        models.GuaranteeOfPayment.state == None).count()
+    approved_count = models.GuaranteeOfPayment.query.filter_by(
+        status='approved').filter(
+        models.GuaranteeOfPayment.state == None).count()
+    rejected_count = models.GuaranteeOfPayment.query.filter_by(
+        status='declined').filter(
+        models.GuaranteeOfPayment.state == None).count()
+    total_count = gops.count()
+    pending_count = total_count - (approved_count + rejected_count + \
+        in_review_count)
+
+    # count all GOP's by its providers' country
+    by_country_count = db.session\
+        .query(models.Provider.country, db.func.count(
+            models.Provider.country))\
+        .join(models.GuaranteeOfPayment,
+              models.GuaranteeOfPayment.provider_id == models.Provider.id)\
+        .group_by(models.Provider.country)\
+        .filter(models.GuaranteeOfPayment.state == None).all()
+
+    # count all GOP's by its providers' company
+    by_provider_count = db.session\
+        .query(models.Provider.company, db.func.count(
+            models.Provider.company))\
+        .join(models.GuaranteeOfPayment,
+              models.GuaranteeOfPayment.provider_id == models.Provider.id)\
+        .group_by(models.Provider.company)\
+        .filter(models.GuaranteeOfPayment.state == None).all()
+
+    # count all GOP's by its payers's company
+    by_payer_count = db.session\
+        .query(models.Payer.company, db.func.count(
+            models.Payer.company))\
+        .join(models.GuaranteeOfPayment,
+              models.GuaranteeOfPayment.payer_id == models.Payer.id)\
+        .group_by(models.Payer.company)\
+        .filter(models.GuaranteeOfPayment.state == None).all()
+
+    today = datetime.now()
+
+    pagination, gops = gop_service.prepare_pagination(gops)
+
+    context = {
+        'gops': gops,
+        'pagination': pagination,
+        'status':status,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'total_count': total_count,
+        'in_review_count': in_review_count,
+        'pending_count': pending_count,
+        'by_country_count': by_country_count,
+        'by_provider_count': by_provider_count,
+        'by_payer_count': by_payer_count,
+        'today': today
+    }
+
+    return render_template('index.html', **context)
+
+
+@admin.route('/requests/by/<by>')
+@login_required(roles=['admin'])
+def requests_sorted(by):
+    allowed = ['provider', 'payer', 'status', 'country']
+
+    if by not in allowed:
+        return redirect(url_for('main.index'))
+
+    gops = models.GuaranteeOfPayment.query.filter(
+            models.GuaranteeOfPayment.state == None)
+
+    pagination, gops = gop_service.prepare_pagination(gops)
+
+    return render_template('requests-all.html', by=by, gops=gops,
+                           pagination=pagination)
+
+
+@admin.route('/users')
+@login_required(roles=['admin'])
+def users():
+    users = models.User.query.filter(models.User.id > 0)
+
+    pagination, users = user_service.prepare_pagination(users)
+
+    return render_template('users.html', users=users, pagination=pagination)
+
+
+@admin.route('/history')
+@login_required(roles=['admin'])
+def history():
+    gops = models.GuaranteeOfPayment.query.filter_by(state='closed')
+    return render_template('history.html', gops=gops)
+
+
+@admin.route('/request/<int:gop_id>', methods=['GET', 'POST'])
+@login_required()
+def request_page(gop_id):
+    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    icd_codes = gop.icd_codes
+    return render_template('request.html', gop=gop, icd_codes=icd_codes)
 
 
 @admin.route('/user/<int:user_id>/settings', methods=['GET', 'POST'])
