@@ -401,10 +401,6 @@ def request_page_edit(gop_id):
 
     form = GOPForm()
 
-    if not gop.medical_details:
-        medical_details = models.MedicalDetails(guarantee_of_payment=gop)
-        db.session.add(gop)
-
     # as a provider can't change the GOP's payer after
     # request is sent we leave only the one select choice
     form.payer.choices = [(gop.payer.id, gop.payer.company)]
