@@ -19,17 +19,17 @@ def index():
     status = request.args.get('status',None)
 
     gops = models.GuaranteeOfPayment.query.filter(
-            models.GuaranteeOfPayment.state == None)
+            not models.GuaranteeOfPayment.closed)
 
     in_review_count = models.GuaranteeOfPayment.query.filter_by(
         status='in review').filter(
-        models.GuaranteeOfPayment.state == None).count()
+        not models.GuaranteeOfPayment.closed).count()
     approved_count = models.GuaranteeOfPayment.query.filter_by(
         status='approved').filter(
-        models.GuaranteeOfPayment.state == None).count()
+        not models.GuaranteeOfPayment.closed).count()
     rejected_count = models.GuaranteeOfPayment.query.filter_by(
         status='declined').filter(
-        models.GuaranteeOfPayment.state == None).count()
+        not models.GuaranteeOfPayment.closed).count()
     total_count = gops.count()
     pending_count = total_count - (approved_count + rejected_count + \
         in_review_count)
@@ -41,7 +41,7 @@ def index():
         .join(models.GuaranteeOfPayment,
               models.GuaranteeOfPayment.provider_id == models.Provider.id)\
         .group_by(models.Provider.country)\
-        .filter(models.GuaranteeOfPayment.state == None).all()
+        .filter(not models.GuaranteeOfPayment.closed).all()
 
     # count all GOP's by its providers' company
     by_provider_count = db.session\
@@ -50,7 +50,7 @@ def index():
         .join(models.GuaranteeOfPayment,
               models.GuaranteeOfPayment.provider_id == models.Provider.id)\
         .group_by(models.Provider.company)\
-        .filter(models.GuaranteeOfPayment.state == None).all()
+        .filter(not models.GuaranteeOfPayment.closed).all()
 
     # count all GOP's by its payers's company
     by_payer_count = db.session\
@@ -59,7 +59,7 @@ def index():
         .join(models.GuaranteeOfPayment,
               models.GuaranteeOfPayment.payer_id == models.Payer.id)\
         .group_by(models.Payer.company)\
-        .filter(models.GuaranteeOfPayment.state == None).all()
+        .filter(not models.GuaranteeOfPayment.closed).all()
 
     today = datetime.now()
 
@@ -92,7 +92,7 @@ def requests_sorted(by):
         return redirect(url_for('main.index'))
 
     gops = models.GuaranteeOfPayment.query.filter(
-            models.GuaranteeOfPayment.state == None)
+            not models.GuaranteeOfPayment.closed)
 
     pagination, gops = gop_service.prepare_pagination(gops)
 
@@ -113,7 +113,7 @@ def users():
 @admin.route('/history')
 @login_required(roles=['admin'])
 def history():
-    gops = models.GuaranteeOfPayment.query.filter_by(state='closed')
+    gops = models.GuaranteeOfPayment.query.filter_by(closed=True)
     return render_template('history.html', gops=gops)
 
 

@@ -46,83 +46,87 @@ def index():
     if current_user.user_type == 'provider':
         if status == 'approved' or status == 'declined' or status == 'in_review':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, status=status.replace('_',' ')).filter(
-            not models.GuaranteeOfPayment.closed)
+                provider=current_user.provider, status=status)\
+                .filter(not models.GuaranteeOfPayment.closed)
         elif status == 'pending':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-                and_(not models.GuaranteeOfPayment.closed,
-                     models.GuaranteeOfPayment.status == 'pending')
-            )
+                provider=current_user.provider).filter(
+                    and_(not models.GuaranteeOfPayment.closed,
+                         models.GuaranteeOfPayment.status == 'pending'))
         elif status == 'initial':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-                and_(models.GuaranteeOfPayment.status == 'approved',
-                     models.GuaranteeOfPayment.state == None,models.GuaranteeOfPayment.final == None))
+                provider=current_user.provider).filter(
+                    and_(models.GuaranteeOfPayment.status == 'approved',
+                         not models.GuaranteeOfPayment.closed,
+                         not models.GuaranteeOfPayment.final))
         elif status == 'final':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-            and_(models.GuaranteeOfPayment.status == 'approved',models.GuaranteeOfPayment.state == None,models.GuaranteeOfPayment.final != None))
+                provider=current_user.provider).filter(
+                    and_(models.GuaranteeOfPayment.status == 'approved',
+                         not models.GuaranteeOfPayment.closed,
+                         models.GuaranteeOfPayment.final))
         else:
             gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-            models.GuaranteeOfPayment.state == None)
+                provider=current_user.provider).filter(
+                not models.GuaranteeOfPayment.closed)
 
         in_review_count = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, status='in review').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         approved_count = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, status='approved').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         rejected_count = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, status='declined').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         pending_count = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
-            and_(models.GuaranteeOfPayment.state == None,
-            or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending'))).count()
+            and_(not models.GuaranteeOfPayment.closed,
+                 models.GuaranteeOfPayment.status == 'pending')).count()
         total_count = gops.count()
 
     elif current_user.user_type == 'payer':
         if status == 'approved' or status == 'declined' or status == 'in_review':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, status=status.replace('_',' ')).filter(
-            models.GuaranteeOfPayment.state == None)
+                payer=current_user.payer, status=status).filter(
+                not models.GuaranteeOfPayment.closed)
         elif status == 'pending':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            and_(models.GuaranteeOfPayment.state == None,
-            or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending')))
+                payer=current_user.payer).filter(
+                and_(not models.GuaranteeOfPayment.closed,
+                     models.GuaranteeOfPayment.status == 'pending'))
         elif status == 'initial':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            and_(or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending',models.GuaranteeOfPayment.status == 'in review'),
-                models.GuaranteeOfPayment.state == None,
-                models.GuaranteeOfPayment.final == None))
+                payer=current_user.payer).filter(
+                and_(or_(models.GuaranteeOfPayment.status == 'pending',
+                         models.GuaranteeOfPayment.status == 'in_review'),
+                    not models.GuaranteeOfPayment.closed,
+                    not models.GuaranteeOfPayment.final))
         elif status == 'final':
             gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            and_(or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending',models.GuaranteeOfPayment.status == 'in review'),
-                models.GuaranteeOfPayment.state == None,
-                models.GuaranteeOfPayment.final != None))
+                payer=current_user.payer).filter(
+                and_(or_(models.GuaranteeOfPayment.status == 'pending',
+                         models.GuaranteeOfPayment.status == 'in review'),
+                    not models.GuaranteeOfPayment.closed,
+                    models.GuaranteeOfPayment.final))
         else:
             gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            models.GuaranteeOfPayment.state == None)
+                payer=current_user.payer).filter(
+                not models.GuaranteeOfPayment.closed)
             
         in_review_count = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, status='in review').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         approved_count = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, status='approved').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         rejected_count = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, status='declined').filter(
-            models.GuaranteeOfPayment.state == None).count()
+            not models.GuaranteeOfPayment.closed).count()
         pending_count = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer).filter(
-            and_(models.GuaranteeOfPayment.state == None,
-            or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending'))).count()
+            and_(not models.GuaranteeOfPayment.closed,
+                 models.GuaranteeOfPayment.status == 'pending')).count()
         total_count = gops.count()
 
     today = datetime.now()
@@ -466,7 +470,7 @@ def request_page_edit(gop_id):
         flash('GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
-    if gop.state == 'closed':
+    if gop.closed:
         flash('GOP request #%d is closed.' % gop_id)
         return redirect(url_for('main.index'))
 
@@ -733,11 +737,11 @@ def request_page_close(gop_id, reason):
         flash('The GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
-    if gop.state == 'closed':
+    if gop.closed:
         flash('The GOP request #%d is already closed.' % gop_id)
         return redirect(url_for('main.index'))
 
-    gop.state = 'closed'
+    gop.closed = True
     gop.reason_close = reason
     db.session.add(gop)
 
@@ -754,10 +758,10 @@ def history():
 
     if current_user.user_type == 'provider':
         gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, state='closed')
+            provider=current_user.provider, closed=True)
     elif current_user.user_type == 'payer':
         gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, state='closed')
+            payer=current_user.payer, closed=True)
 
     pagination, gops = gop_service.prepare_pagination(gops)
 
@@ -871,32 +875,32 @@ def requests_filter():
                          models.Provider.id)\
                    .filter(db.and_(models.Provider.country == country,
                                    models.Provider.company == provider))\
-                   .filter(models.GuaranteeOfPayment.state == None)
+                   .filter(not models.GuaranteeOfPayment.closed)
 
     elif country:
         gops = gops.join(models.Provider,
                          models.GuaranteeOfPayment.provider_id == \
                          models.Provider.id)\
                    .filter(models.Provider.country == country)\
-                   .filter(models.GuaranteeOfPayment.state == None)
+                   .filter(not models.GuaranteeOfPayment.closed)
 
     elif provider:
         gops = gops.join(models.Provider,
                          models.GuaranteeOfPayment.provider_id == \
                          models.Provider.id)\
                    .filter(models.Provider.company == provider)\
-                   .filter(models.GuaranteeOfPayment.state == None)
+                   .filter(not models.GuaranteeOfPayment.closed)
 
     if payer:
         gops = gops.join(models.Payer,
                          models.GuaranteeOfPayment.payer_id == \
                          models.Payer.id)\
                    .filter(models.Payer.company == payer)\
-                   .filter(models.GuaranteeOfPayment.state == None)
+                   .filter(not models.GuaranteeOfPayment.closed)
 
     if status:
         gops = gops.filter(models.GuaranteeOfPayment.status == status)\
-                   .filter(models.GuaranteeOfPayment.state == None)
+                   .filter(not models.GuaranteeOfPayment.closed)
 
     gops = gops.all()
 
@@ -952,42 +956,42 @@ def get_gops():
                              models.Provider.id)\
                        .filter(db.and_(models.Provider.country == country,
                                        models.Provider.company == provider))\
-                       .filter(models.GuaranteeOfPayment.state == None)
+                       .filter(not models.GuaranteeOfPayment.closed)
 
         elif country:
             gops = gops.join(models.Provider,
                              models.GuaranteeOfPayment.provider_id == \
                              models.Provider.id)\
                        .filter(models.Provider.country == country)\
-                       .filter(models.GuaranteeOfPayment.state == None)
+                       .filter(not models.GuaranteeOfPayment.closed)
 
         elif provider:
             gops = gops.join(models.Provider,
                              models.GuaranteeOfPayment.provider_id == \
                              models.Provider.id)\
                        .filter(models.Provider.company == provider)\
-                       .filter(models.GuaranteeOfPayment.state == None)
+                       .filter(not models.GuaranteeOfPayment.closed)
 
         if payer:
             gops = gops.join(models.Payer,
                              models.GuaranteeOfPayment.payer_id == \
                              models.Payer.id)\
                        .filter(models.Payer.company == payer)\
-                       .filter(models.GuaranteeOfPayment.state == None)
+                       .filter(not models.GuaranteeOfPayment.closed)
 
         if status:
             gops = gops.filter(models.GuaranteeOfPayment.status == status)\
-                       .filter(models.GuaranteeOfPayment.state == None)
+                       .filter(not models.GuaranteeOfPayment.closed)
 
     elif current_user.user_type == 'provider':
         gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
-            models.GuaranteeOfPayment.state == None)
+            not models.GuaranteeOfPayment.closed)
 
     elif current_user.user_type == 'payer':
         gops = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer).filter(
-            models.GuaranteeOfPayment.state == None)
+            not models.GuaranteeOfPayment.closed)
 
     if sort:
         if sort == 'status':
