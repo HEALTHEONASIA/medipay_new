@@ -410,7 +410,7 @@ class GuaranteeOfPayment(ColsMapMixin ,db.Model):
     surgery_fee = db.Column(db.Float, default=0.0)
     medication_fee = db.Column(db.Float, default=0.0)
     quotation = db.Column(db.Float, default=0.0)
-    status = db.Column(db.String(20), default='draft')
+    status = db.Column(db.String(20), default='pending')
     state = db.Column(db.String(20))
     final = db.Column(db.SmallInteger)
     reason_decline = db.Column(db.String(127))

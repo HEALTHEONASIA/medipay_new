@@ -7,7 +7,7 @@ import random
 import sys
 import re
 from datetime import datetime
-from sqlalchemy import or_,and_
+from sqlalchemy import or_, and_
 from flask import render_template, flash, redirect, request, session, jsonify
 from flask import url_for, make_response, send_from_directory
 from flask_login import login_user, login_required, current_user
@@ -40,7 +40,7 @@ def index():
     status = request.args.get('status',None)
 
     # if it is an admin account
-    if current_user.role == 'admin':
+    if current_user.get_role() == 'admin':
         return redirect(url_for('admin.index'))
 
     if current_user.user_type == 'provider':
