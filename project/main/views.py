@@ -28,106 +28,33 @@ gop_service = GuaranteeOfPaymentService()
 user_service = UserService()
 
 @main.route('/', methods=['GET', 'POST'])
+@login_required()
 def index():
-    if not current_user.is_authenticated:
-        form = LoginForm()
-        if form.validate_on_submit():
-            return login_validation(form)
-            
-        return render_template('home.html', menu_unpin=True, form=form,
-            hide_help_widget=True)
-
     status = request.args.get('status',None)
 
     # if it is an admin account
     if current_user.get_role() == 'admin':
         return redirect(url_for('admin.index'))
 
-    if current_user.user_type == 'provider':
-        if status == 'approved' or status == 'declined' or status == 'in_review':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                provider=current_user.provider, status=status)\
-                .filter(not models.GuaranteeOfPayment.closed)
-        elif status == 'pending':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                provider=current_user.provider).filter(
-                    and_(not models.GuaranteeOfPayment.closed,
-                         models.GuaranteeOfPayment.status == 'pending'))
-        elif status == 'initial':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                provider=current_user.provider).filter(
-                    and_(models.GuaranteeOfPayment.status == 'approved',
-                         not models.GuaranteeOfPayment.closed,
-                         not models.GuaranteeOfPayment.final))
-        elif status == 'final':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                provider=current_user.provider).filter(
-                    and_(models.GuaranteeOfPayment.status == 'approved',
-                         not models.GuaranteeOfPayment.closed,
-                         models.GuaranteeOfPayment.final))
-        else:
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                provider=current_user.provider).filter(
-                not models.GuaranteeOfPayment.closed)
+    open_gops = gop_service.get_open_all()
 
-        in_review_count = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, status='in_review').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        approved_count = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, status='approved').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        rejected_count = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, status='declined').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        pending_count = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-            and_(not models.GuaranteeOfPayment.closed,
-                 models.GuaranteeOfPayment.status == 'pending')).count()
-        total_count = gops.count()
+    user_gops = gop_service.filter_for_user(open_gops, current_user)
 
-    elif current_user.user_type == 'payer':
-        if status == 'approved' or status == 'declined' or status == 'in_review':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                payer=current_user.payer, status=status).filter(
-                not models.GuaranteeOfPayment.closed)
-        elif status == 'pending':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                payer=current_user.payer).filter(
-                and_(not models.GuaranteeOfPayment.closed,
-                     models.GuaranteeOfPayment.status == 'pending'))
-        elif status == 'initial':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                payer=current_user.payer).filter(
-                and_(or_(models.GuaranteeOfPayment.status == 'pending',
-                         models.GuaranteeOfPayment.status == 'in_review'),
-                    not models.GuaranteeOfPayment.closed,
-                    not models.GuaranteeOfPayment.final))
-        elif status == 'final':
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                payer=current_user.payer).filter(
-                and_(or_(models.GuaranteeOfPayment.status == 'pending',
-                         models.GuaranteeOfPayment.status == 'in_review'),
-                    not models.GuaranteeOfPayment.closed,
-                    models.GuaranteeOfPayment.final))
-        else:
-            gops = models.GuaranteeOfPayment.query.filter_by(
-                payer=current_user.payer).filter(
-                not models.GuaranteeOfPayment.closed)
-            
-        in_review_count = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, status='in_review').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        approved_count = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, status='approved').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        rejected_count = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, status='declined').filter(
-            not models.GuaranteeOfPayment.closed).count()
-        pending_count = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            and_(not models.GuaranteeOfPayment.closed,
-                 models.GuaranteeOfPayment.status == 'pending')).count()
-        total_count = gops.count()
+    if status in ['approved', 'declined', 'in_review', 'pending']:
+        gops = user_gops.filter_by(status=status)
+    elif status == 'initial':
+        gops = user_gops.filter_by(final=False)
+    elif status == 'final':
+        gops = user_gops.filter_by(final=True)
+    else:
+        gops = user_gops
+
+    in_review_count = user_gops.filter_by(status='in_review').count()
+    approved_count = user_gops.filter_by(status='approved').count()
+    rejected_count = user_gops.filter_by(status='declined').count()
+    pending_count = user_gops.filter_by(status='pending').count()
+
+    total_count = gops.count()
 
     today = datetime.now()
 

@@ -38,6 +38,17 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
     __model__ = models.GuaranteeOfPayment
     __db__ = db
 
+    def get_open_all(self):
+        return self.__model__.query.filter(not self.__model__.closed)
+
+    def filter_for_user(self, query, user):
+        if user.get_type() == 'provider':
+            return query.filter_by(provider=user.provider)
+        elif user.get_type() == 'payer':
+            return query.filter_by(payer=user.payer)
+        elif user.get_role() == 'admin':
+            return query
+
 
 class UserService(ExtFuncsMixin, SQLAlchemyService):
     __model__ = models.User
