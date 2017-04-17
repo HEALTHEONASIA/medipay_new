@@ -53,3 +53,13 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
 class UserService(ExtFuncsMixin, SQLAlchemyService):
     __model__ = models.User
     __db__ = db
+
+
+class MedicalDetailsService(ExtFuncsMixin, SQLAlchemyService):
+    __model__ = models.MedicalDetails
+    __db__ = db
+
+
+class MemberService(ExtFuncsMixin, SQLAlchemyService):
+    __model__ = models.Member
+    __db__ = db

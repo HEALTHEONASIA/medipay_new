@@ -17,6 +17,7 @@ from .forms import GOPForm, GOPApproveForm
 from .helpers import photo_file_name_santizer, pass_generator, csv_ouput
 from .helpers import to_float_or_zero, validate_email_address
 from .services import GuaranteeOfPaymentService, UserService
+from .services import MedicalDetailsService, MemberService
 from .. import models, db, config, mail, create_app
 from .. import auth
 from ..auth.forms import LoginForm
@@ -26,6 +27,8 @@ from ..models import User, login_required
 
 gop_service = GuaranteeOfPaymentService()
 user_service = UserService()
+medical_details_service = MedicalDetailsService()
+member_service = MemberService()
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -33,7 +36,7 @@ def index():
         form = LoginForm()
         if form.validate_on_submit():
             return login_validation(form)
-            
+
         return render_template('home.html', menu_unpin=True, form=form,
                                             hide_help_widget=True)
 
@@ -104,85 +107,47 @@ def request_form():
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
 
+    # fixes a validation error when user didn't
+    # fill in the previous admitted date field
+    if request.method != 'POST':
+        form.medical_details_previously_admitted.data = datetime.now()
+
     if form.validate_on_submit():
-        dob = datetime.strptime(form.dob.data, '%d/%m/%Y')
-        admission_date = datetime.strptime(form.admission_date.data + ' ' + \
-            form.admission_time.data, '%d/%m/%Y %I:%M %p')
-        admission_time = admission_date
-
-        if form.medical_details_previously_admitted.data:
-            previously_admitted = datetime.strptime(
-                form.medical_details_previously_admitted.data, '%d/%m/%Y')
-        else:
-            previously_admitted = None
-
         photo_filename = photo_file_name_santizer(form.member_photo)
 
         member = models.Member.query.filter_by(
             national_id=form.national_id.data).first()
 
         if not member:
-            member = models.Member(
-                name=form.name.data,
-                dob=dob,
-                gender=form.gender.data,
-                national_id=form.national_id.data,
-                tel=form.tel.data,
-                photo=photo_filename,
-                policy_number=form.policy_number.data)
+            member = models.Member(photo=photo_filename)
 
-        medical_details = models.MedicalDetails(
-            symptoms=form.medical_details_symptoms.data,
-            temperature=form.medical_details_temperature.data,
-            heart_rate=form.medical_details_heart_rate.data,
-            respiration=form.medical_details_respiration.data,
-            blood_pressure=form.medical_details_blood_pressure.data,
-            physical_finding=form.medical_details_physical_finding.data,
-            health_history=form.medical_details_health_history.data,
-            previously_admitted=previously_admitted,
-            diagnosis=form.medical_details_diagnosis.data,
-            in_patient=form.medical_details_in_patient.data,
-            test_results=form.medical_details_test_results.data,
-            current_therapy=form.medical_details_current_therapy.data,
-            treatment_plan=form.medical_details_treatment_plan.data
-        )
+            member_service.update_from_form(member, form,
+                                            exclude=['member_photo'])
 
-        # try to convert the values to float or, if error, convert to zero
-        room_price = to_float_or_zero(form.room_price.data)
-        doctor_fee = to_float_or_zero(form.doctor_fee.data)
-        surgery_fee = to_float_or_zero(form.surgery_fee.data)
-        medication_fee = to_float_or_zero(form.medication_fee.data)
-        quotation = to_float_or_zero(form.quotation.data)
+        medical_details = medical_details_service.create(
+            **{field.name.replace('medical_details_', ''): field.data \
+               for field in form \
+               if field.name.replace('medical_details_', '') \
+               in medical_details_service.columns})
 
         payer = models.Payer.query.get(form.payer.data)
+
         gop = models.GuaranteeOfPayment(
                 provider=current_user.provider,
                 payer=payer,
                 member=member,
-                patient_action_plan=form.patient_action_plan.data,
                 doctor_name=models.Doctor.query.get(int(form.doctor_name.data)).name,
-                admission_date=admission_date,
-                admission_time=admission_time,
-                reason=form.reason.data,
-                room_price=room_price,
                 status='pending',
-                room_type=form.room_type.data,
-                patient_medical_no=form.patient_medical_no.data,
-                doctor_fee=doctor_fee,
-                surgery_fee=surgery_fee,
-                medication_fee=medication_fee,
-                timestamp=datetime.now(),
-                quotation=quotation,
                 medical_details=medical_details
                 )
 
         for icd_code_id in form.icd_codes.data:
             icd_code = models.ICDCode.query.get(int(icd_code_id))
             gop.icd_codes.append(icd_code)
-        
-        db.session.add(gop)
-        db.session.commit()
-        
+
+        exclude = ['doctor_name', 'status', 'icd_codes']
+        gop_service.update_from_form(gop, form, exclude=exclude)
+
         # initializing user and random password 
         user = None
         rand_pass = None
@@ -428,24 +393,6 @@ def request_page_edit(gop_id):
         if final and not gop.final:
             gop.final = True
 
-        # convert the str() to the datetime python objects
-        dob = datetime.strptime(form.dob.data, '%d/%m/%Y')
-        admission_date = datetime.strptime(form.admission_date.data + ' ' + \
-            form.admission_time.data, '%d/%m/%Y %I:%M %p')
-        admission_time = admission_date
-        if form.medical_details_previously_admitted.data:
-            previously_admitted = datetime.strptime(
-                form.medical_details_previously_admitted.data, '%d/%m/%Y')
-        else:
-            previously_admitted = None
-
-        # try to convert the values to float or, if error, convert to zero
-        room_price = to_float_or_zero(form.room_price.data)
-        doctor_fee = to_float_or_zero(form.doctor_fee.data)
-        surgery_fee = to_float_or_zero(form.surgery_fee.data)
-        medication_fee = to_float_or_zero(form.medication_fee.data)
-        quotation = to_float_or_zero(form.quotation.data)
-
         # get and set the payer object
         payer = models.Payer.query.get(form.payer.data)
         gop.payer = payer
@@ -467,7 +414,8 @@ def request_page_edit(gop_id):
             form.medical_details_physical_finding.data
         gop.medical_details.health_history = \
             form.medical_details_health_history.data
-        gop.medical_details.previously_admitted = previously_admitted
+        gop.medical_details.previously_admitted = \
+            form.medical_details_previously_admitted.data
         gop.medical_details.diagnosis = \
             form.medical_details_diagnosis.data
         gop.medical_details.in_patient = \
@@ -480,12 +428,8 @@ def request_page_edit(gop_id):
             form.medical_details_treatment_plan.data
 
         # update the patient info
-        gop.member.name = form.name.data
-        gop.member.dob = dob
-        gop.member.national_id = form.national_id.data
-        gop.member.gender = form.gender.data
-        gop.member.tel = form.tel.data
-        gop.member.policy_number = form.policy_number.data
+        member_service.update_from_form(gop.member, form,
+                                        exclude=['member_photo'])
 
         if filename:
             gop.member.photo = filename
@@ -494,23 +438,13 @@ def request_page_edit(gop_id):
             icd_code = models.ICDCode.query.get(int(icd_code_id))
             gop.icd_codes.append(icd_code)
 
-        gop.patient_action_plan = form.patient_action_plan.data
         gop.doctor_name = models.Doctor.query.get(int(form.doctor_name.data)).name
-        gop.admission_date = admission_date
-        gop.admission_time = admission_time
-        gop.reason = form.reason.data
-        gop.room_price = room_price
-        gop.room_type = form.room_type.data
-        gop.patient_medical_no = form.patient_medical_no.data
-        gop.doctor_fee = doctor_fee
-        gop.surgery_fee = surgery_fee
-        gop.medication_fee = medication_fee
-        gop.quotation = quotation
 
         if gop.final:
             gop.status = None
 
-        db.session.add(gop)
+        exclude = ['doctor_name', 'status', 'icd_codes']
+        gop_service.update_from_form(gop, form, exclude=exclude)
 
         if gop.final and final:
             if gop.payer.user:
@@ -575,12 +509,8 @@ def request_page_edit(gop_id):
         gop.medical_details.physical_finding
     form.medical_details_health_history.data = \
         gop.medical_details.health_history
-
-    if gop.medical_details.previously_admitted:
-        # convert the datetime python object to the string representation
-        form.medical_details_previously_admitted.data = \
-          gop.medical_details.previously_admitted.strftime('%d/%m/%Y')
-
+    form.medical_details_previously_admitted.data = \
+        gop.medical_details.previously_admitted
     form.medical_details_diagnosis.data = gop.medical_details.diagnosis
     form.medical_details_test_results.data = \
         gop.medical_details.test_results
@@ -593,15 +523,15 @@ def request_page_edit(gop_id):
     form.national_id.data = gop.member.national_id
     form.current_national_id.data = gop.member.national_id
     # convert the datetime python object to the string representation
-    form.dob.data = gop.member.dob.strftime('%d/%m/%Y')
+    form.dob.data = gop.member.dob
     form.gender.data = gop.member.gender
     form.tel.data = gop.member.tel
     form.policy_number.data = gop.member.policy_number
     form.patient_action_plan.data = gop.patient_action_plan
     # convert the datetime python object to the string representation
-    form.admission_date.data = gop.admission_date.strftime('%d/%m/%Y')
+    form.admission_date.data = gop.admission_date
     # convert the datetime python object to the string representation
-    form.admission_time.data = gop.admission_time.strftime('%I:%M %p')
+    form.admission_time.data = gop.admission_time
     form.room_price.data = gop.room_price
     form.patient_medical_no.data = gop.patient_medical_no
     form.doctor_fee.data = gop.doctor_fee

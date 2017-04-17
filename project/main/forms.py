@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from wtforms import StringField, RadioField, SubmitField, TextAreaField
 from wtforms import HiddenField, SelectField, FileField, ValidationError
 from wtforms import PasswordField, SelectMultipleField, BooleanField
+from wtforms import DateField, DateTimeField
 from wtforms.validators import Required, Email, Length, EqualTo, URL
 from flask_login import current_user
 from ..models import Payer, Member, User, Provider
@@ -16,6 +17,12 @@ class BaseForm(Form):
             filters = unbound_field.kwargs.get('filters', [])
             filters.append(strip_filter)
             return unbound_field.bind(form=form, filters=filters, **options)
+
+    def prepopulate(self, model, exclude=[]):
+        """Prepopulates the form with a given model"""
+        for col in model.columns():
+            if col not in exclude and hasattr(self, col):
+                setattr(getattr(self, col), 'data', getattr(model, col))
 
 
 def strip_filter(value):
@@ -84,7 +91,8 @@ class GOPForm(BaseForm):
     payer = SelectField('Payer Select', coerce=int, choices=[('0', 'None')])
     policy_number = StringField('Policy Number', validators=[Required()])
     name = StringField('Name', validators=[Required()])
-    dob = StringField('Date of birth', validators=[Required()])
+    dob = DateField('Date of birth', validators=[Required()],
+                                     format='%m/%d/%Y')
     gender = RadioField('Sex', validators=[Required()],
                             choices=[('male', 'Male'),
                                      ('female', 'Female')])
@@ -104,7 +112,8 @@ class GOPForm(BaseForm):
     medical_details_blood_pressure = StringField('Blood pressure')
     medical_details_physical_finding = StringField('Physical finding')
     medical_details_health_history = TextAreaField('Health history')
-    medical_details_previously_admitted = StringField('Previously admitted')
+    medical_details_previously_admitted = DateField('Previously admitted',
+                                                    format='%d/%m/%Y')
     medical_details_diagnosis = StringField('Diagnosis')
     medical_details_in_patient = BooleanField('In patient indication')
     medical_details_test_results = TextAreaField('Test results')
@@ -113,15 +122,18 @@ class GOPForm(BaseForm):
 
     doctor_name = SelectField('Doctor name', validators=[Required()],
                               coerce=int, choices=[('0', 'None')])
-    admission_date = StringField('Admission date', validators=[Required()])
-    admission_time = StringField('Admission time', validators=[Required()])
+    admission_date = DateTimeField('Admission date', validators=[Required()],
+                                                     format='%m/%d/%Y')
+    admission_time = DateTimeField('Admission time', validators=[Required()],
+                                                     format='%I:%M %p')
 
     icd_codes = SelectMultipleField('ICD codes', validators=[Required()],
                                     coerce=int)
 
     room_price = StringField('Room price', validators=[Required(), 
                                                        validate_comma_sep_dec,
-                                                       validate_empty_fee])
+                                                       validate_empty_fee],
+                                                       default='0')
     room_type = SelectField('Room type', validators=[Required()],
                             choices=[(False, 'SELECT ROOM'),
                                      ('na', 'NA'),
@@ -139,16 +151,20 @@ class GOPForm(BaseForm):
 
     doctor_fee = StringField('Doctor fee', validators=[Required(),
                                                        validate_comma_sep_dec,
-                                                       validate_empty_fee])
+                                                       validate_empty_fee],
+                                                       default='0')
     surgery_fee = StringField('Surgery fee', validators=[Required(),
                                                        validate_comma_sep_dec,
-                                                       validate_empty_fee])
+                                                       validate_empty_fee],
+                                                       default='0')
     medication_fee = StringField('Medication fee', validators=[Required(),
                                                        validate_comma_sep_dec,
-                                                       validate_empty_fee])
+                                                       validate_empty_fee],
+                                                       default='0')
     quotation = StringField('Quotation', validators=[Required(),
                                                      validate_comma_sep_dec,
-                                                     validate_empty_fee])
+                                                     validate_empty_fee],
+                                                     default='0')
     submit = SubmitField('Submit')
 
     def validate_national_id(self, field):
