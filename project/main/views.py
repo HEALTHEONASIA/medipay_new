@@ -71,7 +71,7 @@ def index():
                 not models.GuaranteeOfPayment.closed)
 
         in_review_count = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, status='in review').filter(
+            provider=current_user.provider, status='in_review').filter(
             not models.GuaranteeOfPayment.closed).count()
         approved_count = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, status='approved').filter(
@@ -106,7 +106,7 @@ def index():
             gops = models.GuaranteeOfPayment.query.filter_by(
                 payer=current_user.payer).filter(
                 and_(or_(models.GuaranteeOfPayment.status == 'pending',
-                         models.GuaranteeOfPayment.status == 'in review'),
+                         models.GuaranteeOfPayment.status == 'in_review'),
                     not models.GuaranteeOfPayment.closed,
                     models.GuaranteeOfPayment.final))
         else:
@@ -115,7 +115,7 @@ def index():
                 not models.GuaranteeOfPayment.closed)
             
         in_review_count = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, status='in review').filter(
+            payer=current_user.payer, status='in_review').filter(
             not models.GuaranteeOfPayment.closed).count()
         approved_count = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, status='approved').filter(
@@ -321,7 +321,7 @@ def request_page(gop_id):
                 return redirect(url_for('main.index'))
 
             if not gop.status or gop.status == 'pending':
-                gop.status = 'in review'
+                gop.status = 'in_review'
                 gop.timestamp_edited = datetime.now()
                 db.session.add(gop)
 
@@ -410,7 +410,7 @@ def request_page_download(gop_id):
             data.append(['Rejected By',gop.payer.pic])
         elif gop.status == 'pending':
             data.append(['Sent By',gop.payer.pic])
-        elif gop.status == 'in review':
+        elif gop.status == 'in_review':
             data.append(['Reviewed By',gop.payer.pic])
         else:
             data.append(['Reviewed By',gop.payer.pic])

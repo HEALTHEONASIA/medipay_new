@@ -22,7 +22,7 @@ def index():
             not models.GuaranteeOfPayment.closed)
 
     in_review_count = models.GuaranteeOfPayment.query.filter_by(
-        status='in review').filter(
+        status='in_review').filter(
         not models.GuaranteeOfPayment.closed).count()
     approved_count = models.GuaranteeOfPayment.query.filter_by(
         status='approved').filter(
