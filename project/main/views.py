@@ -47,16 +47,18 @@ def index():
         if status == 'approved' or status == 'declined' or status == 'in_review':
             gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, status=status.replace('_',' ')).filter(
-            models.GuaranteeOfPayment.state == None)
+            not models.GuaranteeOfPayment.closed)
         elif status == 'pending':
             gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
-            and_(models.GuaranteeOfPayment.state == None,
-            or_(models.GuaranteeOfPayment.status == None,models.GuaranteeOfPayment.status == 'pending')))
+                and_(not models.GuaranteeOfPayment.closed,
+                     models.GuaranteeOfPayment.status == 'pending')
+            )
         elif status == 'initial':
             gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
-            and_(models.GuaranteeOfPayment.status == 'approved',models.GuaranteeOfPayment.state == None,models.GuaranteeOfPayment.final == None))
+                and_(models.GuaranteeOfPayment.status == 'approved',
+                     models.GuaranteeOfPayment.state == None,models.GuaranteeOfPayment.final == None))
         elif status == 'final':
             gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
