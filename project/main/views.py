@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy import or_, and_
 from flask import render_template, flash, redirect, request, session, jsonify
 from flask import url_for, make_response, send_from_directory
-from flask_login import login_user, login_required, current_user
+from flask_login import login_user, current_user
 from flask_mail import Message
 from . import main
 from .forms import GOPForm, GOPApproveForm
@@ -87,15 +87,13 @@ def request_form():
     payers = current_user.provider.payers
     form = GOPForm()
 
-    form.payer.choices = [('0', 'None')]
     form.payer.choices += [(p.id, p.company) for p in \
                            current_user.provider.payers]
 
     form.icd_codes.choices = [(i.id, i.code) for i in \
         models.ICDCode.query.filter(models.ICDCode.code != 'None' and \
         models.ICDCode.code != '')]
-    
-    form.doctor_name.choices = [('0', 'None')]
+
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
 
@@ -415,7 +413,6 @@ def request_page_edit(gop_id):
         models.ICDCode.query.filter(models.ICDCode.code != 'None' and \
         models.ICDCode.code != '')]
 
-    form.doctor_name.choices = [('0', 'None')]
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
 
@@ -694,26 +691,6 @@ def history():
 
 
     return render_template('history.html', gops=gops, pagination=pagination)
-
-
-@main.app_errorhandler(404)
-def page_not_found(e):
-    if request.accept_mimetypes.accept_json and \
-            not request.accept_mimetypes.accept_html:
-        response = jsonify({'error': 'not found'})
-        response.status_code = 404
-        return response
-    return render_template('404.html'), 404
-
-
-@main.app_errorhandler(500)
-def internal_server_error(e):
-    if request.accept_mimetypes.accept_json and \
-            not request.accept_mimetypes.accept_html:
-        response = jsonify({'error': 'internal server error'})
-        response.status_code = 500
-        return response
-    return render_template('500.html'), 500
 
 
 @main.route('/search', methods=['GET'])

@@ -81,7 +81,7 @@ def validate_empty_fee(form, field):
 class GOPForm(BaseForm):
     patient_medical_no = StringField('Patient medical no.',
                                      validators=[Required()])
-    payer = SelectField('Payer Select', coerce=int)
+    payer = SelectField('Payer Select', coerce=int, choices=[('0', 'None')])
     policy_number = StringField('Policy Number', validators=[Required()])
     name = StringField('Name', validators=[Required()])
     dob = StringField('Date of birth', validators=[Required()])
@@ -112,7 +112,7 @@ class GOPForm(BaseForm):
     medical_details_treatment_plan = TextAreaField('Treatment plan')
 
     doctor_name = SelectField('Doctor name', validators=[Required()],
-                              coerce=int)
+                              coerce=int, choices=[('0', 'None')])
     admission_date = StringField('Admission date', validators=[Required()])
     admission_time = StringField('Admission time', validators=[Required()])
 
