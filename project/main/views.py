@@ -28,8 +28,15 @@ gop_service = GuaranteeOfPaymentService()
 user_service = UserService()
 
 @main.route('/', methods=['GET', 'POST'])
-@login_required()
 def index():
+    if not current_user.is_authenticated:
+        form = LoginForm()
+        if form.validate_on_submit():
+            return login_validation(form)
+            
+        return render_template('home.html', menu_unpin=True, form=form,
+                                            hide_help_widget=True)
+
     status = request.args.get('status',None)
 
     # if it is an admin account
