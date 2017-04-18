@@ -98,14 +98,14 @@ def request_form():
     form = GOPForm()
 
     form.payer.choices += [(p.id, p.company) for p in \
-                           current_user.provider.payers]
+        current_user.provider.payers]
 
     form.icd_codes.choices = [(i.id, i.code) for i in \
         models.ICDCode.query.filter(models.ICDCode.code != 'None' and \
         models.ICDCode.code != '')]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
-                                for d in current_user.provider.doctors]
+        for d in current_user.provider.doctors]
 
     # fixes a validation error when user didn't
     # fill in the previous admitted date field
@@ -120,56 +120,49 @@ def request_form():
 
         if not member:
             member = models.Member(photo=photo_filename)
-
             member_service.update_from_form(member, form,
                                             exclude=['member_photo'])
 
         medical_details = medical_details_service.create(
             **{field.name.replace('medical_details_', ''): field.data \
-               for field in form \
-               if field.name.replace('medical_details_', '') \
-               in medical_details_service.columns})
+            for field in form \
+            if field.name.replace('medical_details_', '') \
+            in medical_details_service.columns})
 
         payer = models.Payer.query.get(form.payer.data)
 
         gop = models.GuaranteeOfPayment(
-                provider=current_user.provider,
-                payer=payer,
-                member=member,
-                doctor_name=models.Doctor.query.get(int(form.doctor_name.data)).name,
-                status='pending',
-                medical_details=medical_details
-                )
+            provider=current_user.provider,
+            payer=payer,
+            member=member,
+            doctor_name=models.Doctor.query.get(form.doctor_name.data).name,
+            status='pending',
+            medical_details=medical_details)
 
         for icd_code_id in form.icd_codes.data:
-            icd_code = models.ICDCode.query.get(int(icd_code_id))
-            gop.icd_codes.append(icd_code)
+            icd_code = models.ICDCode.query.get(icd_code_id)
 
+            if icd_code:
+                gop.icd_codes.append(icd_code)
+
+        # update the gop request data from the form
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        # initializing user and random password 
-        user = None
-        rand_pass = None
-        
         # if the payer is registered as a user in our system
         if gop.payer.user:
-            if gop.payer.pic_email:
-                recipient_email = gop.payer.pic_email
-            elif gop.payer.pic_alt_email:
-                recipient_email = gop.payer.pic_alt_email
-            else:
-                recipient_email = gop.payer.user.email
-            
+            recipient_email = gop.payer.pic_email \
+                or gop.payer.pic_alt_email \
+                or gop.payer.user.email
+
         # if no, we register him, set the random password and send
         # the access credentials to him
         else:
             recipient_email = gop.payer.pic_email
-            rand_pass = pass_generator(size=8)
             user = models.User(email=gop.payer.pic_email,
-                    password=rand_pass,
-                    user_type='payer',
-                    payer=gop.payer)
+                               password=pass_generator(size=8),
+                               user_type='payer',
+                               payer=gop.payer)
             db.session.add(user)
 
         msg = Message("Request for GOP - %s" % gop.provider.company,
@@ -181,7 +174,6 @@ def request_form():
                                    root=request.url_root, user=user,
                                    rand_pass = rand_pass, gop_id=gop.id)
 
-        
         # send the email
         try:
             mail.send(msg)
