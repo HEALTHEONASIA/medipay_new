@@ -46,21 +46,6 @@
     </script>
   {% block extraheader %}{% endblock %}
 
-{% if not hide_help_widget %}
-<!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-        (function(){
-            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-            s1.async=true;
-            s1.src='https://embed.tawk.to/5800aa4b1693680717e5c6d2/default';
-            s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
-            s0.parentNode.insertBefore(s1,s0);
-        })();
-    </script>
-<!--End of Tawk.to Script-->
-{% endif %}
 {% if current_user.role != 'admin' %}
 <style>
 	.icon-thumbnail{
@@ -912,18 +897,6 @@
       {% endif %}
     {% endblock %}
     <script type="text/javascript">
-      $(document).ready(function(){
-          $('#Chat_Pop_Up').click(function(e){
-              Tawk_API.popup();
-          });
-      });
-    </script>
-    <script type="text/javascript">
-      Tawk_API.onLoad = function(){
-        Tawk_API.hideWidget();
-      };
-    </script>
-    <script type="text/javascript">
       $('.sidebar-header-controls a').click(function() {
           var $this = $(this);
           var iconSpan = $this.children('span');
@@ -937,41 +910,5 @@
           }
       });
     </script>
-    
-    {% if current_user.is_authenticated  and  (current_user.user_type == 'payer' or current_user.user_type == 'provider')%}
-      <!-- Notifications functionality -->
-      <script src="/static/js/toastr.min.js" type="text/javascript"></script>
-      <script type="text/javascript">
-        // check for the new GOP requests' status changes
-        // for every 10 seconds and push the notification
-        // if there were any changes
-        setInterval(function() {
-          $.get('/check-notification', function(data) {
-              
-              toastr.options = {
-                    "closeButton": false,
-                    "debug": false,
-                    "positionClass": "toast-top-right",
-                    "onclick": null,
-                    "showDuration": "900",
-                    "hideDuration": "1000",
-                    "timeOut": "5000",
-                    "extendedTimeOut": "1000",
-                    "showEasing": "swing",
-                    "hideEasing": "linear",
-                    "showMethod": "fadeIn",
-                    "hideMethod": "fadeOut"
-                    }
-            
-            var str = '';
-            for (var key in data) {
-              if (data[key] != null) {
-                toastr.info(data[key])
-              }
-            }
-          });
-        }, 10000);
-      </script>
-    {% endif %}
   </body>
 </html>

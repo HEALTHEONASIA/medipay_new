@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "widget.html" as widget %}
 {% block title %}Home{% endblock %}
 {% block sidebar %}{{ super() }}{% endblock %}
 {% block kpi_values %}
@@ -279,21 +280,7 @@
             </table>
           </div>
         </div>
-        {% if pagination %}
-          <div id="pagination">
-            {%- for page in pagination.iter_pages() %}
-              {% if page %}
-                {% if page != pagination.page %}
-                  <a href="{{ url_for('main.index', page=page, status=status) }}">{{ page }}</a>
-                {% else %}
-                  <strong>{{ page }}</strong>
-                {% endif %}
-              {% else %}
-                <span>...</span>
-              {% endif %}
-            {%- endfor %}
-          </div>
-        {% endif %}
+        {{ widget.page_number(pagination, url = 'main.index', status = status) }}
         {% if current_user.role == 'admin' %}
           <div class="row">
             <div class="col-md-6">
@@ -367,83 +354,6 @@
       </div>
     </div>
   </div>
-<!--
-  <div class="col-md-3">
-    {% if current_user.role != 'admin' %}
-      <div class="panel panel-transparent">
-        <a href="{% if current_user.user_type == 'provider' %}{{ url_for('main.request_form') }}{% else %}#{% endif %}" class="panel-body" style="display: block; background: #48b0f7; padding: 50px 30px 70px;">
-          <span style="color: #fff;">{{ (' ' + today.strftime('%d %b')).replace(' 0', '') }}</span>
-          <h3 style="line-height: 28px; margin: 0; color: #fff; font-weight: bold;">
-            {% if current_user.user_type == 'provider' %}Request{% else %}Send{% endif %}<br>a GOP!
-          </h3>
-          <span style="color: #000;font-size: 14px;">(Gurantee of Payment)</span>
-        </a>
-      </div>
-      <div class="panel panel-transparent">
-        <div class="panel-body" style="background: #e2e2e2;">
-          <div class="form-group">
-            <div class="row">
-              <div class="col-md-7">
-                <label style="margin-top: 9px;">
-                  <i class="fs-14 fa fa-check" style="color: #187a30"></i>&nbsp;&nbsp;Approved
-                </label>
-              </div>
-              <div class="col-md-5">
-                <input type="text" style="color: #000;" class="form-control" value="{{ approved_count }}" disabled>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="row">
-              <div class="col-md-7">
-                <label style="margin-top: 9px;">
-                  <i class="fs-14 fa fa-search" style="color: #fef100"></i>&nbsp;&nbsp;In Review
-                </label>
-              </div>
-              <div class="col-md-5">
-                <input type="text" style="color: #000;" class="form-control" value="{{ in_review_count }}" disabled>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="row">
-              <div class="col-md-7">
-                <label style="margin-top: 9px;">
-                  <i class="glyphicon glyphicon-hourglass" style="color: #000;"></i>&nbsp;&nbsp;Pending
-                </label>
-              </div>
-              <div class="col-md-5">
-                <input type="text" style="color: #000;" class="form-control" value="{{ pending_count }}" disabled>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="row">
-              <div class="col-md-7">
-                <label style="margin-top: 9px;">
-                  <i class="fs-14 pg-close" style="color: #ea1a22;"></i>&nbsp;Rejected
-                </label>
-              </div>
-              <div class="col-md-5">
-                <input type="text" style="color: #000;" class="form-control" value="{{ rejected_count }}" disabled>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <div class="row">
-              <div class="col-md-7">
-                <label style="margin-top: 9px;">TOTAL</label>
-              </div>
-              <div class="col-md-5">
-                <input type="text" style="color: #000;" class="form-control" value="{{ total_count }}" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    {% endif %}
-  </div>
--->
 </div>
 {% endblock %}
 {% block page_js %}
@@ -554,48 +464,4 @@
     </script>
     <script src="/static/js/index-charts.js"></script>
   {% endif %}
-    <script>
-      // Here is a test JS pagination
-      // $('#pagination a').click(function(e) {
-      //   e.preventDefault();
-      //   var $this = $(this);
-      //   var page = $this.text();
-      //   $.get('/get-gops', {'page': page}, function(data) {
-      //     // console.log(data);
-      //     for (var key in data) {
-      //       var obj = data[key];
-      //       console.log(obj['id'],
-      //                   obj['status'],
-      //                   obj['patient_name'],
-      //                   obj['payer_company'],
-      //                   obj['turnaround_time']);
-      //       var origRowHtml = $('tr.raw');
-      //       var rowHtml = origRowHtml.clone();
-      //       var statusCol = rowHtml.find('td:first p');
-      //       var patientCol = rowHtml.find('td:nth-child(2) p');
-      //       var payerCol = rowHtml.find('td:nth-child(3) p');
-      //       var timeCol = rowHtml.find('td:nth-child(4) p');
-      //       {% if current_user.user_type  %}
-      //         var policyNumberCol = rowHtml.find('td:nth-child(5) p');
-      //         var reasonCol = rowHtml.find('td:last-child p');
-
-      //         policyNumberCol.text(obj['policy_number']);
-      //         reasonCol.text(obj['reason']);
-      //       {% endif %}
-
-      //       statusCol.text(obj['status']);
-      //       patientCol.text(obj['patient_name']);
-      //       payerCol.text(obj['payer_company']);
-      //       timeCol.text(obj['turnaround_time']);
-
-      //       console.log(rowHtml);
-      //       $('#basicTable tbody').html('');
-      //       $('#basicTable tbody').append(origRowHtml);
-      //       rowHtml.css('display', 'table-row');
-      //       $('#basicTable tbody').append(rowHtml);
-      //     }
-      //   });
-      // });
-    </script>
-
 {% endblock %}
