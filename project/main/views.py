@@ -196,55 +196,53 @@ def request_page(gop_id):
         return redirect(url_for('main.index'))
 
     gop = models.GuaranteeOfPayment.query.get(gop_id)
-    if gop:
-        icd_codes = gop.icd_codes
 
-        # admin can see any GOP request
-        if current_user.role == 'admin':
-            return redirect(url_for('admin.request_page', gop_id=gop.id))
+    if not gop:
+        flash('The GOP request #%d is not found.' % gop_id)
+        return redirect(url_for('main.index'))
 
-        if current_user.user_type == 'payer':
+    # admin can see any GOP request
+    if current_user.get_role() == 'admin':
+        return redirect(url_for('admin.request_page', gop_id=gop.id))
 
-            if gop.payer.id != current_user.payer.id:
-                flash('The GOP request #%d is not found.' % gop_id)
-                return redirect(url_for('main.index'))
-
-            if not gop.status or gop.status == 'pending':
-                gop.status = 'in_review'
-                gop.timestamp_edited = datetime.now()
-                db.session.add(gop)
-
-            if not gop.medical_details:
-                medical_details = models.MedicalDetails(guarantee_of_payment=gop)
-                db.session.add(gop)
-
-            form = GOPApproveForm()
-            if form.validate_on_submit():
-                if form.reason_decline.data:
-                    gop.reason_decline = form.reason_decline.data
-                gop.status = form.status.data
-                gop.timestamp_edited = datetime.now()
-
-                db.session.add(gop)
-                
-                flash('The GOP request has been %s.' % form.status.data)
-                return redirect(url_for('main.index'))
-
-            context = {
-                'gop': gop,
-                'icd_codes': icd_codes,
-                'form': form,
-            }
-            return render_template('request.html', **context)
-
-        if gop.provider.id != current_user.provider.id:
+    if current_user.get_type() == 'payer':
+        if gop.payer.id != current_user.payer.id:
             flash('The GOP request #%d is not found.' % gop_id)
             return redirect(url_for('main.index'))
 
-        return render_template('request.html', gop=gop, icd_codes=icd_codes)
-    else:
+        if gop.status == 'pending':
+            gop.status = 'in_review'
+            gop.timestamp_edited = datetime.now()
+            db.session.add(gop)
+
+        if not gop.medical_details:
+            medical_details = models.MedicalDetails(guarantee_of_payment=gop)
+            db.session.add(gop)
+
+        form = GOPApproveForm()
+        if form.validate_on_submit():
+            if form.reason_decline.data:
+                gop.reason_decline = form.reason_decline.data
+            gop.status = form.status.data
+            gop.timestamp_edited = datetime.now()
+
+            db.session.add(gop)
+            
+            flash('The GOP request has been %s.' % form.status.data)
+            return redirect(url_for('main.index'))
+
+        context = {
+            'gop': gop,
+            'icd_codes': gop.icd_codes,
+            'form': form,
+        }
+        return render_template('request.html', **context)
+
+    if gop.provider.id != current_user.provider.id:
         flash('The GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
+
+    return render_template('request.html', gop=gop, icd_codes=gop.icd_codes)
 
 
 @main.route('/request/<int:gop_id>/set-stamp-author', methods=['GET'])
