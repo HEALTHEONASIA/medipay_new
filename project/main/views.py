@@ -34,6 +34,7 @@ member_service = MemberService()
 def index():
     if not current_user.is_authenticated:
         form = LoginForm()
+
         if form.validate_on_submit():
             return login_validation(form)
 
@@ -121,7 +122,7 @@ def request_form():
         if not member:
             member = models.Member(photo=photo_filename)
             member_service.update_from_form(member, form,
-                                            exclude=['member_photo'])
+                exclude=['member_photo'])
 
         medical_details = medical_details_service.create(
             **{field.name.replace('medical_details_', ''): field.data \
@@ -177,7 +178,7 @@ def request_form():
         # send the email
         try:
             mail.send(msg)
-        except Exception as e:
+        except:
             pass
 
         flash('Your GOP request has been sent.')
@@ -280,70 +281,61 @@ def request_page_download(gop_id):
 
     # if no GOP is found, redirect to the home page
     if not gop:
-        flash('No Guarantee of payment request #%d found.' % gop_id)
+        flash('No GOP request #%d is found' % gop_id)
         return redirect(url_for('main.index'))
 
     csv_file_name = '%d_%s_GOP_Request' % (gop_id,
                                     gop.member.name.replace(' ', '_'))
 
-    data = []
-    # prepring the data to be written in csv
-    data.append(['GOP Request Details'])
-    data.append(['Payer Company Name',gop.payer.company])
-    if gop.status and gop.payer.pic:
-        if gop.status == 'approved':
-            data.append(['Approved By',gop.payer.pic])
-        elif gop.status == 'declined':
-            data.append(['Rejected By',gop.payer.pic])
-        elif gop.status == 'pending':
-            data.append(['Sent By',gop.payer.pic])
-        elif gop.status == 'in_review':
-            data.append(['Reviewed By',gop.payer.pic])
-        else:
-            data.append(['Reviewed By',gop.payer.pic])
-        data.append(['Time Stamp',gop.timestamp.strftime('%I:%M%p %m/%d/%Y')])
-    else:
-        if gop.payer.pic:
-            data.append(['Reviewed By',gop.payer.pic])
-            data.append(['Time Stamp',gop.timestamp.strftime('%I:%M%p %m/%d/%Y')])
-        else:
-            data.append(['Reviewed By','Unnamed'])
-    if gop.provider.pic:
-        data.append(['Requested By',gop.provider.pic])
-        data.append(['Time Stamp',gop.timestamp.strftime('%I:%M %p')])
-    else:
-        data.append(['Requested By','Unnamed'])
-        data.append(['Time Stamp','Unknown'])
+    header = ['payer_company',
+        'reviewed_by',
+        'requested_by',
+        'timestamp',
+        'policy_number',
+        'medical_record_no',
+        'patient_name',
+        'date_of_birth',
+        'gender',
+        'telephone',
+        'admission_date',
+        'admission_time',
+        'room_type',
+        'room_price',
+        'doctor_fee',
+        'surgery_fee',
+        'medication_fee',
+        'total_price',
+        'doctor_name',
+        'plan_of_action',
+        'icd_codes']
 
-    data.append(['Patient Details'])
-    if gop.member.policy_number:
-        data.append(['Policy Number',gop.member.policy_number])
-    data.append(['Medical Record Number',gop.patient_medical_no])
-    data.append(['Patient Name',gop.member.name])
-    data.append(['Date Of Birth Name',gop.member.dob.strftime('%m/%d/%Y')])
-    data.append(['Gender',gop.member.gender.title()])
-    data.append(['Telephone Number',gop.member.tel])
+    icd_codes = ', '.join([icd_code.code for icd_code in gop.icd_codes])
 
-    data.append(['Cost Estimation'])
-    data.append(['Addmission Date',gop.admission_date.strftime('%m/%d/%Y')])
-    data.append(['Addmission Time',gop.admission_time.strftime('%I:%M %p')])
-    data.append(['Room Type',gop.room_type.upper()])
-    data.append(['Room Price','%0.2f' % gop.room_price])
-    data.append(['Doctor Fee','%0.2f' % gop.doctor_fee])
-    data.append(['Surgery Fee','%0.2f' % gop.surgery_fee])
-    data.append(['Medication Fee','%0.2f' % gop.medication_fee])
-    data.append(['Total Price','%0.2f' % gop.quotation])
+    data = [gop.payer.company,
+        gop.payer.pic,
+        gop.provider.pic,
+        gop.timestamp.strftime('%I:%M %p'),
+        gop.member.policy_number,
+        gop.patient_medical_no,
+        gop.member.name,
+        gop.member.dob.strftime('%m/%d/%Y'),
+        gop.member.gender.title(),
+        gop.member.tel,
+        gop.admission_date.strftime('%m/%d/%Y'),
+        gop.admission_time.strftime('%I:%M %p'),
+        gop.room_type.upper(),
+        '%0.2f' % gop.room_price,
+        '%0.2f' % gop.doctor_fee,
+        '%0.2f' % gop.surgery_fee,
+        '%0.2f' % gop.medication_fee,
+        '%0.2f' % gop.quotation,
+        gop.doctor_name,
+        gop.patient_action_plan,
+        icd_codes]
 
-    data.append(['Medical Details'])
-    data.append(['Doctor Name',gop.doctor_name])
-    data.append(['Plan Of Action',gop.patient_action_plan])
-    for icd_counter, icd_code in enumerate(gop.icd_codes):
-        if icd_counter == 0:
-            data.append(['ICD Codes', icd_code.code])
-        else:
-            data.append([' ', icd_code.code])
+    result = [header, data]
 
-    return csv_ouput(csv_file_name, data)
+    return csv_ouput(csv_file_name, result)
 
 
 @main.route('/request/<int:gop_id>/edit', methods=['GET', 'POST'])
