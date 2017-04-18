@@ -40,7 +40,7 @@ def index():
         return render_template('home.html', menu_unpin=True, form=form,
                                             hide_help_widget=True)
 
-    status = request.args.get('status',None)
+    status = request.args.get('status', None)
 
     # if it is an admin account
     if current_user.get_role() == 'admin':
@@ -374,13 +374,13 @@ def request_page_edit(gop_id):
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
 
-    final = request.args.get('final')
+    final = request.args.get('final', None)
 
     # if the GOP's info is updated
     if form.validate_on_submit():
         # check if it's the FINAL GOP request sending
 
-        if final and not gop.final:
+        if final:
             gop.final = True
 
         # get and set the payer object
