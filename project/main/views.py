@@ -536,17 +536,14 @@ def request_page_resend(gop_id):
         flash('The GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
-    gop.status = ""
+    gop.status = 'pending'
     gop.timestamp_edited = None
     gop.timestamp = datetime.now()
 
     if gop.payer.user:
-        if gop.payer.pic_email:
-            recipient_email = gop.payer.pic_email
-        elif gop.payer.pic_alt_email:
-            recipient_email = gop.payer.pic_alt_email
-        else:
-            recipient_email = gop.payer.user.email
+        recipient_email = gop.payer.pic_email \
+            or gop.payer.pic_alt_email \
+            or gop.payer.user.email
     else:
         recipient_email = gop.payer.pic_email
 
