@@ -387,7 +387,7 @@ def request_page_edit(gop_id):
         payer = models.Payer.query.get(form.payer.data)
         gop.payer = payer
 
-        filename = photo_file_name_santizer(form.member_photo)
+        gop.member.photo = photo_file_name_santizer(form.member_photo)
 
         # update patient's medical details
         gop.medical_details.symptoms = \
@@ -421,29 +421,21 @@ def request_page_edit(gop_id):
         member_service.update_from_form(gop.member, form,
                                         exclude=['member_photo'])
 
-        if filename:
-            gop.member.photo = filename
-
         for icd_code_id in form.icd_codes.data:
             icd_code = models.ICDCode.query.get(int(icd_code_id))
             gop.icd_codes.append(icd_code)
 
-        gop.doctor_name = models.Doctor.query.get(int(form.doctor_name.data)).name
-
-        if gop.final:
-            gop.status = None
+        gop.doctor_name = models.Doctor.query.get(form.doctor_name.data).name
+        gop.status = 'pending'
 
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        if gop.final and final:
+        if gop.final:
             if gop.payer.user:
-                if gop.payer.pic_email:
-                    recipient_email = gop.payer.pic_email
-                elif gop.payer.pic_alt_email:
-                    recipient_email = gop.payer.pic_alt_email
-                else:
-                    recipient_email = gop.payer.user.email
+                recipient_email = gop.payer.pic_email \
+                    or gop.payer.pic_alt_email \
+                    or gop.payer.user.email
             else:
                 recipient_email = gop.payer.pic_email
 
