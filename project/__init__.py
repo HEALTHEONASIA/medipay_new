@@ -1,17 +1,19 @@
+from datetime import timedelta
+
 from flask import Flask
-from flask import session, g
-from flask_sqlalchemy import SQLAlchemy
+from flask import g, session
 from flask_login import LoginManager
 from flask_login import current_user
-from .config import config
 from flask_mail import Mail
-from datetime import timedelta
+from flask_sqlalchemy import SQLAlchemy
+
+from .config import config
 
 db = SQLAlchemy()
 mail = Mail()
 login_manager = LoginManager()
-login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
+login_manager.session_protection = 'strong'
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -21,14 +23,14 @@ def create_app(config_name):
     # Auto Time Out After 60 Minutes For Session
     @app.before_request
     def before_request():
-        session.permanent = True
         app.permanent_session_lifetime = timedelta(minutes=60)
-        session.modified = True
         g.user = current_user
+        session.permanent = True
+        session.modified = True
 
     db.init_app(app)
-    login_manager.init_app(app)
     mail.init_app(app)
+    login_manager.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
