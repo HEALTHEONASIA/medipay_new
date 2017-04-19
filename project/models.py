@@ -215,7 +215,7 @@ class Provider(db.Model):
         lazy='dynamic', backref=db.backref('providers', lazy='dynamic'))
 
 
-class BillingCode(db.Model):
+class BillingCode(ColsMapMixin, db.Model):
     __tablename__ = 'billing_code'
     id = db.Column(db.Integer, primary_key=True)
     room_and_board = db.Column(db.Float)
