@@ -735,15 +735,7 @@ def billing_code_get(bill_id):
     if bill_code.provider.id != current_user.provider.id:
         return jsonify({})
 
-    output = {
-        'room_and_board': bill_code.room_and_board,
-        'doctor_visit_fee': bill_code.doctor_visit_fee,
-        'doctor_consultation_fee': bill_code.doctor_consultation_fee,
-        'specialist_visit_fee': bill_code.specialist_visit_fee,
-        'specialist_consultation_fee': bill_code.specialist_consultation_fee,
-        'medicines': bill_code.medicines,
-        'administration_fee': bill_code.administration_fee
-    }
+    output = {col: getattr(bill_code, col) for col in bill_code.columns()}
 
     return jsonify(output)
 
