@@ -26,3 +26,7 @@ migrate = Migrate(app, db)
 
 if __name__ == '__main__':
     WSGIServer(app).run()
+
+    from socketio.server import SocketIOServer
+    SocketIOServer(('0.0.0.0', 8080), app,
+        resource="socket.io", policy_server=False).serve_forever()
