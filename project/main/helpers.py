@@ -1,4 +1,5 @@
 import os, random, string
+from flask import request
 from werkzeug.utils import secure_filename
 from .. import config
 

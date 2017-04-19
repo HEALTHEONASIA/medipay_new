@@ -745,54 +745,48 @@ def get_gops():
     page = request.args.get('page')
     sort = request.args.get('sort')
 
-    if current_user.role == 'admin':
+    if current_user.get_role() == 'admin':
         country = request.args.get('country')
         provider = request.args.get('provider')
         payer = request.args.get('payer')
         status = request.args.get('status')
 
-        gops = models.GuaranteeOfPayment.query.filter(
-            models.GuaranteeOfPayment.id > 0)
+        open_gops = gop_service.get_open_all()
 
         if country and provider:
-            gops = gops.join(models.Provider,
+            gops = open_gops.join(models.Provider,
                              models.GuaranteeOfPayment.provider_id == \
                              models.Provider.id)\
                        .filter(db.and_(models.Provider.country == country,
-                                       models.Provider.company == provider))\
-                       .filter(not models.GuaranteeOfPayment.closed)
+                                       models.Provider.company == provider))
 
         elif country:
-            gops = gops.join(models.Provider,
+            gops = open_gops.join(models.Provider,
                              models.GuaranteeOfPayment.provider_id == \
                              models.Provider.id)\
-                       .filter(models.Provider.country == country)\
-                       .filter(not models.GuaranteeOfPayment.closed)
+                       .filter(models.Provider.country == country)
 
         elif provider:
-            gops = gops.join(models.Provider,
+            gops = open_gops.join(models.Provider,
                              models.GuaranteeOfPayment.provider_id == \
                              models.Provider.id)\
-                       .filter(models.Provider.company == provider)\
-                       .filter(not models.GuaranteeOfPayment.closed)
+                       .filter(models.Provider.company == provider)
 
         if payer:
-            gops = gops.join(models.Payer,
+            gops = open_gops.join(models.Payer,
                              models.GuaranteeOfPayment.payer_id == \
                              models.Payer.id)\
-                       .filter(models.Payer.company == payer)\
-                       .filter(not models.GuaranteeOfPayment.closed)
+                       .filter(models.Payer.company == payer)
 
         if status:
-            gops = gops.filter(models.GuaranteeOfPayment.status == status)\
-                       .filter(not models.GuaranteeOfPayment.closed)
+            gops = open_gops.filter_by(status=status)
 
-    elif current_user.user_type == 'provider':
+    elif current_user.get_type() == 'provider':
         gops = models.GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider).filter(
             not models.GuaranteeOfPayment.closed)
 
-    elif current_user.user_type == 'payer':
+    elif current_user.get_type() == 'payer':
         gops = models.GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer).filter(
             not models.GuaranteeOfPayment.closed)
