@@ -13,10 +13,6 @@ Flask-SocketIO==2.7.1
 Flask-SQLAlchemy==2.1
 Flask-WTF==0.12
 flup==1.0.2
-gevent==1.2.1
-gevent-socketio==0.3.6
-gevent-websocket==0.10.1
-greenlet==0.4.12
 httplib2==0.10.3
 itsdangerous==0.24
 Jinja2==2.8
