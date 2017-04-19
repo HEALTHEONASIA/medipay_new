@@ -722,8 +722,7 @@ def requests_filter():
 @main.route('/billing-code/<int:bill_id>/get', methods=['GET'])
 @login_required()
 def billing_code_get(bill_id):
-    if not current_user.is_authenticated or \
-      current_user.user_type != 'provider':
+    if current_user.get_type() != 'provider':
         return jsonify({})
 
     bill_code = models.BillingCode.query.get(bill_id)
