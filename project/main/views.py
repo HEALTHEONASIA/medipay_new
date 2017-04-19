@@ -124,11 +124,16 @@ def request_form():
             member_service.update_from_form(member, form,
                 exclude=['member_photo'])
 
-        medical_details = medical_details_service.create(
-            **{field.name.replace('medical_details_', ''): field.data \
-            for field in form \
-            if field.name.replace('medical_details_', '') \
-            in medical_details_service.columns})
+        # prepare a medical_details args* dict
+        mdetails_dict = {}
+
+        for field in form:
+            fname = field.name.replace('medical_details_', '')
+
+            if fname in medical_details_service.columns:
+                mdetails_dict[fname] = field.data
+
+        medical_details = medical_details_service.create(**mdetails_dict)
 
         payer = models.Payer.query.get(form.payer.data)
 
