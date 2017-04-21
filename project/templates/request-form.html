@@ -65,6 +65,20 @@
       z-index: 11;
       padding: 15px;
     }
+    .icd-pagination a {
+      color: black;
+      float: left;
+      padding: 8px 16px;
+      text-decoration: none;
+      transition: background-color .3s;
+    }
+    .icd-pagination a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .icd-pagination a:hover:not(.active) {
+      background-color: #ddd;
+    }
   </style>
   <div class="modal fade slide-up disable-scroll in" id="modalSlideUp2" tabindex="-1" role="dialog" aria-hidden="false" style="display: none; overflow-y: scroll;">
     <div class="modal-dialog modal-lg">
@@ -669,11 +683,27 @@
             if ($('#modalSlideUp2 input').val().length != 0) 
             {
                 $.get('/icd-code/search', {'query': query}, function(data) {
-                $('#modalSlideUp2 table tbody').html(data);
+                    $('#modalSlideUp2 table tbody').html(data);
+                    
+                    $('#icd_basicTable tr').hide();
+                    $('.icd-pagination-tr').show();
+                    $('.page-number-1').show();
+                    
                 });
             }
           }
         });
+        
+        $(document).on('click','.page-number',function(e){
+            $('#icd_basicTable tr').hide();
+            $('.icd-pagination-tr').show();
+            $('.icd-pagination a').removeClass('active');
+            $(this).addClass('active');
+        
+            var $page_class = '.' + $(this).attr('name')
+            $($page_class).show();
+        });
+                    
         $('#modalSlideUp2 table tbody').on('click', 'tr', function() {
           var $this = $(this);
           $this.toggleClass('selected');
@@ -832,6 +862,19 @@
         "searching": false,
         "bFilter": false
     } );
-
+    
+    
+    //~ $('a.page-number').on("click", function (e) {
+        //~ e.preventDefault();
+        
+        //~ $('#icd_basicTable tr').hide();
+        //~ $('.icd-pagination-tr').show();
+        //~ $('.icd-pagination a').removeClass('active');
+        //~ $(this).addClass('active');
+        
+        //~ var $page_class = '.' + $(this).attr('name')
+        //~ $($page_class).show();
+    //~ });
+    
     </script>
 {% endblock %}

@@ -1,35 +1,60 @@
 {% if icd_codes %}
+    {% set page_break_number = 9 %}
+    {% set page_number = 1 %}
     {% for icd_code in icd_codes %}
-        <tr role="row" class="odd">
+        {% if loop.index is divisibleby(page_break_number + 1) %}
+            {% set page_number = page_number + 1 %}
+        {% endif %}
+        <tr role="row" class="odd page-number-{{page_number}}">
             <td class="v-align-middle sorting_0">
-              <p data-id="{{ icd_code.id }}">
+              <span data-id="{{ icd_code.id }}">
               {% if query in icd_code.code %}
                 {{ icd_code.code.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
               {% else %}
                 {{ icd_code.code }}
               {% endif %}
-              </p>
+              </span>
             </td>
             <td class="v-align-middle">
-              <p>
+              <span>
               {% if query in icd_code.common_term %}
                 {{ icd_code.common_term.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
               {% else %}
                 {{ icd_code.common_term }}
               {% endif %}
-              </p>
+              </span>
             </td>
             <td class="v-align-middle">
-              <p>
+              <span>
               {% if query in icd_code.description %}
                 {{ icd_code.description.replace(query, '<span style="background: #ff0; color: #000;">%s</span>' % query)|safe }}
               {% else %}
                 {{ icd_code.description }}
               {% endif %}
-              </p>
+              </span>
             </td>
         </tr>
     {% endfor %}
+    
+    {% if icd_codes|length > page_break_number %}
+    {% set page_number = 1 %}
+        <tr role="row" class="odd icd-pagination-tr">
+            <td colspan=3>
+                <div class="icd-pagination pull-right">
+                    {% for icd_code in icd_codes %}
+                        {% if loop.first %}
+                            <a href="#" name="page-number-{{page_number}}" class="active page-number">{{page_number}}</a>
+                        {% endif %}
+                        
+                        {% if loop.index is divisibleby(page_break_number + 1) %}
+                            {% set page_number = page_number + 1 %}
+                            <a href="#" name="page-number-{{page_number}}" class="page-number">{{page_number}}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </td>
+        </tr>
+    {% endif %}
 {% else %}
     <tr role="row" class="odd">
         <td class="v-align-middle sorting_1" colspan="3">
@@ -39,3 +64,5 @@
         </td>
     </tr>
 {% endif %}
+
+
