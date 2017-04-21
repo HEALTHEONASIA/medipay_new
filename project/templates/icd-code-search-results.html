@@ -1,5 +1,5 @@
 {% if icd_codes %}
-    {% set page_break_number = 9 %}
+    {% set page_break_number = 10 %}
     {% set page_number = 1 %}
     {% for icd_code in icd_codes %}
         {% if loop.index is divisibleby(page_break_number + 1) %}
