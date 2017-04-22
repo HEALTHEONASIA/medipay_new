@@ -3,6 +3,9 @@ appdirs==1.4.3
 blinker==1.4
 click==6.6
 decorator==4.0.10
+enum-compat==0.0.2
+enum34==1.1.6
+eventlet==0.21.0
 Flask==0.11.1
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
@@ -17,6 +20,7 @@ gevent==1.2.1
 gevent-socketio==0.3.6
 gevent-websocket==0.10.1
 greenlet==0.4.12
+gunicorn==19.7.1
 httplib2==0.10.3
 itsdangerous==0.24
 Jinja2==2.8
