@@ -23,6 +23,7 @@ Mako==1.0.4
 MarkupSafe==1.0
 packaging==16.8
 pbr==1.10.0
+PyMySQL==0.7.11
 pyparsing==2.2.0
 PySocks==1.6.7
 python-dateutil==2.6.0
