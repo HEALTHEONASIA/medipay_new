@@ -838,6 +838,7 @@
         </div>
         <!-- END Overlay Content !-->
       </div>
+      <div id="sound" style="display: none;"></div>
       <!-- END OVERLAY -->
     {% endif %}
     <!-- BEGIN VENDOR JS -->
@@ -861,6 +862,13 @@
       <script type="text/javascript" src="/static/js/notify.min.js"></script>
       <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
       <script type="text/javascript" charset="utf-8">
+          /**
+             * @param {string} filename The name of the file WITHOUT ending
+             */
+            function playSound(filename){   
+                document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
+            }
+
           // request permission on page load
           document.addEventListener('DOMContentLoaded', function () {
             if (!Notification) {
@@ -901,6 +909,7 @@
                   $.notify(message);
                   console.log(message);
                   notifyMe();
+                  playSound('/static/sounds/arpeggio');
               });
           });
       </script>
