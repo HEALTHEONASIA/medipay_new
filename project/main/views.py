@@ -49,6 +49,11 @@ def handle_notifications(data):
         redis_store.delete('id' + str(data))
 
 
+@socketio.on_error_default
+def default_error_handler(e):
+    pass
+
+
 gop_service = GuaranteeOfPaymentService()
 medical_details_service = MedicalDetailsService()
 member_service = MemberService()
