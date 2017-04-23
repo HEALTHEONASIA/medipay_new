@@ -917,12 +917,10 @@
           var socket = io.connect('http://' + document.domain + ':' + location.port);
           socket.on('connect', function() {
               socket.emit('hello', {data: 'I\'m connected!'});
-              socket.on('check-notifications', function(notification) {
-                  $.notify(notification);
+              socket.on('message', function(message) {
+                  $.notify(message);
+                  console.log(message);
               });
-              setInterval(function(data) {
-                socket.emit('check-notifications', '{{ current_user.id }}');
-              }, 1000);
           });
       </script>
     {% endif %}

@@ -1,7 +1,7 @@
 import os, random, string
 from flask import request
 from werkzeug.utils import secure_filename
-from .. import config, redis_store
+from .. import config, redis_store, socketio
 
 def prepare_gop_dict(gop):
     """The function takes the GOP model object
@@ -131,9 +131,9 @@ def validate_email_address(data):
         return True
 
 
-def notify(key, value):
-    """Helper function for shortest redis update"""
+def notify(value):
+    """Function to send socketio message"""
     try:
-        redis_store.set(key, value)
+        socketio.emit('message', value)
     except:
         pass

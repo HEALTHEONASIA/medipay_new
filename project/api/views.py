@@ -1984,7 +1984,7 @@ def claim_add():
         has been added!""" % (url_for('main.claim', claim_id=claim.id),
         claim.id)
 
-    notify('id' + str(provider.user.id), notification)
+    notify(notification)
 
     # returns the url on the current claim's edit page
     # it will redirect the user of the 1TAP desktop app to this page
@@ -2035,7 +2035,7 @@ def claim_add_by_terminal():
     notification = """A <a href="%s" target="_blank">new claim #%d</a>
         has been added!""" % (url_for('main.claim', claim_id=claim.id),
         claim.id)
-    notify('id' + str(provider.user.id), notification)
+    notify(notification)
 
     claim_dict = {
         'id': claim.id,

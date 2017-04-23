@@ -18,7 +18,7 @@ from sqlalchemy import and_, or_
 from .forms import GOPForm, GOPApproveForm
 from .helpers import csv_ouput, pass_generator, photo_file_name_santizer
 from .helpers import to_float_or_zero, validate_email_address
-from .helpers import prepare_gops_list
+from .helpers import prepare_gops_list, notify
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
 from . import main
@@ -32,7 +32,6 @@ from .. import auth
 @socketio.on('hello')
 def handle_hello(message):
     print('received hello message: ' + str(message))
-    send(message)
 
 
 @socketio.on('check-notifications')
@@ -125,6 +124,8 @@ def block_unauthenticated_url(filename):
 @main.route('/request', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_form():
+    notify('Someone has opened a blank GOP request form')
+
     payers = current_user.provider.payers
     form = GOPForm()
 
