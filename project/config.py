@@ -36,7 +36,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     try:
         from . import config_mysql
-        SQLALCHEMY_DATABASE_URI = 'mysql://%s:%s@localhost/%s' % (
+        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@localhost/%s' % (
             config_mysql.username, config_mysql.password, config_mysql.db)
     except ImportError:
         pass
