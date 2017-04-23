@@ -22,8 +22,7 @@ login_manager.session_protection = 'strong'
 
 def create_app(config_name):
     app = Flask(__name__)
-    cors = CORS(app, resources={r"/api/*": {"origins": 
-        "*"}})
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
