@@ -33,6 +33,10 @@ from .. import auth
 def handle_hello(message):
     print('received hello message: ' + str(message))
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    pass
+
 
 @socketio.on('check-notifications')
 def handle_notifications(data):
