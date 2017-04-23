@@ -1,0 +1,88 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Terminal{% if terminal %} ID: {{ terminal.id }}{% endif %} Form{% endblock %}
+{% block page_css %}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{  url_for('one_tap.terminals') }}">Terminals</a>
+    </li>
+    {% if terminal %}
+      <li>
+          <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">Terminal ID: {{ terminal.id }}</a>
+      </li>
+    {% endif %}
+    <li>
+      <a href="#" class="active">Form</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h5>Provider{% if terminal %} ID: {{ terminal.id }}{% endif %} Form</h5>
+      <form method="post" name="terminal" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          <label>{{ form.status.label }}</label>
+          {% for error in form.status.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.status(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.serial_number.label }}</label>
+          {% for error in form.serial_number.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.serial_number(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.model.label }}</label>
+          {% for error in form.model.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.model(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.location.label }}</label>
+          {% for error in form.location.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.location(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.version.label }}</label>
+          {% for error in form.version.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.version(class_="form-control") }}
+        </div>
+<!--
+        <div class="form-group">
+          <label>{{ form.last_update.label }}</label>
+          {% for error in form.last_update.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.last_update(class_="form-control") }}
+        </div>
+-->
+        <div class="form-group">
+          <label>{{ form.remarks.label }}</label>
+          {% for error in form.remarks.errors %}
+            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+          {% endfor %}
+          {{ form.remarks(class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.submit(class_="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 import os, random, string
 from flask import request
 from werkzeug.utils import secure_filename
-from .. import config
+from .. import config, redis_store
 
 def prepare_gop_dict(gop):
     """The function takes the GOP model object
@@ -75,8 +75,10 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in config['production'].ALLOWED_EXTENSIONS
 
+
 def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
 
 def photo_file_name_santizer(photo):
     filename = secure_filename(photo.data.filename)
@@ -96,6 +98,7 @@ def photo_file_name_santizer(photo):
 
     return photo_filename
 
+
 def csv_ouput(csv_file_name, data):
     si = StringIO.StringIO()
     cw = csv.writer(si)
@@ -105,12 +108,14 @@ def csv_ouput(csv_file_name, data):
     output.headers["Content-type"] = "text/csv"
     return output
 
+
 def to_float_or_zero(value):
     try:
         value = float(value)
     except ValueError:
         value = 0.0
     return value
+
 
 def validate_email_address(data):
     """Returns True or False"""
@@ -124,3 +129,11 @@ def validate_email_address(data):
             return False
 
         return True
+
+
+def notify(key, value):
+    """Helper function for shortest redis update"""
+    try:
+        redis_store.set(key, value)
+    except:
+        pass

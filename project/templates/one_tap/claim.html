@@ -1,0 +1,989 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Claim ID: {{ claim.id }}{% endblock %}
+{% block page_css %}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+     <a href="{{ url_for('one_tap.claims') }}">Claims</a>
+    </li>
+    <li>
+        <a href="#" class="active">Claim ID: {{ claim.id }}</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+  <style>
+    #medical-details-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      width: 60%;
+      height: 80%;
+      background: #fff;
+      overflow-y: scroll;
+      z-index: 1000;
+      padding: 2%;
+    }
+    #medical-details-popup-bg {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      background: rgba(0,0,0,.4);
+    }
+    #confirmation-popup-bg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 10;
+      background: rgba(0,0,0,.4);
+    }
+    #confirmation-popup {
+      display: none;
+      height: 300px;
+      width: 350px;
+      background: #fff;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      margin: auto;
+      text-align: center;
+      z-index: 11;
+      padding: 15px;
+    }
+    .radios label {
+        margin-right: 7px;
+    }
+  </style>
+  <div class="modal fade slide-up disable-scroll in" id="modalSlideUp2" tabindex="-1" role="dialog" aria-hidden="false" style="display: none; overflow-y: scroll;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content-wrapper">
+        <div class="modal-content">
+          <div class="modal-header clearfix text-left">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="pg-close fs-14"></i>
+            </button>
+            <h5>ICD <span class="semi-bold">codes</span></h5>
+            <!-- <p class="p-b-10">We need payment information inorder to process your order</p> -->
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="Search..">
+            </div>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+                <table class="table table-hover dataTable no-footer" id="icd_basicTable" role="grid">
+                  <thead>
+                    <tr role="row">
+                      <!-- <th></th> -->
+                      <th style="width: 182px;" class="sorting_asc" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="CODE: activate to sort column descending" aria-sort="ascending">CODE</th>
+                      <th style="width: 130px;" class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Common Term: activate to sort column ascending">Common Term</th>
+                      <th style="width: 282px;" class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Description: activate to sort column ascending">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr role="row" class="odd">
+                        <td class="v-align-middle" colspan="3">
+                            <p style="text-align: center;">
+                                Search Data For Results
+                            </p>
+                        </td>
+                        <td style="display:none;"></td>
+                        <td style="display:none;"></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="clearfix">
+                  <button style="float: right;" class="btn btn-primary">Select</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size: 36px;">
+          Claim details
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size: 18px; text-transform: none; font-weight: normal;">
+            Patient info:
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body remove-top-padding">
+        <div class="row details">
+            <div class="col-md-2">
+                 {% if claim.member.photo %}
+                    <img src="{{ claim.member.photo }}" alt="Memer photo" style="height:150px;" class="img-responsive center-block">
+                 {% else %}
+                    <img class="img-responsive center-block"  style="height:150px;" src="/static/img/person-solid.png">
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Name:</label> <span>{{ claim.member.name }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Age:</label> <span>{{ claim.member.age() }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label> <span>{{ claim.member.gender }}</span>
+                </div>
+                <div class="form-group">
+                    <label>ID Number:</label> <span>{{ claim.member.national_id }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label> <span>{{ claim.member.address }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Address 2:</label> <span>{{ claim.member.address_additional }}</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Membership plan type:</label> <span>{{ claim.member.plan_type }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Membership number:</label> <span>{{ claim.member.id }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Dependents:</label> <span>{{ claim.member.dependents }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label> <span>{{ claim.member.email }}</span>
+                </div>
+                <div class="form-group">
+                    <label>Telephone:</label> <span>{{ claim.member.tel }}</span>
+                </div>
+            </div>
+            {% if current_user.get_type() == 'provider' %}
+                <div class="col-md-2">
+                    <div class="form-group">
+                      <a href="{{ url_for('one_tap.member_edit', member_id=claim.member.id) }}" class="btn btn-primary">Edit member info</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+      </div>
+      {% if claim.guarantee_of_payment %}
+          <div class="panel-heading" style="margin-top: 0; padding-top: 0;">
+            <div class="panel-title" style="margin: 0; padding: 0; font-size: 18px; font-weight: normal; text-transform: none;">
+                Claim info:
+            </div>
+            <div class="clearfix"></div>
+          </div>
+          <div class="panel-body remove-top-padding">
+            <div class="row details">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Status:</label> <span>{{ claim.status }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Claim number:</label> <span>{{ claim.claim_number }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Claim type:</label> <span>{{ claim.claim_type }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Datetime:</label> <span>{{ claim.datetime }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Admitted:</label> <span>{{ claim.admitted }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Discharged:</label> <span>{{ claim.discharged }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label> <span>{{ claim.amount }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>ICD code:</label> <span>{{ claim.icd_code }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Terminal:</label> <span>{{ claim.terminal.serial_number }}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Location:</label> <span>{{ claim.terminal.location }}</span>
+                    </div>
+                </div>
+                {% if current_user.get_type() == 'provider' %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                          <a href="{{ url_for('one_tap.claim_edit', claim_id=claim.id) }}" class="btn btn-primary">Edit claim info</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+          </div>
+      {% endif %}
+      {% if not claim.guarantee_of_payment %}
+          <div class="col-md-6">
+            <div class="panel panel-default">
+              <!-- <div class="panel-heading">
+                <div class="panel-title">
+                Option #two
+                </div>
+              </div> -->
+              <div class="panel-body">
+                <h5>
+                GOP Request Form {% if gop_id %}#{{ gop_id }}{% endif %} {% if final %}(send FINAL request){% endif %}
+                </h5>
+                <form method="post" name="gop" enctype="multipart/form-data">
+                  {{ form.hidden_tag() }}
+                  <div class="row">
+                    <div class="col-md-4 becomes-wider">
+                      <div class="form-group">
+                        <label>Medical Record Nr.</label>
+                        {% for error in form.patient_medical_no.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.patient_medical_no(class_="form-control") }}
+                      </div>
+                    </div>
+                    <div class="col-md-4 becomes-wider">
+                      <div class="form-group">
+                        <label>Admission date</label>
+                        {% for error in form.admission_date.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+
+                        <div id="datepicker-component" class="input-group date">
+                          {{ form.admission_date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 becomes-wider">
+                      <div class="form-group">
+                        <label>Admission time</label>
+                        {% for error in form.admission_time.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <div class="input-group bootstrap-timepicker">
+                          {{ form.admission_time(class_="form-control", id="timepicker") }}
+                          <span class="input-group-addon"><i class="pg-clock"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <h5>Patient</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Name</label>
+                        {% for error in form.name.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.name(class_="form-control") }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Photo</label>
+                        {% for error in form.member_photo.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {% if member_photo and member_photo|length > 0 %}
+                          <img style="display: block; max-width: 50%; margin-bottom: 10px;" src="{{ member_photo }}">
+                        {% endif %}
+                        {{ form.member_photo }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group" style="margin: 20px 0;">
+                        <label>Gender</label>
+                        {% for error in form.gender.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <div class="form-group radios">
+                        {% for subfield in form.gender %}
+                          {{ subfield }}
+                          {{ subfield.label }}
+                        {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group" style="margin: 20px 0;">
+                        <label>Date of birth</label>
+                        {% for error in form.dob.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <div id="datepicker-component-dob" class="input-group date">
+                          {{ form.dob(class_="form-control") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Patient Phone Nr.</label>
+                        {% for error in form.tel.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.tel(class_="form-control") }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Patient ID</label>
+                        {% for error in form.national_id.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.national_id(class_="form-control") }}
+                        {{ form.current_national_id }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Payor</label>
+                    {% for error in form.payer.errors %}
+                      <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                    {% endfor %}
+                    <div id="payor-outer">
+                      {{ form.payer(class_="form-control") }}
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Policy number</label>
+                    {% for error in form.policy_number.errors %}
+                      <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                    {% endfor %}
+                    {{ form.policy_number(class_="form-control") }}
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="panel panel-default">
+              <!-- <div class="panel-heading">
+                <div class="panel-title">
+                Option #two
+                </div>
+              </div> -->
+              <div class="panel-body">
+                  <h5>
+                  Medical Details
+                  </h5>
+                  <div class="form-group">
+                    <label style="margin-bottom: 0;">Type</label>
+                    {% for error in form.reason.errors %}
+                      <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                    {% endfor %}
+                    <div class="radios" style="margin-top: 5px;">
+                      <div class="row">
+                        <div class="col-md-12 clearfix">
+                          {% for subfield in form.reason %}
+                            {% if loop.index == 1 or loop.index == 3 %}
+                              <div style="float: left;">
+                                {% if loop.index == 1 %}
+                                  <span class="m-b-5" style="display: block; text-transform: uppercase; font-size: 11px; font-weight: 600;">Out Patient</span>
+                                {% elif loop.index == 3 %}
+                                  <span class="m-b-5" style="display: block; text-transform: uppercase; font-size: 11px; font-weight: 600;">In Patient</span>
+                                {% endif %}
+                            {% endif %}
+                              {{ subfield }}
+                            {{  subfield.label(style="font-weight: 400;") }}
+                            {% if loop.index == 2 or loop.index == 4 %}
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Doctor name</label>
+                        {% for error in form.doctor_name.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <div class="select-field-outer">
+                          {{ form.doctor_name(class_="form-control") }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Plan of action</label>
+                        {% for error in form.patient_action_plan.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.patient_action_plan(class_="form-control") }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>ICD Codes</label>
+                        {% for error in form.icd_codes.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <span class="btn btn-primary icd-code m-b-10" id="btnToggleSlideUpSize2">
+                          Browse ICD Codes
+                        </span>
+                        <div id="icd-codes-selected">
+                        {% for id,commom_term in icd_code_id_name_web %}
+                            <div> {{ id }} : {{ commom_term }} </div>
+                        {% endfor %}
+                        </div>
+                        {{ form.icd_codes(class_="form-control", style="display: none;") }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>More details</label>
+                        <p><a href="#" id="medical-details-popup-btn">Edit more medical details</a></p>
+                      </div>
+                    </div>
+                  </div>
+                  <h5>Cost Estimation</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Room type</label>
+                        {% for error in form.room_type.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        <div class="select-field-outer">
+                          {{ form.room_type(class_="form-control", placeholder="Select room", style="font-size:12px;") }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Room price</label>
+                        {% for error in form.room_price.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.room_price(class_="autonumeric form-control", **{'data-v-min': '0.00', 'data-v-max': '999999999.99', 'data-a-dec': '.', 'data-a-sep': ','}) }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Doctor Fee</label>
+                        {% for error in form.doctor_fee.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.doctor_fee(class_="autonumeric form-control", **{'data-v-min': '0.00', 'data-v-max': '999999999.99', 'data-a-dec': '.', 'data-a-sep': ','}) }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Surgery Fee</label>
+                        {% for error in form.surgery_fee.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.surgery_fee(class_="autonumeric form-control", **{'data-v-min': '0.00', 'data-v-max': '999999999.99', 'data-a-dec': '.', 'data-a-sep': ','}) }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Medication Fee</label>
+                        {% for error in form.medication_fee.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.medication_fee(class_="autonumeric form-control", **{'data-v-min': '0.00', 'data-v-max': '999999999.99', 'data-a-dec': '.', 'data-a-sep': ','}) }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label>Total Estimate</label>
+                        {% for error in form.quotation.errors %}
+                          <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                        {% endfor %}
+                        {{ form.quotation(class_="autonumeric form-control", style="background: #c3c3c3; color: #fff; font-weight: bold;", readonly=True, **{'data-v-min': '0.00', 'data-v-max': '999999999.99', 'data-a-dec': '.', 'data-a-sep': ','}) }}
+                      </div>
+                    </div>
+                  </div>
+                  {% if bill_codes and bill_codes.count() > 0 %}
+                    <div class="form-group">
+                      <label>Load from billing codes</label>
+                      <div class="select-field-outer">
+                        <select class="form-control" id="billing-codes">
+                          <option value="0">Select billing code</option>
+                          {% for bill_code in bill_codes %}
+                            <option value="{{ bill_code.id }}">Bill Code #{{ bill_code.id }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  <div class="form-group pull-right" style="padding-top:20px;">
+                    {{ form.submit(class_="btn btn-primary") }}
+                  </div>
+
+                  <div id="medical-details-popup-bg"></div>
+                  <div id="medical-details-popup">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <h5>Patient's medical details <span class="pull-right"><a href="#" id="medical-details-popup-close">&times;</a></span></h5>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Symptoms</label>
+                          {% for error in form.medical_details_symptoms.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_symptoms(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Temperature</label>
+                          {% for error in form.medical_details_temperature.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_temperature(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Heart rate</label>
+                          {% for error in form.medical_details_heart_rate.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_heart_rate(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Respiration</label>
+                          {% for error in form.medical_details_respiration.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_respiration(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Blood pressure</label>
+                          {% for error in form.medical_details_blood_pressure.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_blood_pressure(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Physical finding</label>
+                          {% for error in form.medical_details_physical_finding.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_physical_finding(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Health history</label>
+                          {% for error in form.medical_details_health_history.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_health_history(class_="form-control") }}
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Previously admitted</label>
+                          {% for error in form.medical_details_previously_admitted.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          <div id="datepicker-component" class="input-group date">
+                            {{ form.medical_details_previously_admitted(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Diagnosis</label>
+                          {% for error in form.medical_details_diagnosis.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_diagnosis(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>In patient indication</label>
+                          {% for error in form.medical_details_in_patient.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          <!-- Checkbox -->
+                          <div class="checkbox check-success  ">
+                            {{ form.medical_details_in_patient(class_="form-control") }}
+                            <label for="medical_details_in_patient">In patient</label>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Test results</label>
+                          {% for error in form.medical_details_test_results.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_test_results(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Current therapy</label>
+                          {% for error in form.medical_details_current_therapy.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_current_therapy(class_="form-control") }}
+                        </div>
+                        <div class="form-group">
+                          <label>Treatment plan</label>
+                          {% for error in form.medical_details_treatment_plan.errors %}
+                            <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                          {% endfor %}
+                          {{ form.medical_details_treatment_plan(class_="form-control") }}
+                        </div>
+                        <div class="form-group pull-right">
+                          <button class="btn btn-primary">Apply</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </div>
+        {% else %}
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <a href="{{ url_for('main.request', request_id=claim.guarantee_of_payment.id }}" class="btn btn-primary" target="_blank" style="color: #3472F7; background: #3472F7; color: #fff; position: relative; top: -5px;">Open GOP request in Medipay</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+    <script>
+$(document).ready(function(){
+    $(".tabbed-table a").click(function(){
+        $(this).tab('show');
+    });
+});
+</script>
+<div id="confirmation-popup-bg"></div>
+    <div id="confirmation-popup" data-validated="false" data-set-url="">
+      <div class="form-group">
+        <label>I verify that everything stated here is true, and if the patient condition(s) include:<br>
+            (pregnancy (G/P/A),
+            congenital/hereditary disease,
+            cosmetic,
+            fertility,
+            tumour/cancer,
+            STD,
+            HIV/Aids,
+            Mental Illness,
+            drug abuse/alcohol abuse,
+            suicide,
+            accident (work, traffic, etc.),
+            orthodontic,
+            degenerative disease,
+            medical checkup)<br>
+            I have already stated them inside.</label>
+        <div class="">
+          <input id="confirmed" type="checkbox">
+          <label for="confirmed" style="text-align: left;">Agree</label>
+        </div>
+        <span class="btn btn-primary m-t-10">Confirm</span>
+      </div>
+    </div>
+    <script type="text/javascript">
+        function formatAMPM(date) {
+          var hours = date.getHours();
+          var minutes = date.getMinutes();
+          var ampm = hours >= 12 ? 'PM' : 'AM';
+          hours = hours % 12;
+          hours = hours ? hours : 12; // the hour '0' should be '12'
+          minutes = minutes < 10 ? '0'+minutes : minutes;
+          var strTime = hours + ':' + minutes + ' ' + ampm;
+          return strTime
+        }
+        
+        function formatDDMMYYYY(date) {
+            var dd = date.getDate();
+            var mm = date.getMonth()+1;
+            var yyyy = date.getFullYear();
+            if (dd < 10) {
+              dd = '0' + dd;
+            }
+            if (mm < 10) {
+              mm = '0' + mm;
+            }
+            var strDate = dd + '/' + mm + '/' + yyyy;
+            return strDate;
+        }
+        
+        function calculateFees() {
+          var roomPrice = parseFloat($('input#room_price').val().replace(/,/g,''));
+          if (isNaN(roomPrice)) roomPrice = 0.0;
+
+          var doctorFee = parseFloat($('input#doctor_fee').val().replace(/,/g,''));
+          if (isNaN(doctorFee)) doctorFee = 0.0;
+
+          var surgeryFee = parseFloat($('input#surgery_fee').val().replace(/,/g,''));
+          if (isNaN(surgeryFee)) surgeryFee = 0.0;
+
+          var medicationFee = parseFloat($('input#medication_fee').val().replace(/,/g,''));
+          if (isNaN(medicationFee)) medicationFee = 0.0;
+
+          var total = $('input#quotation');
+
+          total.val(numberWithCommas(roomPrice + doctorFee + surgeryFee + medicationFee));
+        }
+        function numberWithCommas(x) {
+          return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }  
+        
+        function close_medical_details_pop_up()
+        {
+          $('#medical-details-popup-bg').fadeOut();
+          $('#medical-details-popup').fadeOut();
+        }
+         
+        $('#medical-details-popup-btn').click(function(e) {
+          e.preventDefault();
+          $('#medical-details-popup-bg').fadeIn();
+          $('#medical-details-popup').fadeIn();
+        });
+        $('#medical-details-popup-bg').click(function() {
+          $(this).fadeOut();
+          $('#medical-details-popup').fadeOut();
+        });
+        $('#medical-details-popup button').click(function(e) {
+          e.preventDefault();
+          close_medical_details_pop_up();
+        });
+        
+        $('#medical-details-popup-close').click(function(e){
+            e.preventDefault();
+            close_medical_details_pop_up();
+        });
+
+        $('#admission_date').parent().datepicker({format: 'dd/mm/yyyy', endDate: new Date(), autoclose: true });
+        $('#admission_date').blur(function() { 
+            if ($(this).val().length === 0)
+            {
+                var today = new Date();
+                $(this).val(formatDDMMYYYY(today));
+            }
+        });
+        $('#dob').parent().datepicker({format: 'dd/mm/yyyy', endDate: new Date(), autoclose: true });
+        $('#medical_details_previously_admitted').parent().datepicker({format: 'dd/mm/yyyy', endDate: new Date(), autoclose: true });
+
+        $('input#room_price, input#doctor_fee, input#surgery_fee, input#medication_fee, input#quotation').on('keyup', function(e) {
+          calculateFees();
+        });
+        $('input#room_price, input#doctor_fee, input#surgery_fee, iFnput#medication_fee, input#quotation').on('change', function(e) {
+          var total = $('input#quotation');
+          total.focus();
+          total.blur();
+        });
+        
+        $('#modalSlideUp table tr').click(function() {
+          var $this = $(this);
+          $('#modalSlideUp table tr').removeClass('selected');
+          $this.addClass('selected');
+        });
+        $('#modalSlideUp2 input').on('keyup', function() {
+          var query = $(this).val();
+          if(event.keyCode == 13)
+          {
+            if ($('#modalSlideUp2 input').val().length != 0) 
+            {
+                $.get('/icd-code/search', {'query': query}, function(data) {
+                $('#modalSlideUp2 table tbody').html(data);
+                });
+            }
+          }
+        });
+        $('#modalSlideUp2 table tbody').on('click', 'tr', function() {
+          var $this = $(this);
+          $this.toggleClass('selected');
+        });
+        $('#modalSlideUp button.btn-primary').click(function() {
+          var $this = $(this);
+          var selectedRow = $('#modalSlideUp table tr.selected');
+          var selectedCode = '';
+          var payerId;
+          selectedCode = selectedRow.find('td:first p').text();
+          payerId = selectedRow.find('td:first p').attr('data-payer-id');
+          $('input[name="payer"]').val(selectedCode);
+          $('input[name="payer_id"]').val(payerId);
+          $('#modalSlideUp button.close').click();
+        });
+        $('#btnToggleSlideUpSize2, #btnToggleSlideUpSize3, #btnToggleSlideUpSize4').click(function() {
+            var size = $('input[name=slideup_toggler]:checked').val()
+            var modalElem = $('#modalSlideUp2');
+            if (size == "mini") {
+                $('#modalSlideUpSmall').modal('show')
+            } else {
+                $('#modalSlideUp2 table tr').each(function() {
+                  var tr = $(this);
+                  $('select#icd_codes option:selected').each(function() {
+                    var option = $(this);
+                    if (tr.find('td:first p').attr('data-id')==option.val()) {
+                      tr.addClass('selected');
+                    }
+                  });
+                });
+
+                $('#modalSlideUp2').modal('show');
+                $('#modalSlideUp2').attr('data-calledby', $(this).attr('id'));
+
+                if (size == "default") {
+                    modalElem.children('.modal-dialog').removeClass('modal-lg');
+                } else if (size == "full") {
+                    modalElem.children('.modal-dialog').addClass('modal-lg');
+                }
+            }
+        });
+
+        $('#modalSlideUp2 button.btn-primary').click(function() {
+          var $this = $(this);
+          var selectedRows = $('#modalSlideUp2 table tr.selected');
+          var selectedName = '';
+          var calledBy = $('#modalSlideUp2').attr('data-calledby');
+          var icdCodesSelected = [];
+          $('select#icd_codes option').prop('selected', false);
+          selectedRows.each(function() {
+            var $this = $(this);
+            var code = $this.find('td:first p').text();
+            var term = $this.find('td:last p').text();
+            icdId = $this.find('td:first p').attr('data-id');
+            $('select#icd_codes option[value="' + icdId + '"]').prop('selected', true);
+            icdCodesSelected.push('<div>' + code + ': ' + term + '</div>');
+            $('#modalSlideUp2 button.close').click();
+          });
+
+          $('#icd-codes-selected').text('');
+          for (var key in icdCodesSelected) {
+            $('#icd-codes-selected').append(icdCodesSelected[key]);
+          }
+          
+        });
+
+        if ($('input[name="admission_time"]')) {
+          if (window.location.href.indexOf('/edit') == -1) {
+            var today = new Date();
+            $('input[name="admission_time"]').val(formatAMPM(today));
+          }
+        }
+        $('input#dob').keydown(function(e) {
+          if (e.keyCode == 13) {
+            $(this).click();
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('Enter pressed');
+            return false;
+          }
+        });
+        if ($('#admission_date')) {
+          if (window.location.href.indexOf('/edit') == -1) {
+            var today = new Date();
+            $('#admission_date').val(formatDDMMYYYY(today));
+          }
+        }
+        if ($('#billing-codes')) {
+          $('#billing-codes').change(function() {
+            var billCodeId = $(this).find('option:selected').val();
+            if (billCodeId != 0) {
+              $.get('/billing-code/' + billCodeId + '/get', function(data) {
+                console.log(data);
+                var roomPrice = parseInt(data['room_and_board']);
+                var doctorFee = parseInt(data['doctor_visit_fee']) + parseInt(data['doctor_consultation_fee']);
+                var surgeryFee = parseInt(data['specialist_visit_fee']) + parseInt(data['specialist_consultation_fee']);
+                var medicationFee = parseInt(data['medicines']);
+                var total = roomPrice + doctorFee + surgeryFee + medicationFee + parseInt(data['administration_fee']);
+                $('input[name="room_price"]').val(roomPrice);
+                $('input[name="doctor_fee"]').val(doctorFee);
+                $('input[name="surgery_fee"]').val(surgeryFee);
+                $('input[name="medication_fee"]').val(medicationFee);
+                $('input[name="quotation"]').val(total);
+              });
+            }
+          })
+        }
+
+        $('input[type="submit"]#submit').click(function(e) {
+          var confirmationPopup = $('#confirmation-popup');
+          if (confirmationPopup.attr('data-validated') != "true") {
+            e.preventDefault();
+            confirmationPopup.attr('data-called-by', $(this).attr('id'));
+            confirmationPopup.fadeIn();
+            $('#confirmation-popup-bg').fadeIn();
+          }
+        });
+        $('#confirmation-popup-bg').click(function() {
+          $(this).fadeOut();
+          $('#confirmation-popup').fadeOut();
+        });
+        $('#confirmation-popup .btn').click(function() {
+          var confirmField = $('#confirmation-popup input');
+          var confirmed = confirmField.prop('checked');
+          var calledBy = $('#confirmation-popup').attr('data-called-by');
+          var setUrl = $('#confirmation-popup').attr('data-set-url');
+
+          if (calledBy.length == 0) {
+            console.log('Error: wrong caller id.');
+            return false;
+          }
+
+          if (confirmed) {
+            // $.get(setUrl, {'name': fullName}, function(data) {
+            //   if (data == 'SUCCESS') {
+            //     $('#user-prompt').attr('data-validated', "true");
+            //     $('#user-prompt-bg').click();
+            //     $('#' + calledBy).click();
+            //   } else if (data == 'ERROR') {
+            //     console.log('Error: server error.');
+            //     alert('Error: server error. Try again later.');
+            //   }
+            // });
+            $('#confirmation-popup').attr('data-validated', "true");
+            $('#confirmation-popup-bg').click();
+            $('#' + calledBy).click();
+          } else {
+            confirmField.parent().parent().addClass('has-error');
+            confirmField.attr('aria-invalid', true);
+            console.log('ValidationError: the field is required.');
+          }
+        });
+        
+    $('#icd_basicTable').dataTable( {
+        "sDom": "t",
+        "searching": false,
+        "bFilter": false
+    } );
+
+    </script>
+    {{ super() }}
+{% endblock %}

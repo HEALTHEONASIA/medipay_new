@@ -1,0 +1,244 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Member ID: {{ member.id }}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{ url_for('one_tap.members') }}">Members</a>
+    </li>
+    <li>
+        <a href="#" class="active">Member ID: {{ member.id }}</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent no-m-b">
+      <div class="panel-heading">
+        <div class="panel-title" style="font-size: 36px; margin-bottom: 20px;">
+          Patient details
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="row details">
+            <div class="col-md-2">
+              {% if member.photo %}
+                <img src="{{ member.photo }}" style="max-width: 100%; height: 150px;" alt="Member Photo">
+              {% else %}
+                <img src="/static/img/person-solid.png" alt="Member No Photo">
+              {% endif %}
+            </div>
+            <div class="col-md-5">
+              <dl class="dl-horizontal">
+                <dt>Name:</dt><dd>{{ member.name }}</dd>
+                <dt>Age:</dt><dd>{{ member.age() }}</dd>
+                <dt>Gender:</dt><dd>{{ member.gender }}</dd>
+                <dt>ID number:</dt><dd>{{ member.national_id }}</dd>
+                <dt>Address:</dt><dd>{{ member.address }}</dd>
+                <dt>Address 2:</dt><dd>{{ member.address_additional or '-' }}</dd>
+              </dl>
+            </div>
+            <div class="col-md-5">
+              <dl class="dl-horizontal">
+                <dt>Membership plan type:</dt><dd>{{ member.plan_type }}</dd>
+                <dt>Membership number:</dt><dd>{{ member.card_number }}</dd>
+                <dt>Dependents:</dt><dd>{{ member.dependents or '-' }}</dd>
+                <dt>Email:</dt><dd>{{ member.email }}</dd>
+                <dt>Telephone:</dt><dd>{{ member.tel }}</dd>
+              </dl>
+            </div>
+        </div>
+        {% if current_user.get_type() == 'provider' %}
+          <div class="row details-btn">
+            <div class="col-md-12 text-center">
+              <div class="form-group">
+                <a href="{{ url_for('one_tap.member_edit', member_id=member.id) }}" class="btn btn-primary">Edit member info</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading text-center no-p-t">
+        <div class="panel-title" style="font-size: 24px;">
+          Claims history
+          <div style="font-size: 16px; text-transform: none; font-weight: normal;">
+            (click on any to see more info)
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body remove-top-padding">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Datetime: activate to sort column ascending">DATETIME</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Claim type: activate to sort column ascending">TYPE</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Admitted: activate to sort column ascending">ADMITTED</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Discharged: activate to sort column ascending">DISCHARGED</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Terminal: activate to sort column ascending">TERMINAL</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">LOCATION</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for claim in claims %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p style="padding-left:0px;">{{ claim.datetime.strftime('%m/%d/%Y %H:%M') }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.claim_type }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.admitted }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.discharged }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.terminal.serial_number }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.terminal.location }}</p>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% if pagination %}
+          <div id="pagination">
+            {%- for page in pagination.iter_pages() %}
+              {% if page %}
+                {% if page != pagination.page %}
+                  <a href="{{ url_for('one_tap.member', page=page, member_id=member.id) }}">{{ page }}</a>
+                {% else %}
+                  <strong>{{ page }}</strong>
+                {% endif %}
+              {% else %}
+                <span>...</span>
+              {% endif %}
+            {%- endfor %}
+          </div>
+        {% endif %}
+        {% if current_user.get_type() == 'provider' %}
+          <div class="row">
+            <div class="col-md-12 m-t-10" style="text-align: center;">
+              <a href="{{ url_for('one_tap.claim_add') }}" class="btn btn-primary">Add new claim</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="row">
+  <div class="container">
+    <div class="col-md-offset-2">
+      <ul class="tabbed-table nav nav-tabs" style="border-bottom: none; ">
+        <li><a href="#benefits-table">BENEFITS TABLE</a></li>
+        <li class="active"><a href="#claims-history">CLAIMS HISTORY</a></li>
+        <li><a href="#communication-history">COMMUNICATION HISTORY</a></li>
+      </ul>
+    </div>
+  </div>
+</div> -->
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="tab-content"> 
+      <div id="benefits-table" class="tab-pane fade">
+          <h3>Benefits Table</h3>
+      </div>
+      <div id="claims-history" class="tab-pane fade in active">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer reduce-padding" id="basicTableClaims" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Datetime: activate to sort column ascending">DATETIME</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Claim type: activate to sort column ascending">TYPE</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Admitted: activate to sort column ascending">ADMITTED</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Discharged: activate to sort column ascending">DISCHARGED</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Terminal: activate to sort column ascending">TERMINAL</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">LOCATION</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for claim in claims_history %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.datetime }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.claim_type }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.admitted }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.discharged }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.terminal.serial_number }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                      <p>{{ claim.terminal.location }}</p>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 m-t-10" style="text-align: center;">
+            <a href="{{ url_for('one_tap.claim_add') }}" class="btn btn-primary">Add new claim</a>
+          </div>
+        </div>
+      </div>
+      <div id="communication-history" class="tab-pane fade">
+        <h3>Commission History</h3>
+      </div>
+    </div>
+  </div>
+</div> -->
+{% endblock %}

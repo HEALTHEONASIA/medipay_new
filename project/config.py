@@ -5,6 +5,9 @@ class Config:
     WTF_CSRF_ENABLED = True
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
 
+    # REDIS_URL = "redis://:password@localhost:6379/0"
+    REDIS_URL = "redis://localhost:6379/0"
+
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')

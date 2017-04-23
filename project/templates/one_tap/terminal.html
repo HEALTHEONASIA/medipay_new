@@ -1,0 +1,125 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Terminal ID: {{ terminal.id }}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{  url_for('one_tap.terminals') }}">Terminals</a>
+    </li>
+    <li>
+        <a href="" class="active">Terminal ID: {{ terminal.id }}</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>STATUS:</label> <span>{{ terminal.status }}</span>
+      </div>
+      <div class="form-group">
+        <label>SERIAL NUMBER:</label> <span>{{ terminal.serial_number }}</span>
+      </div>
+      <div class="form-group">
+        <label>MODEL:</label> <span>{{ terminal.model }}</span>
+      </div>
+      <div class="form-group">
+        <label>LOCATION:</label> <span>{{ terminal.location }}</span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <a href="{{ url_for('one_tap.terminal_edit', terminal_id=terminal.id) }}" class="btn btn-primary">Edit</a>
+      </div>
+      <div class="form-group">
+        <label>VERSION:</label> <span>{{ terminal.version }}</span>
+      </div>
+      <div class="form-group">
+        <label>LAST UPDATE:</label>
+        {% if terminal.last_update %}
+          <span>{{ terminal.last_update.strftime('%d-%m-%Y %H:%M') }}</span>
+        {% else %}
+          <span>{{ terminal.last_update }}</span>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label>REMARKS:</label> <span>{{ terminal.remarks }}</span>
+      </div>
+    </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h2>Claims:</h2>
+    <div class="table-responsive">
+      <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+        <table class="table table-hover dataTable no-footer reduce-padding" id="basicTableClaims" role="grid">
+          <thead>
+            <tr role="row">
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Datetime: activate to sort column ascending">DATETIME</th>
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Claim type: activate to sort column ascending">TYPE</th>
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Admitted: activate to sort column ascending">ADMITTED</th>
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Discharged: activate to sort column ascending">DISCHARGED</th>
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Terminal: activate to sort column ascending">TERMINAL</th>
+              <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">LOCATION</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for claim in claims %}
+            <tr role="row">
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.datetime }}</p>
+                </a>
+              </td>
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.claim_type }}</p>
+                </a>
+              </td>
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.admitted }}</p>
+                </a>
+              </td>
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.discharged }}</p>
+                </a>
+              </td>
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.terminal.serial_number }}</p>
+                </a>
+              </td>
+              <td class="v-align-middle">
+                <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">
+                  <p>{{ claim.terminal.location }}</p>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if pagination %}
+      <div id="pagination">
+        {%- for page in pagination.iter_pages() %}
+          {% if page %}
+            {% if page != pagination.page %}
+              <a href="{{ url_for('one_tap.terminal', page=page, terminal_id=terminal.id) }}">{{ page }}</a>
+            {% else %}
+              <strong>{{ page }}</strong>
+            {% endif %}
+          {% else %}
+            <span>...</span>
+          {% endif %}
+        {%- endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

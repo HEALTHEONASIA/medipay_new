@@ -1,0 +1,36 @@
+{% extends "one_tap/base.html" %}
+{% block title %}2 Factor Authentication{% endblock %}
+{% block page_css %}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block page_content %}
+
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h5>Verify Account</h5>
+      <p>We have sent you a SMS with a code to the number {% if verification_phone_number %} {{ verification_phone_number }} {% endif %}</p>
+      <p>To complete your phone number verification, please enter the 6-digits activation code.</p>
+      <div class="row">
+      <form method="post" name="sms-verify">
+        {{ form.hidden_tag() }}
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label>{{ form.verification_code.label }}</label>
+                {% for error in form.verification_code.errors %}
+                    <span class="help" style="color: #f55753;">[{{ error }}]</span>
+                {% endfor %}
+                {{ form.verification_code(class_="form-control") }}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group p-t-30">
+                {{ form.submit(class_="btn btn-primary") }}
+            </div>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

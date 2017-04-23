@@ -1,0 +1,116 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Terminals{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Terminals</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading text-center">
+        <div class="panel-title" style="font-size: 36px;">
+          Terminals
+          <div style="font-size: 16px; text-transform: none; font-weight: normal;">
+            (click on any to see more info)
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">STATUS</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Serial number: activate to sort column ascending">SERIAL NUMBER</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Model: activate to sort column ascending">MODEL</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">LOCATION</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Version: activate to sort column ascending">VERSION</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Last update: activate to sort column ascending">LAST UPDATE</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Remarks: activate to sort column ascending">REMARKS</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for terminal in terminals %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.status }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.serial_number }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.model }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.location }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.version }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      {% if terminal.last_update %}
+                        <p>{{ terminal.last_update.strftime('%d-%m-%Y %H:%M') }}</p>
+                      {% else %}
+                        <p>{{ terminal.last_update }}</p>
+                      {% endif %}
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.terminal', terminal_id=terminal.id) }}">
+                      <p>{{ terminal.remarks }}</p>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% if pagination %}
+          <div id="pagination">
+            {%- for page in pagination.iter_pages() %}
+              {% if page %}
+                {% if page != pagination.page %}
+                  <a href="{{ url_for('one_tap.terminals', page=page) }}">{{ page }}</a>
+                {% else %}
+                  <strong>{{ page }}</strong>
+                {% endif %}
+              {% else %}
+                <span>...</span>
+              {% endif %}
+            {%- endfor %}
+          </div>
+        {% endif %}
+        {% if current_user.get_type() == 'provider' %}
+          <div class="row">
+            <div class="col-md-12 m-t-10" style="text-align: center;">
+              <a href="{{ url_for('one_tap.terminal_add') }}" class="btn btn-primary">Add new terminal</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

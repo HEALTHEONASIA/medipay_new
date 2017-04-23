@@ -1,0 +1,230 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Member{% if member %} ID: {{ member.id }}{% endif %} Form{% endblock %}
+{% block page_css %}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{  url_for('one_tap.members') }}">Members</a>
+    </li>
+    {% if member %}
+      <li>
+          <a href="{{ url_for('one_tap.member', member_id=member.id) }}">Member ID: {{ member.id }}</a>
+      </li>
+    {% endif %}
+    <li>
+      <a href="#" class="active">Form</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h5>Member{% if Member %} ID: {{ member.id }}{% endif %} Form</h5>
+      <form method="post" name="member" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ form.photo.label }}</label>
+              {% for error in form.photo.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.photo(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.name.label }}</label>
+              {% for error in form.name.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.name(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.email.label }}</label>
+              {% for error in form.email.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.email(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.action.label }}</label>
+              {% for error in form.action.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.action(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.address.label }}</label>
+              {% for error in form.address.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.address(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.address_additional.label }}</label>
+              {% for error in form.address_additional.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.address_additional(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.tel.label }}</label>
+              {% for error in form.tel.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.tel(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.dob.label }}</label>
+              {% for error in form.dob.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.dob(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.gender.label }}</label>
+              {% for error in form.gender.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="select-field-outer">
+                {{ form.gender(class_="form-control") }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.marital_status.label }}</label>
+              {% for error in form.marital_status.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="select-field-outer">
+                {{ form.marital_status(class_="form-control") }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.start_date.label }}</label>
+              {% for error in form.start_date.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.start_date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.effective_date.label }}</label>
+              {% for error in form.effective_date.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.effective_date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ form.mature_date.label }}</label>
+              {% for error in form.mature_date.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.mature_date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.exit_date.label }}</label>
+              {% for error in form.exit_date.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.exit_date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.product.label }}</label>
+              {% for error in form.product.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.product(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.plan.label }}</label>
+              {% for error in form.plan.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.plan(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.policy_number.label }}</label>
+              {% for error in form.policy_number.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.policy_number(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.national_id.label }}</label>
+              {% for error in form.national_id.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.national_id(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.card_number.label }}</label>
+              {% for error in form.card_number.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.card_number(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.plan_type.label }}</label>
+              {% for error in form.plan_type.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.plan_type(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.remarks.label }}</label>
+              {% for error in form.remarks.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.remarks(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.dependents.label }}</label>
+              {% for error in form.dependents.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.dependents(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.sequence.label }}</label>
+              {% for error in form.sequence.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.sequence(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.patient_type.label }}</label>
+              {% for error in form.patient_type.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="select-field-outer">
+                {{ form.patient_type(class_="form-control") }}
+              </div>
+            </div>
+            <div class="form-group">
+              {{ form.submit(class_="btn btn-primary") }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}
+  {{ super() }}
+{% endblock %}

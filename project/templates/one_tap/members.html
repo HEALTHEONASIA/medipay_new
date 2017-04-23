@@ -1,0 +1,194 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Members{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="#" class="active">Members</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-transparent">
+      <div class="panel-heading text-center">
+        <div class="panel-title" style="font-size: 36px;">
+          Members
+          <div style="font-size: 16px; text-transform: none; font-weight: normal;">
+            (click on any to see more info)
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <div id="basicTable_wrapper" class="dataTables_wrapper form-inline no-footer">
+            <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
+              <thead>
+                <tr role="row">
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Name: activate to sort column ascending">NAME</th>
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Serial number: activate to sort column ascending">STATUS</th> -->
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Date of birth: activate to sort column ascending">DATE OF BIRTH</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Gender: activate to sort column ascending">GENDER</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Client policy number: activate to sort column ascending">CLIENT POLICY NR.</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Client ID number: activate to sort column ascending">CLIENT ID NR.</th>
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Card number: activate to sort column ascending">CARD NUMBER</th> -->
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Product: activate to sort column ascending">PRODUCT</th> -->
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Plans: activate to sort column ascending">PLANS</th> -->
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Start date: activate to sort column ascending">START DATE</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Effective date: activate to sort column ascending">EFFECTIVE DATE</th>
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Mature date: activate to sort column ascending">MATURE DATE</th> -->
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Exit date: activate to sort column ascending">EXIT DATE</th>
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Marital status: activate to sort column ascending">MARITAL STATUS</th> -->
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Index: activate to sort column ascending">INDEX</th> -->
+                  <!-- <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Sequence: activate to sort column ascending">SEQUENCE</th>
+                  <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Remarks: activate to sort column ascending">REMARKS</th> -->
+                </tr>
+              </thead>
+              <tbody>
+              {% for member in members %}
+                <tr role="row">
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.name }}</p>
+                    </a>
+                  </td>
+<!--
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.status }}</p>
+                    </a>
+                  </td>
+-->
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      {% if member.dob %}
+                        <p>{{ member.dob.strftime('%Y-%m-%d') }}</p>
+                      {% else %}
+                        <p>{{ member.dob }}</p>
+                      {% endif %}
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.gender }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.policy_number }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.national_id }}</p>
+                    </a>
+                  </td>
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.card_number }}</p>
+                    </a>
+                  </td> -->
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.product }}</p>
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.plan }}</p>
+                    </a>
+                  </td> -->
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                    {% if member.start_date %}
+                      <p>{{ member.start_date.strftime('%Y-%m-%d') }}</p>
+                    {% else %}
+                      <p>{{ member.start_date }}</p>
+                    {% endif %}
+                    </a>
+                  </td>
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      {% if member.effective_date %}
+                        <p>{{ member.effective_date.strftime('%Y-%m-%d') }}</p>
+                      {% else %}
+                        <p>{{ member.effective_date }}</p>
+                      {% endif %}
+                    </a>
+                  </td>
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      {% if member.mature_date %}
+                        <p>{{ member.mature_date.strftime('%Y-%m-%d') }}</p>
+                      {% else %}
+                        <p>{{ member.mature_date }}</p>
+                      {% endif %}
+                    </a>
+                  </td> -->
+                  <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      {% if member.exit_date %}
+                        <p>{{ member.exit_date.strftime('%Y-%m-%d') }}</p>
+                      {% else %}
+                        <p>{{ member.exit_date }}</p>
+                      {% endif %}
+                    </a>
+                  </td>
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.marital_status }}</p>
+                    </a>
+                  </td> -->
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.id }}</p>
+                    </a>
+                  </td> -->
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.sequence }}</p>
+                    </a>
+                  </td> -->
+                  <!-- <td class="v-align-middle">
+                    <a href="{{ url_for('one_tap.member', member_id=member.id) }}">
+                      <p>{{ member.remarks }}</p>
+                    </a>
+                  </td> -->
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% if pagination %}
+          <div id="pagination">
+            {%- for page in pagination.iter_pages() %}
+              {% if page %}
+                {% if page != pagination.page %}
+                  <a href="{{ url_for('one_tap.members', page=page) }}">{{ page }}</a>
+                {% else %}
+                  <strong>{{ page }}</strong>
+                {% endif %}
+              {% else %}
+                <span>...</span>
+              {% endif %}
+            {%- endfor %}
+          </div>
+        {% endif %}
+        {% if current_user.get_type() == 'provider' %}
+          <div class="row">
+            <div class="col-md-12 m-t-10" style="text-align: center;">
+              <a href="{{ url_for('one_tap.member_add') }}" class="btn btn-primary">Add new member</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

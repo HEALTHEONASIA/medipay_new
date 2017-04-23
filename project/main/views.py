@@ -1,34 +1,59 @@
 import csv
-import StringIO
-import io
-import time, os
-import string
 import random
-import sys
 import re
+import os
+import string
+import sys
+import time
+
 from datetime import datetime
-from sqlalchemy import or_, and_
-from flask import render_template, flash, redirect, request, session, jsonify
-from flask import url_for, make_response, send_from_directory
-from flask_login import login_user, current_user
+
+from flask import flash, jsonify, render_template, redirect, request, session
+from flask import make_response, send_from_directory, url_for
+from flask_login import current_user, login_user
+from flask_socketio import send, emit
 from flask_mail import Message
-from . import main
+from sqlalchemy import and_, or_
+
 from .forms import GOPForm, GOPApproveForm
-from .helpers import photo_file_name_santizer, pass_generator, csv_ouput
+from .helpers import csv_ouput, pass_generator, photo_file_name_santizer
 from .helpers import to_float_or_zero, validate_email_address
+from .helpers import prepare_gops_list
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
-from .. import models, db, config, mail, create_app
-from .. import auth
+from . import main
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
-from .helpers import prepare_gops_list
-from ..models import User, login_required
+from ..models import login_required, User
+from .. import config, create_app, db, redis_store, mail, models, socketio
+from .. import auth
+
+
+@socketio.on('hello')
+def handle_hello(message):
+    print('received hello message: ' + str(message))
+    send(message)
+
+
+@socketio.on('check-notifications')
+def handle_notifications(data):
+    # try connecting to redis server
+    try:
+        notification = redis_store.get('id' + str(data))
+    except:
+        notification = None
+
+    if notification:
+        # return notification text and delete it from redis
+        emit('check-notifications', notification.decode('utf-8'))
+        redis_store.delete('id' + str(data))
+
 
 gop_service = GuaranteeOfPaymentService()
-user_service = UserService()
 medical_details_service = MedicalDetailsService()
 member_service = MemberService()
+user_service = UserService()
+
 
 @main.route('/', methods=['GET', 'POST'])
 def index():

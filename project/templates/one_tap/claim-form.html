@@ -1,0 +1,112 @@
+{% extends "one_tap/base.html" %}
+{% block title %}Claims{% if claim %} ID: {{ claim.id }}{% endif %} Form{% endblock %}
+{% block page_css %}{% endblock %}
+{% block sidebar %}{{ super() }}{% endblock %}
+{% block breadcrumb %}
+  <ul class="breadcrumb">
+    <li>
+      <a href="{{ url_for('one_tap.index') }}">Home</a>
+    </li>
+    <li>
+      <a href="{{  url_for('one_tap.claims') }}">Claims</a>
+    </li>
+    {% if claim %}
+      <li>
+          <a href="{{ url_for('one_tap.claim', claim_id=claim.id) }}">Claims ID: {{ claim.id }}</a>
+      </li>
+    {% endif %}
+    <li>
+      <a href="#" class="active">Form</a>
+    </li>
+  </ul>
+{% endblock %}
+{% block page_content %}
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h5>Claims{% if claim %} ID: {{ claim.id }}{% endif %} Form</h5>
+      <form method="post" name="claim" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ form.status.label }}</label>
+              {% for error in form.status.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.status(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.amount.label }}</label>
+              {% for error in form.amount.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.amount(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.claim_number.label }}</label>
+              {% for error in form.claim_number.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.claim_number(class_="form-control") }}
+            </div>
+            <div class="form-group">
+              <label>{{ form.time.label }}</label>
+              {% for error in form.time.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="input-group bootstrap-timepicker">
+                {{ form.time(class_="form-control", id="timepicker") }}
+                <span class="input-group-addon"><i class="pg-clock"></i></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>{{ form.date.label }}</label>
+              {% for error in form.date.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div id="datepicker-component" class="input-group date">
+                {{ form.date(class_="form-control", readonly="true") }}<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{ form.claim_type.label }}</label>
+              {% for error in form.claim_type.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              {{ form.claim_type(class_="form-control") }}
+            </div>
+            <!-- admitted -->
+            <!-- discharged -->
+            <!-- member -->
+            <div class="form-group">
+              <label>{{ form.member_id.label }}</label>
+              {% for error in form.member_id.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="select-field-outer">
+                {{ form.member_id(class_="form-control") }}
+              </div>
+            </div>
+            <!-- terminal -->
+            <div class="form-group">
+              <label>{{ form.terminal_id.label }}</label>
+              {% for error in form.terminal_id.errors %}
+                <span class="help" style="color: #f55753;">[{{ error }}]</span>
+              {% endfor %}
+              <div class="select-field-outer">
+                {{ form.terminal_id (class_="form-control") }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form.submit(class_="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
