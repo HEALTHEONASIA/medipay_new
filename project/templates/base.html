@@ -855,6 +855,8 @@
     <script src="/static/js/imagesloaded.pkgd.min.js"></script>
     
     {% if current_user.is_authenticated %}
+      <script src="/static/js/browser-notification.js"></script>
+
       <!--  Notifications Plugin    -->
       <script src="/static/js/bootstrap-notify.js"></script>
       <!-- Notifications functionality -->
@@ -872,6 +874,7 @@
               socket.on('message', function(message) {
                   $.notify(message);
                   console.log(message);
+                  notifyMe();
               });
           });
       </script>
