@@ -855,14 +855,40 @@
     <script src="/static/js/imagesloaded.pkgd.min.js"></script>
     
     {% if current_user.is_authenticated %}
-      <script src="/static/js/browser-notification.js"></script>
-
       <!--  Notifications Plugin    -->
       <script src="/static/js/bootstrap-notify.js"></script>
       <!-- Notifications functionality -->
       <script type="text/javascript" src="/static/js/notify.min.js"></script>
       <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
       <script type="text/javascript" charset="utf-8">
+          // request permission on page load
+          document.addEventListener('DOMContentLoaded', function () {
+            if (!Notification) {
+              alert('Desktop notifications not available in your browser. Try Chromium.'); 
+              return;
+            }
+
+            if (Notification.permission !== "granted")
+              Notification.requestPermission();
+          });
+
+          function notifyMe() {
+            if (Notification.permission !== "granted")
+              Notification.requestPermission();
+            else {
+              var notification = new Notification('Notification title', {
+                icon: 'http://qa.medipayasia.com/static/img/medipay_logo.png',
+                body: "Hey there! You've been notified!",
+              });
+
+              notification.onclick = function () {
+                window.open("http://qa.medipayasia.com");
+              };
+
+            }
+
+          }
+
           $.notifyDefaults({
             type: 'success',
             timer: 10000
