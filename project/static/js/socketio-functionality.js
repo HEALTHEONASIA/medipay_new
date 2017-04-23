@@ -1,0 +1,50 @@
+/**
+   * @param {string} filename The name of the file WITHOUT ending
+  */
+  function playSound(filename){   
+      document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
+  }
+
+// request permission on page load
+document.addEventListener('DOMContentLoaded', function () {
+  if (!Notification) {
+    alert('Desktop notifications not available in your browser. Try Chromium.'); 
+    return;
+  }
+
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+});
+
+function notifyMe(title, message, url) {
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+  else {
+    var notification = new Notification(title, {
+      icon: 'http://qa.medipayasia.com/static/img/medipay_logo.png',
+      body: message,
+    });
+
+    notification.onclick = function () {
+      window.open(url);
+    };
+
+  }
+
+}
+
+$.notifyDefaults({
+  type: 'success',
+  timer: 10000
+});
+
+var socket = io.connect('http://' + document.domain + ':' + location.port);
+socket.on('connect', function() {
+    socket.emit('hello', {data: 'I\'m connected!'});
+    socket.on('message', function(message) {
+        $.notify(message);
+        console.log(message);
+        notifyMe('A new notification for you', message, 'http://qa.medipayasia.com');
+        playSound('/static/sounds/arpeggio');
+    });
+});
