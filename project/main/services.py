@@ -77,7 +77,7 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
     def get_open_all(self):
-        return self.__model__.query.filter(not self.__model__.closed)
+        return self.__model__.query.filter_by(closed=False)
 
     def filter_for_user(self, query, user):
         if user.get_type() == 'provider':

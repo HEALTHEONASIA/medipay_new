@@ -1,9 +1,9 @@
 /**
    * @param {string} filename The name of the file WITHOUT ending
   */
-  function playSound(filename){   
-      document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
-  }
+function playSound(filename) {
+    document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
+}
 
 // request permission on page load
 document.addEventListener('DOMContentLoaded', function () {
@@ -41,10 +41,10 @@ $.notifyDefaults({
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 socket.on('connect', function() {
     socket.emit('hello', {data: 'I\'m connected!'});
-    socket.on('message', function(message) {
-        $.notify(message);
-        console.log(message);
-        notifyMe('A new notification for you', message, 'http://qa.medipayasia.com');
+    socket.on('message', function(data) {
+        $.notify({'title': data.title, 'message': data.message, 'url': data.url});
+        console.log(data);
+        notifyMe(data.title, data.message, data.url);
         playSound('/static/sounds/arpeggio');
     });
 });

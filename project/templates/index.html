@@ -196,7 +196,7 @@
                               <i class="glyphicon glyphicon-ok approved"></i><span class="approved" style="font-size:13px;"> Approved {% if current_user.user_type == 'provider' or current_user.user_type == 'payer' %} {% if gop.final %}- Final {% else %}- Intial {% endif %} {% endif %} </span>
                             {% elif gop.status == 'declined' %}
                               <i class="glyphicon glyphicon-remove declined"></i><span class="declined" style="font-size:13px;"> Declined</span>
-                            {% elif gop.status == 'in review' %}
+                            {% elif gop.status == 'in_review' %}
                               <i class="glyphicon glyphicon-search review"></i><span class="review" style="font-size:13px;"> In review {% if current_user.user_type == 'payer' %} {% if gop.final %}- Final {% else %}- Intial {% endif %} {% endif %}</span>
                             {% endif %}
                         {% else %}

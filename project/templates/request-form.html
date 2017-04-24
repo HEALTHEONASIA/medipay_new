@@ -729,7 +729,7 @@
                   var tr = $(this);
                   $('select#icd_codes option:selected').each(function() {
                     var option = $(this);
-                    if (tr.find('td:first p').attr('data-id')==option.val()) {
+                    if (tr.find('td:first span').attr('data-id')==option.val()) {
                       tr.addClass('selected');
                     }
                   });
@@ -755,9 +755,9 @@
           $('select#icd_codes option').prop('selected', false);
           selectedRows.each(function() {
             var $this = $(this);
-            var code = $this.find('td:first p').text();
-            var term = $this.find('td:last p').text();
-            icdId = $this.find('td:first p').attr('data-id');
+            var code = $this.find('td:first span').text();
+            var term = $this.find('td:last span').text();
+            icdId = $this.find('td:first span').attr('data-id');
             $('select#icd_codes option[value="' + icdId + '"]').prop('selected', true);
             icdCodesSelected.push('<div>' + code + ': ' + term + '</div>');
             $('#modalSlideUp2 button.close').click();

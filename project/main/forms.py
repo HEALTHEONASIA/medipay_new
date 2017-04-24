@@ -92,7 +92,7 @@ class GOPForm(BaseForm):
     policy_number = StringField('Policy Number', validators=[Required()])
     name = StringField('Name', validators=[Required()])
     dob = DateField('Date of birth', validators=[Required()],
-                                     format='%m/%d/%Y')
+                                     format='%d/%m/%Y')
     gender = RadioField('Sex', validators=[Required()],
                             choices=[('male', 'Male'),
                                      ('female', 'Female')])
@@ -123,7 +123,7 @@ class GOPForm(BaseForm):
     doctor_name = SelectField('Doctor name', validators=[Required()],
                               coerce=int, choices=[('0', 'None')])
     admission_date = DateTimeField('Admission date', validators=[Required()],
-                                                     format='%m/%d/%Y')
+                                                     format='%d/%m/%Y')
     admission_time = DateTimeField('Admission time', validators=[Required()],
                                                      format='%I:%M %p')
 

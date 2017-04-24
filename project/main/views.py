@@ -128,8 +128,6 @@ def block_unauthenticated_url(filename):
 @main.route('/request', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_form():
-    notify('Someone has opened a blank GOP request form')
-
     payers = current_user.provider.payers
     form = GOPForm()
 
@@ -190,6 +188,8 @@ def request_form():
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
+        rand_pass = pass_generator(size=8)
+
         # if the payer is registered as a user in our system
         if gop.payer.user:
             recipient_email = gop.payer.pic_email \
@@ -201,7 +201,7 @@ def request_form():
         else:
             recipient_email = gop.payer.pic_email
             user = models.User(email=gop.payer.pic_email,
-                               password=pass_generator(size=8),
+                               password=rand_pass,
                                user_type='payer',
                                payer=gop.payer)
             db.session.add(user)
@@ -212,7 +212,7 @@ def request_form():
                       recipients=[recipient_email])
 
         msg.html = render_template("request-email.html", gop=gop,
-                                   root=request.url_root, user=user,
+                                   root=request.url_root, user=current_user,
                                    rand_pass = rand_pass, gop_id=gop.id)
 
         # send the email
@@ -220,6 +220,12 @@ def request_form():
             mail.send(msg)
         except:
             pass
+
+        notification = 'Added by "%s" on %s, (click to open)' % \
+            (str(gop.provider.company),
+            gop.timestamp.strftime('%I:%M %p %m/%d/%Y'))
+        notify('New GOP request', notification,
+            url_for('main.request_page', gop_id=gop.id))
 
         flash('Your GOP request has been sent.')
         return redirect(url_for('main.index'))
@@ -252,6 +258,12 @@ def request_page(gop_id):
             return redirect(url_for('main.index'))
 
         if gop.status == 'pending':
+            notification = 'Your GOP request #%d is under review now by "%s"' \
+                + ', (click to open)'
+            notification = notification % (gop.id, str(gop.payer.company))
+            notify('Your GOP request is under review', notification,
+                url_for('main.request_page', gop_id=gop.id))
+
             gop.status = 'in_review'
             gop.timestamp_edited = datetime.now()
             db.session.add(gop)
@@ -268,6 +280,11 @@ def request_page(gop_id):
             gop.timestamp_edited = datetime.now()
 
             db.session.add(gop)
+
+            notification = 'Your GOP request #%d status is changed to "%s",' + \
+                ' (click to open)' % (gop.id, gop.status.company)
+            notify('Your GOP request status is changed', notification,
+                url_for('main.request_page', gop_id=gop.id))
             
             flash('The GOP request has been %s.' % form.status.data)
             return redirect(url_for('main.index'))
@@ -462,6 +479,11 @@ def request_page_edit(gop_id):
 
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
+
+        notification = 'The GOP request #%d status is changed to "%s",' + \
+            ' (click to open)' % (gop.id, gop.status.company)
+        notify('The GOP request status is changed', notification,
+            url_for('main.request_page', gop_id=gop.id))
 
         if gop.final:
             if gop.payer.user:
@@ -723,32 +745,32 @@ def requests_filter():
                          models.Provider.id)\
                    .filter(db.and_(models.Provider.country == country,
                                    models.Provider.company == provider))\
-                   .filter(not models.GuaranteeOfPayment.closed)
+                   .filter_by(closed=False)
 
     elif country:
         gops = gops.join(models.Provider,
                          models.GuaranteeOfPayment.provider_id == \
                          models.Provider.id)\
                    .filter(models.Provider.country == country)\
-                   .filter(not models.GuaranteeOfPayment.closed)
+                   .filter_by(closed=False)
 
     elif provider:
         gops = gops.join(models.Provider,
                          models.GuaranteeOfPayment.provider_id == \
                          models.Provider.id)\
                    .filter(models.Provider.company == provider)\
-                   .filter(not models.GuaranteeOfPayment.closed)
+                   .filter_by(closed=False)
 
     if payer:
         gops = gops.join(models.Payer,
                          models.GuaranteeOfPayment.payer_id == \
                          models.Payer.id)\
                    .filter(models.Payer.company == payer)\
-                   .filter(not models.GuaranteeOfPayment.closed)
+                   .filter_by(closed=False)
 
     if status:
         gops = gops.filter(models.GuaranteeOfPayment.status == status)\
-                   .filter(not models.GuaranteeOfPayment.closed)
+                   .filter_by(closed=False)
 
     gops = gops.all()
 
@@ -818,13 +840,11 @@ def get_gops():
 
     elif current_user.get_type() == 'provider':
         gops = models.GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider).filter(
-            not models.GuaranteeOfPayment.closed)
+            provider=current_user.provider, closed=False)
 
     elif current_user.get_type() == 'payer':
         gops = models.GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer).filter(
-            not models.GuaranteeOfPayment.closed)
+            payer=current_user.payer, closed=False)
 
     if sort:
         if sort == 'status':
