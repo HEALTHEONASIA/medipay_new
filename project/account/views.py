@@ -7,6 +7,7 @@ from .forms import ProviderPayerSetupAddForm, ProviderPayerSetupEditForm
 from .forms import BillingCodeForm, SingleCsvForm, DoctorForm, UserSetupForm
 from .forms import UserSetupAdminForm, UserUpgradeForm, EditAccountForm
 from .. import models, db, mail
+from ..main.helpers import photo_file_name_santizer
 from ..models import login_required
 
 @account.route('/settings', methods=['GET', 'POST'])
