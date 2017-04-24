@@ -1,4 +1,5 @@
 import re
+
 from flask_wtf import Form
 from flask import request
 from werkzeug.utils import secure_filename
@@ -7,6 +8,7 @@ from wtforms import HiddenField, SelectField, FileField, ValidationError
 from wtforms import PasswordField, SelectMultipleField, BooleanField
 from wtforms.validators import Required, Email, Length, EqualTo, URL
 from flask_login import current_user
+
 from ..models import Payer, Member, User, Provider
 
 

@@ -1,13 +1,20 @@
-import os, random, string
+import os
+import random
+import string
+
 from werkzeug.utils import secure_filename
+
 from .. import config, redis_store
+
 
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in config['production'].ALLOWED_EXTENSIONS
 
+
 def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
 
 def photo_file_name_santizer(photo):
     filename = secure_filename(photo.data.filename)
@@ -27,6 +34,7 @@ def photo_file_name_santizer(photo):
 
     return photo_filename
 
+
 def safe_div(dividend, divisor):
     try:
         result = dividend / divisor
@@ -34,8 +42,10 @@ def safe_div(dividend, divisor):
         result = 0.00
     return result
 
+
 def percent_of(part, total):
     return safe_div(float(part), float(total)) * 100
+
 
 def patients_amount(claims, _type):
     """Returns the in-patients for the given claims."""

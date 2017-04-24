@@ -3,6 +3,7 @@ from flask_servicelayer import SQLAlchemyService
 
 from .. import db, models
 
+
 class ExtFuncsMixin(object):
     def __init__(self):
         self.columns = self.__model__.columns()

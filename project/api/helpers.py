@@ -312,8 +312,7 @@ def prepare_icd_codes_list(icd_codes):
     if not icd_codes:
         return []
 
-    # initialize the results list
-    results = []
+    results = []  # Initialize the results list
 
     for icd_code in icd_codes:
         results.append(prepare_icd_code_dict(icd_code))
@@ -325,8 +324,7 @@ def prepare_users_list(users):
     if not users:
         return []
 
-    # initialize the results list
-    results = []
+    results = [] # Initialize the results list
 
     for user in users:
         results.append(prepare_user_dict(user))
@@ -334,11 +332,10 @@ def prepare_users_list(users):
     return results
 
 
-# functions for getting parameters from POST parameters and JSON
 def from_post_to_dict(dest_dict, overwrite=False):
     for key, value in dest_dict.iteritems():
         if not overwrite:
-            # if it is the adding operation,
+            # If it is the adding operation,
             # the all parameters are required
             if request.form.get(key):
                 dest_dict[key] = request.form.get(key)
@@ -347,7 +344,7 @@ def from_post_to_dict(dest_dict, overwrite=False):
                 raise ValueError('Missing the required parameter "%s"', key)
 
         else:
-            # in case it is the editing operaition, we change only
+            # In case it is the editing operaition, we change only
             # those parameters, that are available in the POST request
             if request.form.get(key):
                 dest_dict[key] = request.form.get(key)
@@ -358,7 +355,7 @@ def from_post_to_dict(dest_dict, overwrite=False):
 def from_json_to_dict(json_dict, dest_dict, overwrite=False):
     for key, value in dest_dict.iteritems():
         if not overwrite:
-            # if it is the adding operation,
+            # If it is the adding operation,
             # the all parameters are required
             if key in json_dict:
                 dest_dict[key] = json_dict[key]
@@ -367,7 +364,7 @@ def from_json_to_dict(json_dict, dest_dict, overwrite=False):
                 raise ValueError('Missing the required parameter "%s"' % key)
 
         else:
-            # in case it is the editing operaition, we change only
+            # In case it is the editing operaition, we change only
             # those parameters, that are available in the JSON
             if key in json_dict:
                 dest_dict[key] = json_dict[key]

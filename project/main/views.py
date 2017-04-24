@@ -18,14 +18,14 @@ from sqlalchemy import and_, or_
 from .forms import GOPForm, GOPApproveForm
 from .helpers import csv_ouput, pass_generator, photo_file_name_santizer
 from .helpers import to_float_or_zero, validate_email_address
-from .helpers import prepare_gops_list, notify
+from .helpers import prepare_gops_list, notify, is_admin, is_provider, is_payer
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
 from . import main
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
-from ..models import GuaranteeOfPayment, ICDCode, login_required, Member
-from ..models import Payer, Provider, User
+from ..models import BillingCode, GuaranteeOfPayment, ICDCode, login_required
+from ..models import Member, Payer, Provider, User
 from .. import config, create_app, db, redis_store, mail, models, socketio
 from .. import auth
 
@@ -33,6 +33,7 @@ from .. import auth
 @socketio.on('hello')
 def handle_hello(message):
     print('received hello message: ' + str(message))
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -78,7 +79,7 @@ def index():
     status = request.args.get('status', None)
 
     # if it is an admin account
-    if current_user.get_role() == 'admin':
+    if is_admin(current_user):
         return redirect(url_for('admin.index'))
 
     open_gops = gop_service.get_open_all()
@@ -250,10 +251,10 @@ def request_page(gop_id):
         return redirect(url_for('main.index'))
 
     # admin can see any GOP request
-    if current_user.get_role() == 'admin':
+    if is_admin(current_user):
         return redirect(url_for('admin.request_page', gop_id=gop.id))
 
-    if current_user.get_type() == 'payer':
+    if is_payer(current_user):
         if gop.payer.id != current_user.payer.id:
             flash('The GOP request #%d is not found.' % gop_id)
             return redirect(url_for('main.index'))
@@ -282,8 +283,8 @@ def request_page(gop_id):
 
             db.session.add(gop)
 
-            notification = 'Your GOP request #%d status is changed to "%s",' + \
-                ' (click to open)'
+            notification = 'Your GOP request #%d status is changed to "%s",' \
+                + ' (click to open)'
             notification = notification % (gop.id, gop.status)
             notify('Your GOP request status is changed', notification,
                 url_for('main.request_page', gop_id=gop.id))
@@ -308,7 +309,7 @@ def request_page(gop_id):
 @main.route('/request/<int:gop_id>/set-stamp-author', methods=['GET'])
 @login_required()
 def request_set_stamp_author(gop_id):
-    if current_user.user_type != 'payer':
+    if not is_payer(current_user):
         return 'ERROR'
 
     gop = GuaranteeOfPayment.query.get(gop_id)
@@ -482,8 +483,8 @@ def request_page_edit(gop_id):
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        notification = 'The GOP request #%d status is changed to "%s",' + \
-            ' (click to open)'
+        notification = 'The GOP request #%d status is changed to "%s",' \
+            + ' (click to open)'
         notification = notification % (gop.id, gop.status)
         notify('The GOP request status is changed', notification,
             url_for('main.request_page', gop_id=gop.id))
@@ -646,13 +647,13 @@ def request_page_close(gop_id, reason):
 @login_required()
 def history():
     # if it is admin, show him all the closed requests
-    if current_user.role == 'admin':
+    if is_admin(current_user):
         return redirect(url_for('admin.history'))
 
-    if current_user.user_type == 'provider':
+    if is_provider(current_user):
         gops = GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, closed=True)
-    elif current_user.user_type == 'payer':
+    elif is_payer(current_user):
         gops = GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, closed=True)
 
@@ -676,15 +677,15 @@ def search():
     gops_all = GuaranteeOfPayment.query.all()
     gops_current = []
 
-    if current_user.role == 'admin':
+    if is_admin(current_user):
         gops_current = gops_all
     else:
-        if current_user.user_type == 'provider':
+        if is_provider(current_user):
             for gop in gops_all:
                 if gop.provider.id == current_user.provider.id:
                     gops_current.append(gop)
 
-        elif current_user.user_type == 'payer':
+        elif is_payer(current_user):
             for gop in gops_all:
                 if gop.payer.id == current_user.payer.id:
                     gops_current.append(gop)
@@ -721,8 +722,9 @@ def icd_code_search():
 
     result = []
     fields = ['code', 'description', 'common_term']
-    find = lambda query, obj, attr: query in getattr(obj, attr).lower()
-    
+
+    def find(query, obj, attr): return query in getattr(obj, attr).lower()
+
     for icd_code in icd_codes:
         if any([find(query, icd_code, field) for field in fields]):
             result.append(icd_code)
@@ -739,41 +741,31 @@ def requests_filter():
     payer = request.args.get('payer')
     status = request.args.get('status')
 
-    gops = GuaranteeOfPayment.query.filter(
-        GuaranteeOfPayment.id > 0)
+    gops = gop_service.get_open_all()
 
     if country and provider:
         gops = gops.join(Provider,
-                         GuaranteeOfPayment.provider_id == \
-                         Provider.id)\
+                         GuaranteeOfPayment.provider_id == Provider.id)\
                    .filter(db.and_(Provider.country == country,
-                                   Provider.company == provider))\
-                   .filter_by(closed=False)
+                                   Provider.company == provider))
 
     elif country:
         gops = gops.join(Provider,
-                         GuaranteeOfPayment.provider_id == \
-                         Provider.id)\
-                   .filter(Provider.country == country)\
-                   .filter_by(closed=False)
+                         GuaranteeOfPayment.provider_id == Provider.id)\
+                   .filter(Provider.country == country)
 
     elif provider:
         gops = gops.join(Provider,
-                         GuaranteeOfPayment.provider_id == \
-                         Provider.id)\
-                   .filter(Provider.company == provider)\
-                   .filter_by(closed=False)
+                         GuaranteeOfPayment.provider_id == Provider.id)\
+                   .filter(Provider.company == provider)
 
     if payer:
         gops = gops.join(Payer,
-                         GuaranteeOfPayment.payer_id == \
-                         Payer.id)\
-                   .filter(Payer.company == payer)\
-                   .filter_by(closed=False)
+                         GuaranteeOfPayment.payer_id == Payer.id)\
+                   .filter(Payer.company == payer)
 
     if status:
-        gops = gops.filter(GuaranteeOfPayment.status == status)\
-                   .filter_by(closed=False)
+        gops = gops.filter_by(status=status)
 
     gops = gops.all()
 
@@ -782,12 +774,15 @@ def requests_filter():
 @main.route('/billing-code/<int:bill_id>/get', methods=['GET'])
 @login_required()
 def billing_code_get(bill_id):
-    if current_user.get_type() != 'provider':
+    if is_provider(current_user):
         return jsonify({})
 
-    bill_code = current_user.provider.billing_codes.filter_by(id=bill_id).first()
+    bill_code = BillingCode.query.get(bill_id)
 
     if not bill_code:
+        return jsonify({})
+
+    if bill_code.provider.id != current_user.provider.id:
         return jsonify({})
 
     output = {col: getattr(bill_code, col) for col in bill_code.columns()}
@@ -801,7 +796,7 @@ def get_gops():
     page = request.args.get('page')
     sort = request.args.get('sort')
 
-    if current_user.get_role() == 'admin':
+    if is_admin(current_user):
         country = request.args.get('country')
         provider = request.args.get('provider')
         payer = request.args.get('payer')
@@ -837,11 +832,11 @@ def get_gops():
         if status:
             gops = open_gops.filter_by(status=status)
 
-    elif current_user.get_type() == 'provider':
+    elif is_provider(current_user):
         gops = GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, closed=False)
 
-    elif current_user.get_type() == 'payer':
+    elif is_payer(current_user):
         gops = GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, closed=False)
 

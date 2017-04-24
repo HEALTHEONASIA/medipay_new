@@ -2,6 +2,7 @@ import json, requests
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+
 from flask import redirect, url_for
 from flask_login import current_user, UserMixin
 from functools import wraps
@@ -11,6 +12,7 @@ from sqlalchemy.sql import func
 from werkzeug import check_password_hash, generate_password_hash
 
 from . import db, login_manager
+
 
 def login_required(roles=["any"], types=["any"],
                    deny_roles=[], deny_types=[]):
@@ -33,12 +35,14 @@ def login_required(roles=["any"], types=["any"],
         return decorated_view
     return wrapper
 
+
 def to_float_or_zero(value):
     try:
         value = float(value)
     except (ValueError, TypeError):
         value = 0.0
     return value
+
 
 class ColsMapMixin(object):
     @classmethod
@@ -259,6 +263,7 @@ def monthdelta(date, delta):
     d = min(date.day, [31,
         29 if y%4==0 and not y%400==0 else 28,31,30,31,30,31,31,30,31,30,31][m-1])
     return date.replace(day=d,month=m, year=y)
+
 
 def date_months_ago(months):
     """Returns a datetime range as a difference between the current

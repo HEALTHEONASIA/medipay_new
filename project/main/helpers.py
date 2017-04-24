@@ -1,7 +1,12 @@
-import os, random, string
+import os
+import random
+import string
+
 from flask import request, url_for
 from werkzeug.utils import secure_filename
+
 from .. import config, redis_store, socketio
+
 
 def prepare_gop_dict(gop):
     """The function takes the GOP model object
@@ -138,3 +143,15 @@ def notify(title='New notification', message='Message', url=None):
             {'title': title, 'message': message, 'url': url})
     except:
         pass
+
+
+def is_admin(user):
+    return user.get_role() == 'admin'
+
+
+def is_provider(user):
+    return user.get_type() == 'provider'
+
+
+def is_payer(user):
+    return user.get_type() == 'payer'

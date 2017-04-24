@@ -1,9 +1,12 @@
 import string
 import random
+
 from datetime import datetime
+
 from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_mail import Message
+
 from . import auth
 from .. import mail
 from ..models import db, User, Provider, Payer

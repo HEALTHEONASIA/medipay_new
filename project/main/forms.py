@@ -1,4 +1,5 @@
 import re
+
 from flask_wtf import Form
 from flask import request
 from werkzeug.utils import secure_filename
@@ -8,6 +9,7 @@ from wtforms import PasswordField, SelectMultipleField, BooleanField
 from wtforms import DateField, DateTimeField
 from wtforms.validators import Required, Email, Length, EqualTo, URL
 from flask_login import current_user
+
 from ..models import Payer, Member, User, Provider
 
 
@@ -92,12 +94,11 @@ class GOPForm(BaseForm):
     policy_number = StringField('Policy Number', validators=[Required()])
     name = StringField('Name', validators=[Required()])
     dob = DateField('Date of birth', validators=[Required()],
-                                     format='%d/%m/%Y')
+                    format='%d/%m/%Y')
     gender = RadioField('Sex', validators=[Required()],
-                            choices=[('male', 'Male'),
-                                     ('female', 'Female')])
+                        choices=[('male', 'Male'), ('female', 'Female')])
     tel = StringField('Patient phone nr.', validators=[Required(),
-                                                       validate_phone])
+                      validate_phone])
 
     current_national_id = HiddenField('Current national ID')
 

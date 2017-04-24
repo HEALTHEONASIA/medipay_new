@@ -1,10 +1,12 @@
 import re
+
 from flask import flash
 from flask_wtf import Form
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms import RadioField, HiddenField
 from wtforms.validators import Required, Email, Length, EqualTo
 from wtforms import ValidationError
+
 from ..models import User
 
 

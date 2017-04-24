@@ -3,6 +3,7 @@ import os
 from calendar import month_abbr
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
+
 from flask import flash, render_template, redirect, request, url_for
 from flask import jsonify, send_from_directory, session
 from flask_login import current_user, login_user
@@ -12,7 +13,6 @@ from flask_mail import Message
 from .forms import ClaimForm, MemberForm, TerminalForm
 from .helpers import pass_generator, photo_file_name_santizer, percent_of
 from .helpers import patients_amount
-
 from . import one_tap
 from .. import config, db, models, mail
 from ..main.forms import GOPForm
