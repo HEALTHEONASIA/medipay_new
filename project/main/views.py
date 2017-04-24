@@ -282,7 +282,8 @@ def request_page(gop_id):
             db.session.add(gop)
 
             notification = 'Your GOP request #%d status is changed to "%s",' + \
-                ' (click to open)' % (gop.id, gop.status)
+                ' (click to open)'
+            notification = notification % (gop.id, gop.status)
             notify('Your GOP request status is changed', notification,
                 url_for('main.request_page', gop_id=gop.id))
             
@@ -481,7 +482,8 @@ def request_page_edit(gop_id):
         gop_service.update_from_form(gop, form, exclude=exclude)
 
         notification = 'The GOP request #%d status is changed to "%s",' + \
-            ' (click to open)' % (gop.id, gop.status)
+            ' (click to open)'
+        notification = notification % (gop.id, gop.status)
         notify('The GOP request status is changed', notification,
             url_for('main.request_page', gop_id=gop.id))
 
