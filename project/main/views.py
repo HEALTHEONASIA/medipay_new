@@ -24,7 +24,8 @@ from .services import MedicalDetailsService, MemberService
 from . import main
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
-from ..models import login_required, User
+from ..models import GuaranteeOfPayment, ICDCode, login_required, Member
+from ..models import Payer, Provider, User
 from .. import config, create_app, db, redis_store, mail, models, socketio
 from .. import auth
 
@@ -135,8 +136,8 @@ def request_form():
         current_user.provider.payers]
 
     form.icd_codes.choices = [(i.id, i.code) for i in \
-        models.ICDCode.query.filter(models.ICDCode.code != 'None' and \
-        models.ICDCode.code != '')]
+        ICDCode.query.filter(ICDCode.code != 'None' and \
+        ICDCode.code != '')]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
         for d in current_user.provider.doctors]
@@ -149,11 +150,11 @@ def request_form():
     if form.validate_on_submit():
         photo_filename = photo_file_name_santizer(form.member_photo)
 
-        member = models.Member.query.filter_by(
+        member = Member.query.filter_by(
             national_id=form.national_id.data).first()
 
         if not member:
-            member = models.Member(photo=photo_filename)
+            member = Member(photo=photo_filename)
             member_service.update_from_form(member, form,
                 exclude=['member_photo'])
 
@@ -168,9 +169,9 @@ def request_form():
 
         medical_details = medical_details_service.create(**mdetails_dict)
 
-        payer = models.Payer.query.get(form.payer.data)
+        payer = Payer.query.get(form.payer.data)
 
-        gop = models.GuaranteeOfPayment(
+        gop = GuaranteeOfPayment(
             provider=current_user.provider,
             payer=payer,
             member=member,
@@ -179,7 +180,7 @@ def request_form():
             medical_details=medical_details)
 
         for icd_code_id in form.icd_codes.data:
-            icd_code = models.ICDCode.query.get(icd_code_id)
+            icd_code = ICDCode.query.get(icd_code_id)
 
             if icd_code:
                 gop.icd_codes.append(icd_code)
@@ -200,7 +201,7 @@ def request_form():
         # the access credentials to him
         else:
             recipient_email = gop.payer.pic_email
-            user = models.User(email=gop.payer.pic_email,
+            user = User(email=gop.payer.pic_email,
                                password=rand_pass,
                                user_type='payer',
                                payer=gop.payer)
@@ -242,7 +243,7 @@ def request_page(gop_id):
         flash('Request out of range')
         return redirect(url_for('main.index'))
 
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     if not gop:
         flash('The GOP request #%d is not found.' % gop_id)
@@ -310,7 +311,7 @@ def request_set_stamp_author(gop_id):
     if current_user.user_type != 'payer':
         return 'ERROR'
 
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     if not gop:
         return 'ERROR'
@@ -335,7 +336,7 @@ def request_page_download(gop_id):
         flash('To download the GOP request you need to upgrade your account.')
         return redirect(url_for('account.user_upgrade'))
 
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
     if not gop:
@@ -399,7 +400,7 @@ def request_page_download(gop_id):
 @main.route('/request/<int:gop_id>/edit', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_page_edit(gop_id):
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found or it is not the current user's GOP, 
     # redirect to the home page
@@ -418,8 +419,8 @@ def request_page_edit(gop_id):
     form.payer.choices = [(gop.payer.id, gop.payer.company)]
 
     form.icd_codes.choices = [(i.id, i.code) for i in \
-        models.ICDCode.query.filter(models.ICDCode.code != 'None' and \
-        models.ICDCode.code != '')]
+        ICDCode.query.filter(ICDCode.code != 'None' and \
+        ICDCode.code != '')]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
@@ -434,7 +435,7 @@ def request_page_edit(gop_id):
             gop.final = True
 
         # get and set the payer object
-        payer = models.Payer.query.get(form.payer.data)
+        payer = Payer.query.get(form.payer.data)
         gop.payer = payer
 
         gop.member.photo = photo_file_name_santizer(form.member_photo)
@@ -472,7 +473,7 @@ def request_page_edit(gop_id):
                                         exclude=['member_photo'])
 
         for icd_code_id in form.icd_codes.data:
-            icd_code = models.ICDCode.query.get(int(icd_code_id))
+            icd_code = ICDCode.query.get(int(icd_code_id))
             gop.icd_codes.append(icd_code)
 
         gop.doctor_name = models.Doctor.query.get(form.doctor_name.data).name
@@ -585,7 +586,7 @@ def request_page_edit(gop_id):
 @main.route('/request/<int:gop_id>/resend', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_resend(gop_id):
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
     if not gop or gop.provider.id != current_user.provider.id:
@@ -622,7 +623,7 @@ def request_page_resend(gop_id):
 @main.route('/request/<int:gop_id>/close/<reason>', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_close(gop_id, reason):
-    gop = models.GuaranteeOfPayment.query.get(gop_id)
+    gop = GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
     if not gop or gop.provider.id != current_user.provider.id:
@@ -649,10 +650,10 @@ def history():
         return redirect(url_for('admin.history'))
 
     if current_user.user_type == 'provider':
-        gops = models.GuaranteeOfPayment.query.filter_by(
+        gops = GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, closed=True)
     elif current_user.user_type == 'payer':
-        gops = models.GuaranteeOfPayment.query.filter_by(
+        gops = GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, closed=True)
 
     pagination, gops = gop_service.prepare_pagination(gops)
@@ -672,7 +673,7 @@ def search():
 
     query = query.lower()
 
-    gops_all = models.GuaranteeOfPayment.query.all()
+    gops_all = GuaranteeOfPayment.query.all()
     gops_current = []
 
     if current_user.role == 'admin':
@@ -716,7 +717,7 @@ def icd_code_search():
         return render_template('icd-code-search-results.html',
                                icd_codes=None, query=query)
 
-    icd_codes = models.ICDCode.query.all()
+    icd_codes = ICDCode.query.all()
 
     result = []
     fields = ['code', 'description', 'common_term']
@@ -738,40 +739,40 @@ def requests_filter():
     payer = request.args.get('payer')
     status = request.args.get('status')
 
-    gops = models.GuaranteeOfPayment.query.filter(
-        models.GuaranteeOfPayment.id > 0)
+    gops = GuaranteeOfPayment.query.filter(
+        GuaranteeOfPayment.id > 0)
 
     if country and provider:
-        gops = gops.join(models.Provider,
-                         models.GuaranteeOfPayment.provider_id == \
-                         models.Provider.id)\
-                   .filter(db.and_(models.Provider.country == country,
-                                   models.Provider.company == provider))\
+        gops = gops.join(Provider,
+                         GuaranteeOfPayment.provider_id == \
+                         Provider.id)\
+                   .filter(db.and_(Provider.country == country,
+                                   Provider.company == provider))\
                    .filter_by(closed=False)
 
     elif country:
-        gops = gops.join(models.Provider,
-                         models.GuaranteeOfPayment.provider_id == \
-                         models.Provider.id)\
-                   .filter(models.Provider.country == country)\
+        gops = gops.join(Provider,
+                         GuaranteeOfPayment.provider_id == \
+                         Provider.id)\
+                   .filter(Provider.country == country)\
                    .filter_by(closed=False)
 
     elif provider:
-        gops = gops.join(models.Provider,
-                         models.GuaranteeOfPayment.provider_id == \
-                         models.Provider.id)\
-                   .filter(models.Provider.company == provider)\
+        gops = gops.join(Provider,
+                         GuaranteeOfPayment.provider_id == \
+                         Provider.id)\
+                   .filter(Provider.company == provider)\
                    .filter_by(closed=False)
 
     if payer:
-        gops = gops.join(models.Payer,
-                         models.GuaranteeOfPayment.payer_id == \
-                         models.Payer.id)\
-                   .filter(models.Payer.company == payer)\
+        gops = gops.join(Payer,
+                         GuaranteeOfPayment.payer_id == \
+                         Payer.id)\
+                   .filter(Payer.company == payer)\
                    .filter_by(closed=False)
 
     if status:
-        gops = gops.filter(models.GuaranteeOfPayment.status == status)\
+        gops = gops.filter(GuaranteeOfPayment.status == status)\
                    .filter_by(closed=False)
 
     gops = gops.all()
@@ -784,13 +785,9 @@ def billing_code_get(bill_id):
     if current_user.get_type() != 'provider':
         return jsonify({})
 
-    bill_code = models.BillingCode.query.get(bill_id)
+    bill_code = current_user.provider.billing_codes.filter_by(id=bill_id).first()
 
     if not bill_code:
-        return jsonify({})
-
-    # if it is not the current provider's code
-    if bill_code.provider.id != current_user.provider.id:
         return jsonify({})
 
     output = {col: getattr(bill_code, col) for col in bill_code.columns()}
@@ -813,53 +810,53 @@ def get_gops():
         open_gops = gop_service.get_open_all()
 
         if country and provider:
-            gops = open_gops.join(models.Provider,
-                             models.GuaranteeOfPayment.provider_id == \
-                             models.Provider.id)\
-                       .filter(db.and_(models.Provider.country == country,
-                                       models.Provider.company == provider))
+            gops = open_gops.join(Provider,
+                             GuaranteeOfPayment.provider_id == \
+                             Provider.id)\
+                       .filter(db.and_(Provider.country == country,
+                                       Provider.company == provider))
 
         elif country:
-            gops = open_gops.join(models.Provider,
-                             models.GuaranteeOfPayment.provider_id == \
-                             models.Provider.id)\
-                       .filter(models.Provider.country == country)
+            gops = open_gops.join(Provider,
+                             GuaranteeOfPayment.provider_id == \
+                             Provider.id)\
+                       .filter(Provider.country == country)
 
         elif provider:
-            gops = open_gops.join(models.Provider,
-                             models.GuaranteeOfPayment.provider_id == \
-                             models.Provider.id)\
-                       .filter(models.Provider.company == provider)
+            gops = open_gops.join(Provider,
+                             GuaranteeOfPayment.provider_id == \
+                             Provider.id)\
+                       .filter(Provider.company == provider)
 
         if payer:
-            gops = open_gops.join(models.Payer,
-                             models.GuaranteeOfPayment.payer_id == \
-                             models.Payer.id)\
-                       .filter(models.Payer.company == payer)
+            gops = open_gops.join(Payer,
+                             GuaranteeOfPayment.payer_id == \
+                             Payer.id)\
+                       .filter(Payer.company == payer)
 
         if status:
             gops = open_gops.filter_by(status=status)
 
     elif current_user.get_type() == 'provider':
-        gops = models.GuaranteeOfPayment.query.filter_by(
+        gops = GuaranteeOfPayment.query.filter_by(
             provider=current_user.provider, closed=False)
 
     elif current_user.get_type() == 'payer':
-        gops = models.GuaranteeOfPayment.query.filter_by(
+        gops = GuaranteeOfPayment.query.filter_by(
             payer=current_user.payer, closed=False)
 
     if sort:
         if sort == 'status':
-            gops = gops.group_by(models.GuaranteeOfPayment.status)
+            gops = gops.group_by(GuaranteeOfPayment.status)
 
         elif sort == 'patient':
-            gops = gops.group_by(models.GuaranteeOfPayment.member.name)
+            gops = gops.group_by(GuaranteeOfPayment.member.name)
 
         elif sort == 'payer':
-            gops = gops.group_by(models.GuaranteeOfPayment.payer.company)
+            gops = gops.group_by(GuaranteeOfPayment.payer.company)
 
         elif sort == 'time':
-            gops = gops.group_by(models.GuaranteeOfPayment.turnaround_time)
+            gops = gops.group_by(GuaranteeOfPayment.turnaround_time)
 
     if page or pagination.pages > 1:
         try:
