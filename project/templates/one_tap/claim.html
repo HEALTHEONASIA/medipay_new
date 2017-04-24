@@ -672,7 +672,7 @@
         {% else %}
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <a href="{{ url_for('main.request', request_id=claim.guarantee_of_payment.id }}" class="btn btn-primary" target="_blank" style="color: #3472F7; background: #3472F7; color: #fff; position: relative; top: -5px;">Open GOP request in Medipay</a>
+                    <a href="{{ url_for('main.request_page', gop_id=claim.guarantee_of_payment.id) }}" class="btn btn-primary" target="_blank" style="color: #3472F7; background: #3472F7; color: #fff; position: relative; top: -5px;">Open GOP request in Medipay</a>
                 </div>
             </div>
         {% endif %}
