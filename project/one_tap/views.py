@@ -9,12 +9,13 @@ from flask_login import current_user, login_user
 from sqlalchemy import desc
 from flask_mail import Message
 
-from .forms import ClaimForm, MemberForm, TerminalForm, GOPForm
+from .forms import ClaimForm, MemberForm, TerminalForm
 from .helpers import pass_generator, photo_file_name_santizer, percent_of
 from .helpers import patients_amount
 
 from . import one_tap
 from .. import config, db, models, mail
+from ..main.forms import GOPForm
 from ..models import Claim, Member, Terminal, ICDCode, Provider, Payer
 from ..models import Doctor, User, GuaranteeOfPayment
 from ..models import monthdelta, login_required
