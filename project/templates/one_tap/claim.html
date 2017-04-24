@@ -834,8 +834,8 @@ $(document).ready(function(){
           var selectedRow = $('#modalSlideUp table tr.selected');
           var selectedCode = '';
           var payerId;
-          selectedCode = selectedRow.find('td:first p').text();
-          payerId = selectedRow.find('td:first p').attr('data-payer-id');
+          selectedCode = selectedRow.find('td:first span').text();
+          payerId = selectedRow.find('td:first span').attr('data-payer-id');
           $('input[name="payer"]').val(selectedCode);
           $('input[name="payer_id"]').val(payerId);
           $('#modalSlideUp button.close').click();
@@ -850,7 +850,7 @@ $(document).ready(function(){
                   var tr = $(this);
                   $('select#icd_codes option:selected').each(function() {
                     var option = $(this);
-                    if (tr.find('td:first p').attr('data-id')==option.val()) {
+                    if (tr.find('td:first span').attr('data-id')==option.val()) {
                       tr.addClass('selected');
                     }
                   });
@@ -876,9 +876,9 @@ $(document).ready(function(){
           $('select#icd_codes option').prop('selected', false);
           selectedRows.each(function() {
             var $this = $(this);
-            var code = $this.find('td:first p').text();
-            var term = $this.find('td:last p').text();
-            icdId = $this.find('td:first p').attr('data-id');
+            var code = $this.find('td:first span').text();
+            var term = $this.find('td:last span').text();
+            icdId = $this.find('td:first span').attr('data-id');
             $('select#icd_codes option[value="' + icdId + '"]').prop('selected', true);
             icdCodesSelected.push('<div>' + code + ': ' + term + '</div>');
             $('#modalSlideUp2 button.close').click();
