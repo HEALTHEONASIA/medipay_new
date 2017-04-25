@@ -136,9 +136,7 @@ def request_form():
     form.payer.choices += [(p.id, p.company) for p in \
         current_user.provider.payers]
 
-    form.icd_codes.choices = [(i.id, i.code) for i in \
-        ICDCode.query.filter(ICDCode.code != 'None' and \
-        ICDCode.code != '')]
+    form.icd_codes.choices = [(i.id, i.code) for i in ICDCode.query.all()]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
         for d in current_user.provider.doctors]
@@ -157,7 +155,7 @@ def request_form():
         if not member:
             member = Member(photo=photo_filename)
             member_service.update_from_form(member, form,
-                exclude=['member_photo'])
+                                            exclude=['member_photo'])
 
         # prepare a medical_details args* dict
         mdetails_dict = {}
