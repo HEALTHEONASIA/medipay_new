@@ -1958,8 +1958,12 @@ def claim_check_new():
 
 
 @api.route('/claim/add', methods=['POST'])
-@api_auth()
 def claim_add():
+    authorized, error, user = authorize_api_key()
+
+    if not authorized:
+        return error
+
     json_ = request.get_json()
 
     # find the member with the given device uid
