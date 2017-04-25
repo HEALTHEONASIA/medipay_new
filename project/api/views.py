@@ -1984,16 +1984,10 @@ def claim_add():
     db.session.add(claim)
     db.session.commit()
 
-    notification = """A <a href="%s" target="_blank">new claim #%d</a>
-        has been added!""" % (url_for('main.claim', claim_id=claim.id),
-        claim.id)
-
-    notify(notification)
-
     # returns the url on the current claim's edit page
     # it will redirect the user of the 1TAP desktop app to this page
     return jsonify([{
-        'redirect_url': 'https://1tapsystem.com/claim/%d' % claim.id
+        'redirect_url': url_for('one_tap.claim', claim_id=claim.id)
     }])
 
 
