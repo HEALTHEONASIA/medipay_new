@@ -124,7 +124,7 @@ def index():
 @main.route('/static/uploads/<filename>')
 @login_required()
 def block_unauthenticated_url(filename):
-    return send_from_directory(os.path.join('static','uploads'),filename)
+    return send_from_directory(os.path.join('static', 'uploads'), filename)
 
 
 @main.route('/request', methods=['GET', 'POST'])
@@ -198,7 +198,7 @@ def request_form():
                 or gop.payer.pic_alt_email \
                 or gop.payer.user.email
 
-        # if no, we register him, set the random password and send
+        # If no, register him, set the random password and send
         # the access credentials to him
         else:
             recipient_email = gop.payer.pic_email
@@ -209,8 +209,7 @@ def request_form():
             db.session.add(user)
 
         msg = Message("Request for GOP - %s" % gop.provider.company,
-                      sender=("MediPay",
-                              "request@app.medipayasia.com"),
+                      sender=("MediPay", "request@app.medipayasia.com"),
                       recipients=[recipient_email])
 
         msg.html = render_template("request-email.html", gop=gop,
