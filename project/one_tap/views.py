@@ -321,36 +321,7 @@ def claim(claim_id):
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        # initializing user and random password 
-        user = None
-        rand_pass = None
-
-        # if the payer is registered as a user in our system
-        if gop.payer.user:
-            if gop.payer.pic_email:
-                recipient_email = gop.payer.pic_email
-            elif gop.payer.pic_alt_email:
-                recipient_email = gop.payer.pic_alt_email
-            else:
-                recipient_email = gop.payer.user.email
-            # getting payer id for sending notification
-            notification_payer_id = gop.payer.user.id
-
-        # if no, we register him, set the random password and send
-        # the access credentials to him
-        else:
-            recipient_email = gop.payer.pic_email
-            rand_pass = pass_generator(size=8)
-            user = User(email=gop.payer.pic_email,
-                        password=rand_pass,
-                        user_type='payer',
-                        payer=gop.payer)
-            db.session.add(user)
-            # getting payer id for sending notification 
-            notification_payer_id = user.id
-
-        gop_service.send_email(gop=gop, recipient_email=recipient_email,
-                               user=user, rand_pass=rand_pass)
+        gop_service.send_email(gop)
 
         flash('Your GOP request has been sent.')
 

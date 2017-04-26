@@ -3,7 +3,8 @@ from flask_mail import Message
 from flask_servicelayer import SQLAlchemyService
 
 from .. import db, models, mail
-from .helpers import is_admin, is_payer, is_provider
+from ..models import User
+from .helpers import is_admin, is_payer, is_provider, pass_generator
 
 
 class ExtFuncsMixin(object):
@@ -90,7 +91,27 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
         elif is_admin(user):
             return query
 
-    def send_email(self, gop, recipient_email, user=None, rand_pass=None):
+    def send_email(self, gop):
+        user = None
+        rand_pass = None
+
+        # if the payer is registered as a user in our system
+        if gop.payer.user:
+            recipient_email = gop.payer.pic_email \
+                or gop.payer.pic_alt_email \
+                or gop.payer.user.email
+
+        # If no, register him, set the random password and send
+        # the access credentials to him
+        else:
+            rand_pass = pass_generator(size=8)
+            recipient_email = gop.payer.pic_email
+            user = User(email=gop.payer.pic_email,
+                        password=rand_pass,
+                        user_type='payer',
+                        payer=gop.payer)
+            db.session.add(user)
+
         msg = Message("Request for GOP - %s" % gop.provider.company,
                       sender=("MediPay", "request@app.medipayasia.com"),
                       recipients=[recipient_email])

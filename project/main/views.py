@@ -187,32 +187,11 @@ def request_form():
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        user = None
-        rand_pass = None
-
-        # if the payer is registered as a user in our system
-        if gop.payer.user:
-            recipient_email = gop.payer.pic_email \
-                or gop.payer.pic_alt_email \
-                or gop.payer.user.email
-
-        # If no, register him, set the random password and send
-        # the access credentials to him
-        else:
-            rand_pass = pass_generator(size=8)
-            recipient_email = gop.payer.pic_email
-            user = User(email=gop.payer.pic_email,
-                        password=rand_pass,
-                        user_type='payer',
-                        payer=gop.payer)
-            db.session.add(user)
-
         notification = 'New GOP request is added'
         url = url_for('main.request_page', gop_id=gop.id)
         notify('New GOP request', notification, url)
 
-        gop_service.send_email(gop=gop, recipient_email=recipient_email,
-                               user=user, rand_pass=rand_pass)
+        gop_service.send_email(gop)
 
         flash('Your GOP request has been sent.')
         return redirect(url_for('main.index'))
@@ -453,14 +432,7 @@ def request_page_edit(gop_id):
         notify('The GOP request status is changed', notification, url)
 
         if gop.final:
-            if gop.payer.user:
-                recipient_email = gop.payer.pic_email \
-                                  or gop.payer.pic_alt_email \
-                                  or gop.payer.user.email
-            else:
-                recipient_email = gop.payer.pic_email
-
-            gop_service.send_email(gop=gop, recipient_email=recipient_email)
+            gop_service.send_email(gop)
 
         flash('The GOP request has been updated.')
         return redirect(url_for('main.request_page', gop_id=gop.id))
@@ -539,14 +511,7 @@ def request_page_resend(gop_id):
     gop.timestamp_edited = None
     gop.timestamp = datetime.now()
 
-    if gop.payer.user:
-        recipient_email = gop.payer.pic_email \
-                          or gop.payer.pic_alt_email \
-                          or gop.payer.user.email
-    else:
-        recipient_email = gop.payer.pic_email
-
-    gop_service.send_email(gop=gop, recipient_email=recipient_email)
+    gop_service.send_email(gop)
 
     db.session.add(gop)
     flash('The GOP request has been resent.')
