@@ -8,13 +8,16 @@ from datetime import datetime
 from functools import wraps
 
 from flask import jsonify, request, render_template, url_for
-from flask_mail import Message
 from sqlalchemy import desc
 
 from .helpers import *
 from . import api
 from ..main.helpers import notify
-from .. import config, db, mail, models
+from ..main.services improt GuaranteeOfPaymentService
+from .. import config, db, models
+
+
+gop_service = GuaranteeOfPaymentService()
 
 
 def api_auth():
@@ -445,40 +448,7 @@ def request_add_json():
         db.session.add(gop)
         db.session.commit()
 
-        # initializing user and random password 
-        payer_user = None
-        rand_pass = None
-        
-        # if the payer is registered as a user in our system
-        if payer.user:
-            if payer.pic_email:
-                recipient_email = payer.pic_email
-            elif payer.pic_alt_email:
-                recipient_email = payer.pic_alt_email
-            else:
-                recipient_email = payer.user.email
-        # if no, we register him, set the random password and send
-        # the access credentials to him
-        else:
-            recipient_email = payer.pic_email
-            rand_pass = pass_generator(size=8)
-            payer_user = models.User(email=payer.pic_email,
-                    password=rand_pass,
-                    user_type='payer',
-                    payer=payer)
-            db.session.add(payer_user)
-
-        msg = Message("Request for GOP - %s" % user.provider.company,
-                      sender=("MediPay",
-                              "request@app.medipayasia.com"),
-                      recipients=[recipient_email])
-
-        msg.html = render_template("request-email.html", gop=gop,
-                                   root=request.url_root, user=payer_user,
-                                   rand_pass = rand_pass, gop_id=gop.id)
-
-        # send the email
-        mail.send(msg)
+        gop_service.send_email(gop)
 
         gops_list[row_num]['id'] = gop.id
 
