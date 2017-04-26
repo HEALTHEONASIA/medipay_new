@@ -1,7 +1,8 @@
-from flask import request
+from flask import request, render_template
+from flask_mail import Message
 from flask_servicelayer import SQLAlchemyService
 
-from .. import db, models
+from .. import db, models, mail
 from .helpers import is_admin, is_payer, is_provider
 
 
@@ -88,6 +89,21 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
             return query.filter_by(payer=user.payer)
         elif is_admin(user):
             return query
+
+    def send_email(self, gop, recipient_email, user=None, rand_pass=None):
+        msg = Message("Request for GOP - %s" % gop.provider.company,
+                      sender=("MediPay", "request@app.medipayasia.com"),
+                      recipients=[recipient_email])
+
+        msg.html = render_template("request-email.html", gop=gop,
+                                   root=request.url_root, user=user,
+                                   rand_pass=rand_pass)
+
+        # send the email
+        try:
+            mail.send(msg)
+        except:
+            pass
 
 
 class UserService(ExtFuncsMixin, SQLAlchemyService):

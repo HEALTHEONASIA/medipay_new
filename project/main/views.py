@@ -195,6 +195,7 @@ def request_form():
             recipient_email = gop.payer.pic_email \
                 or gop.payer.pic_alt_email \
                 or gop.payer.user.email
+            user = gop.payer.user
 
         # If no, register him, set the random password and send
         # the access credentials to him
@@ -206,19 +207,8 @@ def request_form():
                         payer=gop.payer)
             db.session.add(user)
 
-        msg = Message("Request for GOP - %s" % gop.provider.company,
-                      sender=("MediPay", "request@app.medipayasia.com"),
-                      recipients=[recipient_email])
-
-        msg.html = render_template("request-email.html", gop=gop,
-                                   root=request.url_root, user=user,
-                                   rand_pass=rand_pass, gop_id=gop.id)
-
-        # send the email
-        try:
-            mail.send(msg)
-        except:
-            pass
+        gop_service.send_email(gop=gop, recipient_email=recipient_email,
+                               user=user, rand_pass=rand_pass)
 
         notification = 'Added by "%s" on %s, (click to open)' % \
             (str(gop.provider.company),
@@ -472,18 +462,7 @@ def request_page_edit(gop_id):
             else:
                 recipient_email = gop.payer.pic_email
 
-            msg = Message("Request for GOP - %s" % gop.provider.company,
-                          sender=("MediPay", "request@app.medipayasia.com"),
-                          recipients=[recipient_email])
-
-            msg.html = render_template("request-email.html", gop=gop,
-                                       root=request.url_root)
-
-            # send the email
-            try:
-                mail.send(msg)
-            except:
-                pass
+            gop_service.send_email(gop=gop, recipient_email=recipient_email)
 
         flash('The GOP request has been updated.')
         return redirect(url_for('main.request_page', gop_id=gop.id))
@@ -569,15 +548,7 @@ def request_page_resend(gop_id):
     else:
         recipient_email = gop.payer.pic_email
 
-    msg = Message("Request for GOP - %s" % gop.provider.company,
-                  sender=("MediPay", "request@app.medipayasia.com"),
-                  recipients=[recipient_email])
-
-    msg.html = render_template("request-email.html", gop=gop,
-                               root=request.url_root)
-
-    # send the email
-    mail.send(msg)
+    gop_service.send_email(gop=gop, recipient_email=recipient_email)
 
     db.session.add(gop)
     flash('The GOP request has been resent.')
