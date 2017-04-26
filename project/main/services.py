@@ -1,8 +1,8 @@
 from flask import request
 from flask_servicelayer import SQLAlchemyService
 
-from .helpers import is_admin, is_payer, is_provider
 from .. import db, models
+from .helpers import is_admin, is_payer, is_provider
 
 
 class ExtFuncsMixin(object):

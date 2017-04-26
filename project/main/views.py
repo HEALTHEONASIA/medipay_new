@@ -15,19 +15,19 @@ from flask_socketio import send, emit
 from flask_mail import Message
 from sqlalchemy import and_, or_
 
+from . import main
 from .forms import GOPForm, GOPApproveForm
 from .helpers import csv_ouput, pass_generator, photo_file_name_santizer
 from .helpers import to_float_or_zero, validate_email_address
 from .helpers import prepare_gops_list, notify, is_admin, is_provider, is_payer
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
-from . import main
+from .. import config, create_app, db, redis_store, mail, models, socketio
+from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
 from ..models import BillingCode, Doctor, GuaranteeOfPayment, ICDCode
 from ..models import login_required, Member, Payer, Provider, User
-from .. import config, create_app, db, redis_store, mail, models, socketio
-from .. import auth
 
 
 @socketio.on('hello')
@@ -74,7 +74,7 @@ def index():
             return login_validation(form)
 
         return render_template('home.html', menu_unpin=True, form=form,
-                                            hide_help_widget=True)
+                               hide_help_widget=True)
 
     status = request.args.get('status', None)
 
@@ -170,13 +170,13 @@ def request_form():
 
         payer = Payer.query.get(form.payer.data)
 
-        gop = GuaranteeOfPayment(
-            provider=current_user.provider,
-            payer=payer,
-            member=member,
-            doctor_name=Doctor.query.get(form.doctor_name.data).name,
-            status='pending',
-            medical_details=medical_details)
+        gop = GuaranteeOfPayment(provider=current_user.provider,
+                                 payer=payer,
+                                 member=member,
+                                 doctor_name=Doctor.query.get(
+                                    form.doctor_name.data).name,
+                                 status='pending',
+                                 medical_details=medical_details)
 
         for icd_code_id in form.icd_codes.data:
             icd_code = ICDCode.query.get(icd_code_id)
@@ -201,9 +201,9 @@ def request_form():
         else:
             recipient_email = gop.payer.pic_email
             user = User(email=gop.payer.pic_email,
-                               password=rand_pass,
-                               user_type='payer',
-                               payer=gop.payer)
+                        password=rand_pass,
+                        user_type='payer',
+                        payer=gop.payer)
             db.session.add(user)
 
         msg = Message("Request for GOP - %s" % gop.provider.company,
@@ -230,7 +230,7 @@ def request_form():
         return redirect(url_for('main.index'))
 
     return render_template('request-form.html', form=form, payers=payers,
-        bill_codes=current_user.provider.billing_codes)
+                           bill_codes=current_user.provider.billing_codes)
 
 
 @main.route('/request/<int:gop_id>', methods=['GET', 'POST'])
@@ -331,7 +331,7 @@ def request_page_download(gop_id):
     gop = gop_service.get_or_404(gop_id)
 
     csv_file_name = '%d_%s_GOP_Request' % (gop_id,
-                                    gop.member.name.replace(' ', '_'))
+                                           gop.member.name.replace(' ', '_'))
 
     header = [
         'payer_company',
@@ -409,12 +409,12 @@ def request_page_edit(gop_id):
     # request is sent we leave only the one select choice
     form.payer.choices = [(gop.payer.id, gop.payer.company)]
 
-    form.icd_codes.choices = [(i.id, i.code) for i in \
-        ICDCode.query.filter(ICDCode.code != 'None' and \
-        ICDCode.code != '')]
+    form.icd_codes.choices = [(i.id, i.code) for i \
+                              in ICDCode.query.filter(ICDCode.code != 'None' \
+                                                      and ICDCode.code != '')]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
-                                for d in current_user.provider.doctors]
+                                 for d in current_user.provider.doctors]
 
     final = request.args.get('final', None)
 
@@ -473,23 +473,20 @@ def request_page_edit(gop_id):
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        notification = 'The GOP request #%d status is changed to "%s",' \
-            + ' (click to open)'
-        notification = notification % (gop.id, gop.status)
-        notify('The GOP request status is changed', notification,
-            url_for('main.request_page', gop_id=gop.id))
+        notification = 'GOP request status is changed to "%s"' % gop.status
+        url = url_for('main.request_page', gop_id=gop.id)
+        notify('The GOP request status is changed', notification, url)
 
         if gop.final:
             if gop.payer.user:
                 recipient_email = gop.payer.pic_email \
-                    or gop.payer.pic_alt_email \
-                    or gop.payer.user.email
+                                  or gop.payer.pic_alt_email \
+                                  or gop.payer.user.email
             else:
                 recipient_email = gop.payer.pic_email
 
             msg = Message("Request for GOP - %s" % gop.provider.company,
-                          sender=("MediPay",
-                                  "request@app.medipayasia.com"),
+                          sender=("MediPay", "request@app.medipayasia.com"),
                           recipients=[recipient_email])
 
             msg.html = render_template("request-email.html", gop=gop,
@@ -498,7 +495,7 @@ def request_page_edit(gop_id):
             # send the email
             try:
                 mail.send(msg)
-            except Exception as e:
+            except:
                 pass
 
         flash('The GOP request has been updated.')
@@ -515,52 +512,40 @@ def request_page_edit(gop_id):
     icd_code_ids = []
     icd_code_id_name_web = []
     for icd_code in gop.icd_codes:
-            icd_code_ids.append(icd_code.id)
-            icd_code_id_name_web.append((icd_code.id,icd_code.common_term))
+        icd_code_ids.append(icd_code.id)
+        icd_code_id_name_web.append((icd_code.id, icd_code.common_term))
 
     form.icd_codes.default = icd_code_ids
-    form.medical_details_in_patient.default = \
-        gop.medical_details.in_patient
+    form.medical_details_in_patient.default = gop.medical_details.in_patient
 
     # when update the form field's properties, we need to reinitiate the form
     form.process()
 
+    m_details = gop.medical_details # shortcut
+
     # fill in medical details
-    form.medical_details_symptoms.data = gop.medical_details.symptoms
-    form.medical_details_temperature.data = \
-        gop.medical_details.temperature
-    form.medical_details_heart_rate.data = \
-        gop.medical_details.heart_rate
-    form.medical_details_respiration.data = \
-        gop.medical_details.respiration
-    form.medical_details_blood_pressure.data = \
-        gop.medical_details.blood_pressure
-    form.medical_details_physical_finding.data = \
-        gop.medical_details.physical_finding
-    form.medical_details_health_history.data = \
-        gop.medical_details.health_history
-    form.medical_details_previously_admitted.data = \
-        gop.medical_details.previously_admitted
+    form.medical_details_symptoms.data = m_details.symptoms
+    form.medical_details_temperature.data = m_details.temperature
+    form.medical_details_heart_rate.data = m_details.heart_rate
+    form.medical_details_respiration.data = m_details.respiration
+    form.medical_details_blood_pressure.data = m_details.blood_pressure
+    form.medical_details_physical_finding.data = m_details.physical_finding
+    form.medical_details_health_history.data = m_details.health_history
+    form.medical_details_previously_admitted.data = m_details.previously_admitted
     form.medical_details_diagnosis.data = gop.medical_details.diagnosis
-    form.medical_details_test_results.data = \
-        gop.medical_details.test_results
-    form.medical_details_current_therapy.data = \
-        gop.medical_details.current_therapy
-    form.medical_details_treatment_plan.data = \
-        gop.medical_details.treatment_plan
+    form.medical_details_test_results.data = m_details.test_results
+    form.medical_details_current_therapy.data = m_details.current_therapy
+    form.medical_details_treatment_plan.data = m_details.treatment_plan
 
     form.name.data = gop.member.name
     form.national_id.data = gop.member.national_id
     form.current_national_id.data = gop.member.national_id
-    # convert the datetime python object to the string representation
     form.dob.data = gop.member.dob
     form.gender.data = gop.member.gender
     form.tel.data = gop.member.tel
     form.policy_number.data = gop.member.policy_number
     form.patient_action_plan.data = gop.patient_action_plan
-    # convert the datetime python object to the string representation
     form.admission_date.data = gop.admission_date
-    # convert the datetime python object to the string representation
     form.admission_time.data = gop.admission_time
     form.room_price.data = gop.room_price
     form.patient_medical_no.data = gop.patient_medical_no
@@ -570,8 +555,10 @@ def request_page_edit(gop_id):
     form.quotation.data = gop.quotation
     
     return render_template('request-form.html', form=form,
-        member_photo=gop.member.photo, bill_codes=gop.provider.billing_codes,
-        gop_id=gop.id, final=final, icd_code_id_name_web=icd_code_id_name_web)
+                           member_photo=gop.member.photo,
+                           bill_codes=gop.provider.billing_codes,
+                           gop_id=gop.id, final=final,
+                           icd_code_id_name_web=icd_code_id_name_web)
 
 
 @main.route('/request/<int:gop_id>/resend', methods=['GET'])
@@ -596,8 +583,7 @@ def request_page_resend(gop_id):
         recipient_email = gop.payer.pic_email
 
     msg = Message("Request for GOP - %s" % gop.provider.company,
-                  sender=("MediPay",
-                          "request@app.medipayasia.com"),
+                  sender=("MediPay", "request@app.medipayasia.com"),
                   recipients=[recipient_email])
 
     msg.html = render_template("request-email.html", gop=gop,
@@ -641,11 +627,11 @@ def history():
         return redirect(url_for('admin.history'))
 
     if is_provider(current_user):
-        gops = GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, closed=True)
+        gops = GuaranteeOfPayment.query.filter_by(provider=current_user.provider,
+                                                  closed=True)
     elif is_payer(current_user):
-        gops = GuaranteeOfPayment.query.filter_by(
-            payer=current_user.payer, closed=True)
+        gops = GuaranteeOfPayment.query.filter_by(payer=current_user.payer,
+                                                  closed=True)
 
     pagination, gops = gop_service.prepare_pagination(gops)
 
@@ -815,8 +801,8 @@ def get_gops():
             gops = open_gops.filter_by(status=status)
 
     elif is_provider(current_user):
-        gops = GuaranteeOfPayment.query.filter_by(
-            provider=current_user.provider, closed=False)
+        gops = GuaranteeOfPayment.query.filter_by(provider=current_user.provider,
+                                                  closed=False)
 
     elif is_payer(current_user):
         gops = GuaranteeOfPayment.query.filter_by(
