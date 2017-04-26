@@ -8,13 +8,12 @@ from flask import flash, render_template, redirect, request, url_for
 from flask import jsonify, send_from_directory, session
 from flask_login import current_user, login_user
 from sqlalchemy import desc
-from flask_mail import Message
 
 from .forms import ClaimForm, MemberForm, TerminalForm
 from .helpers import pass_generator, photo_file_name_santizer, percent_of
 from .helpers import patients_amount
 from . import one_tap
-from .. import config, db, models, mail
+from .. import config, db, models
 from ..main.forms import GOPForm
 from ..main.helpers import is_admin, is_payer, is_provider
 from ..main.services import MedicalDetailsService, MemberService, ClaimService
@@ -350,19 +349,8 @@ def claim(claim_id):
             # getting payer id for sending notification 
             notification_payer_id = user.id
 
-        msg = Message("Request for GOP - %s" % gop.provider.company,
-                      sender=("MediPay", "request@app.medipayasia.com"),
-                      recipients=[recipient_email])
-
-        msg.html = render_template("request-email.html", gop=gop,
-                                   root=request.url_root, user=user,
-                                   rand_pass = rand_pass, gop_id=gop.id)
-
-        # send the email
-        try:
-            mail.send(msg)
-        except Exception as e:
-            pass
+        gop_service.send_email(gop=gop, recipient_email=recipient_email,
+                               user=user, rand_pass=rand_pass)
 
         flash('Your GOP request has been sent.')
 

@@ -12,7 +12,6 @@ from flask import flash, jsonify, render_template, redirect, request, session
 from flask import make_response, send_from_directory, url_for
 from flask_login import current_user, login_user
 from flask_socketio import send, emit
-from flask_mail import Message
 from sqlalchemy import and_, or_
 
 from . import main
@@ -22,7 +21,7 @@ from .helpers import to_float_or_zero, validate_email_address
 from .helpers import prepare_gops_list, notify, is_admin, is_provider, is_payer
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
-from .. import config, create_app, db, redis_store, mail, models, socketio
+from .. import config, create_app, db, redis_store, models, socketio
 from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
@@ -188,18 +187,19 @@ def request_form():
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        rand_pass = pass_generator(size=8)
+        user = None
+        rand_pass = None
 
         # if the payer is registered as a user in our system
         if gop.payer.user:
             recipient_email = gop.payer.pic_email \
                 or gop.payer.pic_alt_email \
                 or gop.payer.user.email
-            user = gop.payer.user
 
         # If no, register him, set the random password and send
         # the access credentials to him
         else:
+            rand_pass = pass_generator(size=8)
             recipient_email = gop.payer.pic_email
             user = User(email=gop.payer.pic_email,
                         password=rand_pass,
