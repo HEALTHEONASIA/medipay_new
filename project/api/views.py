@@ -13,7 +13,7 @@ from sqlalchemy import desc
 from .helpers import *
 from . import api
 from ..main.helpers import notify
-from ..main.services improt GuaranteeOfPaymentService
+from ..main.services import GuaranteeOfPaymentService
 from .. import config, db, models
 
 
