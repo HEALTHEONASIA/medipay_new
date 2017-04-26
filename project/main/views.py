@@ -132,13 +132,13 @@ def request_form():
     payers = current_user.provider.payers
     form = GOPForm()
 
-    form.payer.choices += [(p.id, p.company) for p in \
-        current_user.provider.payers]
+    form.payer.choices += [(p.id, p.company) for p \
+                           in current_user.provider.payers]
 
     form.icd_codes.choices = [(i.id, i.code) for i in ICDCode.query.all()]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
-        for d in current_user.provider.doctors]
+                                 for d in current_user.provider.doctors]
 
     # fixes a validation error when user didn't
     # fill in the previous admitted date field
