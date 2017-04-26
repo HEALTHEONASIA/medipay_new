@@ -11,7 +11,6 @@ from datetime import datetime
 from flask import flash, jsonify, render_template, redirect, request, session
 from flask import make_response, send_from_directory, url_for
 from flask_login import current_user, login_user
-from flask_socketio import send, emit
 from sqlalchemy import and_, or_
 
 from . import main
@@ -21,41 +20,12 @@ from .helpers import to_float_or_zero, validate_email_address
 from .helpers import prepare_gops_list, notify, is_admin, is_provider, is_payer
 from .services import GuaranteeOfPaymentService, UserService
 from .services import MedicalDetailsService, MemberService
-from .. import config, create_app, db, redis_store, models, socketio
+from .. import config, create_app, db, redis_store, models
 from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
 from ..models import BillingCode, Doctor, GuaranteeOfPayment, ICDCode
 from ..models import login_required, Member, Payer, Provider, User
-
-
-@socketio.on('hello')
-def handle_hello(message):
-    print('received hello message: ' + str(message))
-
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    pass
-
-
-@socketio.on('check-notifications')
-def handle_notifications(data):
-    # try connecting to redis server
-    try:
-        notification = redis_store.get('id' + str(data))
-    except:
-        notification = None
-
-    if notification:
-        # return notification text and delete it from redis
-        emit('check-notifications', notification.decode('utf-8'))
-        redis_store.delete('id' + str(data))
-
-
-@socketio.on_error_default
-def default_error_handler(e):
-    pass
 
 
 gop_service = GuaranteeOfPaymentService()
