@@ -24,8 +24,8 @@ from .services import MedicalDetailsService, MemberService
 from . import main
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
-from ..models import BillingCode, GuaranteeOfPayment, ICDCode, login_required
-from ..models import Member, Payer, Provider, User
+from ..models import BillingCode, Doctor, GuaranteeOfPayment, ICDCode
+from ..models import login_required, Member, Payer, Provider, User
 from .. import config, create_app, db, redis_store, mail, models, socketio
 from .. import auth
 
@@ -174,7 +174,7 @@ def request_form():
             provider=current_user.provider,
             payer=payer,
             member=member,
-            doctor_name=models.Doctor.query.get(form.doctor_name.data).name,
+            doctor_name=Doctor.query.get(form.doctor_name.data).name,
             status='pending',
             medical_details=medical_details)
 
@@ -211,8 +211,8 @@ def request_form():
                       recipients=[recipient_email])
 
         msg.html = render_template("request-email.html", gop=gop,
-                                   root=request.url_root, user=current_user,
-                                   rand_pass = rand_pass, gop_id=gop.id)
+                                   root=request.url_root, user=user,
+                                   rand_pass=rand_pass, gop_id=gop.id)
 
         # send the email
         try:
@@ -467,7 +467,7 @@ def request_page_edit(gop_id):
             icd_code = ICDCode.query.get(int(icd_code_id))
             gop.icd_codes.append(icd_code)
 
-        gop.doctor_name = models.Doctor.query.get(form.doctor_name.data).name
+        gop.doctor_name = Doctor.query.get(form.doctor_name.data).name
         gop.status = 'pending'
 
         exclude = ['doctor_name', 'status', 'icd_codes']
@@ -509,7 +509,7 @@ def request_page_edit(gop_id):
     # set the default radio choice as the current GOP's room type
     form.room_type.default = gop.room_type
     form.reason.default = gop.reason
-    doctor =  models.Doctor.query.filter_by(name=gop.doctor_name).first()
+    doctor =  Doctor.query.filter_by(name=gop.doctor_name).first()
     form.doctor_name.default = doctor.id if doctor else 0
 
     icd_code_ids = []
@@ -659,6 +659,7 @@ def search():
         'results': []
     }
     query = request.args.get('query')
+
     if not query or not current_user.is_authenticated:
         return jsonify(found)
 
@@ -711,7 +712,7 @@ def icd_code_search():
             result.append(icd_code)
 
     return render_template('icd-code-search-results.html', icd_codes=result,
-                               query=query)
+                           query=query)
 
 
 @main.route('/requests/filter', methods=['GET'])
