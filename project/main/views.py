@@ -509,7 +509,7 @@ def request_page_edit(gop_id):
     # set the default radio choice as the current GOP's room type
     form.room_type.default = gop.room_type
     form.reason.default = gop.reason
-    doctor =  Doctor.query.filter_by(name=gop.doctor_name).first()
+    doctor = Doctor.query.filter_by(name=gop.doctor_name).first()
     form.doctor_name.default = doctor.id if doctor else 0
 
     icd_code_ids = []
