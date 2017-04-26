@@ -187,9 +187,9 @@ def request_form():
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        notification = 'New GOP request is added'
+        msg = 'New GOP request is added'
         url = url_for('main.request_page', gop_id=gop.id)
-        notify('New GOP request', notification, url)
+        notify('New GOP request', msg, url)
 
         gop_service.send_email(gop)
 
@@ -225,9 +225,9 @@ def request_page(gop_id):
 
         if gop.status == 'pending':
 
-            notification = 'GOP request is under review'
+            msg = 'GOP request is under review'
             url = url_for('main.request_page', gop_id=gop.id)
-            notify('Your GOP request is under review', notification, url)
+            notify('Your GOP request is under review', msg, url)
 
             gop.status = 'in_review'
             gop.timestamp_edited = datetime.now()
@@ -243,9 +243,9 @@ def request_page(gop_id):
 
             db.session.add(gop)
 
-            notification = 'GOP request status is changed to "%s"' % gop.status
+            msg = 'GOP request status is changed to "%s"' % gop.status
             url = url_for('main.request_page', gop_id=gop.id)
-            notify('Your GOP request status is changed', notification, url)
+            notify('Your GOP request status is changed', msg, url)
 
             flash('The GOP request has been %s.' % form.status.data)
             return redirect(url_for('main.index'))
@@ -427,9 +427,9 @@ def request_page_edit(gop_id):
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        notification = 'GOP request status is changed to "%s"' % gop.status
+        msg = 'GOP request status is changed to "%s"' % gop.status
         url = url_for('main.request_page', gop_id=gop.id)
-        notify('The GOP request status is changed', notification, url)
+        notify('The GOP request status is changed', msg, url)
 
         if gop.final:
             gop_service.send_email(gop)
