@@ -207,14 +207,12 @@ def request_form():
                         payer=gop.payer)
             db.session.add(user)
 
+        notification = 'New GOP request is added'
+        url = url_for('main.request_page', gop_id=gop.id)
+        notify('New GOP request', notification, url)
+
         gop_service.send_email(gop=gop, recipient_email=recipient_email,
                                user=user, rand_pass=rand_pass)
-
-        notification = 'Added by "%s" on %s, (click to open)' % \
-            (str(gop.provider.company),
-            gop.timestamp.strftime('%I:%M %p %m/%d/%Y'))
-        notify('New GOP request', notification,
-            url_for('main.request_page', gop_id=gop.id))
 
         flash('Your GOP request has been sent.')
         return redirect(url_for('main.index'))
