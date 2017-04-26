@@ -405,13 +405,10 @@ def request_page_edit(gop_id):
 
     form = GOPForm()
 
-    # as a provider can't change the GOP's payer after
-    # request is sent we leave only the one select choice
+    # Provider cannot change a payer while editing
     form.payer.choices = [(gop.payer.id, gop.payer.company)]
 
-    form.icd_codes.choices = [(i.id, i.code) for i \
-                              in ICDCode.query.filter(ICDCode.code != 'None' \
-                                                      and ICDCode.code != '')]
+    form.icd_codes.choices = [(i.id, i.code) for i in ICDCode.query.all()]
 
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                  for d in current_user.provider.doctors]
@@ -425,21 +422,13 @@ def request_page_edit(gop_id):
         if final:
             gop.final = True
 
-        # get and set the payer object
-        payer = Payer.query.get(form.payer.data)
-        gop.payer = payer
-
         gop.member.photo = photo_file_name_santizer(form.member_photo)
 
         # update patient's medical details
-        gop.medical_details.symptoms = \
-            form.medical_details_symptoms.data
-        gop.medical_details.temperature = \
-            form.medical_details_temperature.data
-        gop.medical_details.heart_rate = \
-            form.medical_details_heart_rate.data
-        gop.medical_details.respiration = \
-            form.medical_details_respiration.data
+        gop.medical_details.symptoms = form.medical_details_symptoms.data
+        gop.medical_details.temperature = form.medical_details_temperature.data
+        gop.medical_details.heart_rate = form.medical_details_heart_rate.data
+        gop.medical_details.respiration = form.medical_details_respiration.data
         gop.medical_details.blood_pressure = \
             form.medical_details_blood_pressure.data
         gop.medical_details.physical_finding = \
@@ -448,10 +437,8 @@ def request_page_edit(gop_id):
             form.medical_details_health_history.data
         gop.medical_details.previously_admitted = \
             form.medical_details_previously_admitted.data
-        gop.medical_details.diagnosis = \
-            form.medical_details_diagnosis.data
-        gop.medical_details.in_patient = \
-            form.medical_details_in_patient.data
+        gop.medical_details.diagnosis = form.medical_details_diagnosis.data
+        gop.medical_details.in_patient = form.medical_details_in_patient.data
         gop.medical_details.test_results = \
             form.medical_details_test_results.data
         gop.medical_details.current_therapy = \
@@ -464,7 +451,7 @@ def request_page_edit(gop_id):
                                         exclude=['member_photo'])
 
         for icd_code_id in form.icd_codes.data:
-            icd_code = ICDCode.query.get(int(icd_code_id))
+            icd_code = ICDCode.query.get(icd_code_id)
             gop.icd_codes.append(icd_code)
 
         gop.doctor_name = Doctor.query.get(form.doctor_name.data).name
