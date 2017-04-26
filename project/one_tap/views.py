@@ -16,11 +16,12 @@ from .helpers import patients_amount
 from . import one_tap
 from .. import config, db, models, mail
 from ..main.forms import GOPForm
+from ..main.helpers import is_admin, is_payer, is_provider
+from ..main.services import MedicalDetailsService, MemberService, ClaimService
+from ..main.services import GuaranteeOfPaymentService, TerminalService
 from ..models import Claim, Member, Terminal, ICDCode, Provider, Payer
 from ..models import Doctor, User, GuaranteeOfPayment
 from ..models import monthdelta, login_required
-from ..main.services import MedicalDetailsService, MemberService, ClaimService
-from ..main.services import GuaranteeOfPaymentService, TerminalService
 
 
 medical_details_service = MedicalDetailsService()
@@ -33,15 +34,15 @@ terminal_service = TerminalService()
 @one_tap.route('/')
 @login_required()
 def index():
-    if current_user.get_type() == 'provider':
+    if is_provider(current_user):
         providers = []
 
-    if current_user.get_type() == 'payer':
+    if is_payer(current_user):
         claim_ids = [gop.claim.id for gop in current_user.payer.guarantees_of_payment if gop.claim]
         providers = Provider.query.join(Claim, Provider.claims)\
             .filter(Claim.id.in_(claim_ids)).all()
 
-    if current_user.get_role() == 'admin':
+    if is_admin(current_user):
         providers = Provider.query.all()
 
     members = member_service.all_for_user(current_user).all()
@@ -271,7 +272,7 @@ def claim(claim_id):
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                 for d in current_user.provider.doctors]
 
-    if current_user.get_type() == 'provider' and request.method != 'POST':
+    if is_provider(current_user) and request.method != 'POST':
         form.name.data = claim.member.name
         form.dob.data = claim.member.dob
         form.policy_number.data = claim.member.policy_number

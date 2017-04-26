@@ -257,35 +257,29 @@ def request_page(gop_id):
             return redirect(url_for('main.index'))
 
         if gop.status == 'pending':
-            notification = 'Your GOP request #%d is under review now by "%s"' \
-                + ', (click to open)'
-            notification = notification % (gop.id, str(gop.payer.company))
-            notify('Your GOP request is under review', notification,
-                url_for('main.request_page', gop_id=gop.id))
+
+            notification = 'GOP request is under review'
+            url = url_for('main.request_page', gop_id=gop.id)
+            notify('Your GOP request is under review', notification, url)
 
             gop.status = 'in_review'
             gop.timestamp_edited = datetime.now()
-            db.session.add(gop)
-
-        if not gop.medical_details:
-            medical_details = models.MedicalDetails(guarantee_of_payment=gop)
             db.session.add(gop)
 
         form = GOPApproveForm()
         if form.validate_on_submit():
             if form.reason_decline.data:
                 gop.reason_decline = form.reason_decline.data
+
             gop.status = form.status.data
             gop.timestamp_edited = datetime.now()
 
             db.session.add(gop)
 
-            notification = 'Your GOP request #%d status is changed to "%s",' \
-                + ' (click to open)'
-            notification = notification % (gop.id, gop.status)
-            notify('Your GOP request status is changed', notification,
-                url_for('main.request_page', gop_id=gop.id))
-            
+            notification = 'GOP request status is changed to "%s"' % gop.status
+            url = url_for('main.request_page', gop_id=gop.id)
+            notify('Your GOP request status is changed', notification, url)
+
             flash('The GOP request has been %s.' % form.status.data)
             return redirect(url_for('main.index'))
 
@@ -334,17 +328,13 @@ def request_page_download(gop_id):
         flash('To download the GOP request you need to upgrade your account.')
         return redirect(url_for('account.user_upgrade'))
 
-    gop = GuaranteeOfPayment.query.get(gop_id)
-
-    # if no GOP is found, redirect to the home page
-    if not gop:
-        flash('No GOP request #%d is found' % gop_id)
-        return redirect(url_for('main.index'))
+    gop = gop_service.get_or_404(gop_id)
 
     csv_file_name = '%d_%s_GOP_Request' % (gop_id,
                                     gop.member.name.replace(' ', '_'))
 
-    header = ['payer_company',
+    header = [
+        'payer_company',
         'reviewed_by',
         'requested_by',
         'timestamp',
@@ -364,11 +354,13 @@ def request_page_download(gop_id):
         'total_price',
         'doctor_name',
         'plan_of_action',
-        'icd_codes']
+        'icd_codes'
+    ]
 
     icd_codes = ', '.join([icd_code.code for icd_code in gop.icd_codes])
 
-    data = [gop.payer.company,
+    data = [
+        gop.payer.company,
         gop.payer.pic,
         gop.provider.pic,
         gop.timestamp.strftime('%I:%M %p'),
@@ -388,7 +380,8 @@ def request_page_download(gop_id):
         '%0.2f' % gop.quotation,
         gop.doctor_name,
         gop.patient_action_plan,
-        icd_codes]
+        icd_codes
+    ]
 
     result = [header, data]
 
@@ -398,11 +391,11 @@ def request_page_download(gop_id):
 @main.route('/request/<int:gop_id>/edit', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_page_edit(gop_id):
-    gop = GuaranteeOfPayment.query.get(gop_id)
+    gop = gop_service.get_or_404(gop_id)
 
     # if no GOP is found or it is not the current user's GOP, 
     # redirect to the home page
-    if not gop or gop.provider.id != current_user.provider.id:
+    if gop.provider.id != current_user.provider.id:
         flash('GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
@@ -597,8 +590,8 @@ def request_page_resend(gop_id):
 
     if gop.payer.user:
         recipient_email = gop.payer.pic_email \
-            or gop.payer.pic_alt_email \
-            or gop.payer.user.email
+                          or gop.payer.pic_alt_email \
+                          or gop.payer.user.email
     else:
         recipient_email = gop.payer.pic_email
 
@@ -621,10 +614,10 @@ def request_page_resend(gop_id):
 @main.route('/request/<int:gop_id>/close/<reason>', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_close(gop_id, reason):
-    gop = GuaranteeOfPayment.query.get(gop_id)
+    gop = gop_service.get_or_404(gop_id)
 
     # if no GOP is found, redirect to the home page
-    if not gop or gop.provider.id != current_user.provider.id:
+    if gop.provider.id != current_user.provider.id:
         flash('The GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
@@ -671,23 +664,14 @@ def search():
 
     query = query.lower()
 
-    gops_all = GuaranteeOfPayment.query.all()
-    gops_current = []
-
     if is_admin(current_user):
-        gops_current = gops_all
-    else:
-        if is_provider(current_user):
-            for gop in gops_all:
-                if gop.provider.id == current_user.provider.id:
-                    gops_current.append(gop)
+        gops = gop_service.all()
+    elif is_provider(current_user):
+        gops = gop_service.find(provider_id=current_user.provider.id)
+    elif is_payer(current_user):
+        gops = gop_service.find(payer_id=current_user.payer.id)
 
-        elif is_payer(current_user):
-            for gop in gops_all:
-                if gop.payer.id == current_user.payer.id:
-                    gops_current.append(gop)
-
-    for gop in gops_current:
+    for gop in gops:
         # if query in gop.icd_codes.lower() \
         if query in gop.patient_action_plan.lower() \
         or query in gop.doctor_name.lower() \

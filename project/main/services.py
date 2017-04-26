@@ -1,6 +1,7 @@
 from flask import request
 from flask_servicelayer import SQLAlchemyService
 
+from .helpers import is_admin, is_payer, is_provider
 from .. import db, models
 
 
@@ -46,28 +47,28 @@ class ClaimService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
     def all_for_user(self, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return self._find(provider_id=user.provider.id)
 
-        elif user.get_type() == 'payer':
+        elif is_payer(user):
             claim_ids = [gop.claim.id for gop in user.payer.guarantees_of_payment if gop.claim]
             return self.__model__.query.filter(self.__model__.id.in_(claim_ids))
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.all_for_admin()
 
         return None
 
     def get_for_user(self, id, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return user.provider.claims.filter_by(id=id).first()
 
-        elif user.get_type() == 'payer':
+        elif is_payer(user):
             claim_ids = [gop.claim.id for gop in user.payer.guarantees_of_payment]
             return self.__model__.query.filter(self.__model__.id==id and \
                                         self.__model__.id.in_(claim_ids)).first()
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.get_for_admin(id)
 
         return None
@@ -81,11 +82,11 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
         return self.__model__.query.filter_by(closed=False)
 
     def filter_for_user(self, query, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return query.filter_by(provider=user.provider)
-        elif user.get_type() == 'payer':
+        elif is_payer(user):
             return query.filter_by(payer=user.payer)
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return query
 
 
@@ -104,30 +105,30 @@ class MemberService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
     def all_for_user(self, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return user.provider.members
 
-        elif user.get_type() == 'payer':
+        elif is_payer(user):
             claim_ids = [gop.claim.id for gop in user.payer.guarantees_of_payment]
             return self.__model__.query.join(models.Claim, self.__model__.claims)\
                                        .filter(models.Claim.id.in_(claim_ids))
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.all_for_admin()
 
         return None
 
     def get_for_user(self, id, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return user.provider.members.filter_by(id=id).first()
 
-        elif user.get_type() == 'payer':
+        elif is_payer(user):
             claim_ids = [gop.claim.id for gop in user.payer.guarantees_of_payment]
             return self.__model__.query.join(models.Claim, self.__model__.claims)\
                                        .filter(models.Claim.id.in_(claim_ids))\
                                        .filter(self.__model__.id==id).first()
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.get_for_admin(id)
 
         return None
@@ -138,19 +139,19 @@ class TerminalService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
     def all_for_user(self, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return user.provider.terminals
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.all_for_admin()
 
         return None
 
     def get_for_user(self, id, user):
-        if user.get_type() == 'provider':
+        if is_provider(user):
             return self.first(id=id, provider_id=user.provider.id)
 
-        elif user.get_role() == 'admin':
+        elif is_admin(user):
             return self.get_for_admin(id)
 
         return None
