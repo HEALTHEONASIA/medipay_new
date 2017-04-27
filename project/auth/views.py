@@ -46,26 +46,6 @@ def login_validation(form):
         user.last_attempt = datetime.now()
         user.last_login_ip = request.environ['REMOTE_ADDR']
         db.session.add(user)
-        
-        #~ # initialze an empty notification dictionary
-        #~ # for the GOP requests statuses
-        #~ curr_gops = {}
-
-        #~ # get all the GOP requests of the currently logged in
-        #~ # user, which is the provider account type
-        #~ if user.user_type == 'provider':
-            #~ for gop in user.provider.guarantees_of_payment:
-                #~ curr_gops[gop.id] = gop.status
-
-        #~ # we don't actually need the payer's GOP requests as the payer
-        #~ # users cannot get notifications, but we do it just in case
-        #~ # we wish to provide some notificiations for the payers later
-        #~ elif user.user_type == 'payer':
-            #~ for gop in user.payer.guarantees_of_payment:
-                #~ curr_gops[gop.id] = gop.status
-
-        #~ # finally save the GOP request statuses to the user session variable
-        #~ session['curr_gops'] = curr_gops
 
         return redirect(request.args.get('next') or url_for('main.index'))
     else:

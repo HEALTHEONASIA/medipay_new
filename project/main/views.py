@@ -184,6 +184,8 @@ def request_page(gop_id):
         flash('The GOP request #%d is not found.' % gop_id)
         return redirect(url_for('main.index'))
 
+    gop_service.set_chat_room(gop)
+
     # admin can see any GOP request
     if is_admin(current_user):
         return redirect(url_for('admin.request_page', gop_id=gop.id))

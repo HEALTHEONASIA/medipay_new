@@ -1,4 +1,5 @@
-from flask import request, render_template
+from flask import request, render_template, session
+from flask_login import current_user
 from flask_mail import Message
 from flask_servicelayer import SQLAlchemyService
 
@@ -125,6 +126,10 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
             mail.send(msg)
         except:
             pass
+
+    def set_chat_room(self, gop):
+        session['room'] = 'gop' + str(gop.id)
+        session['name'] = current_user.email
 
 
 class UserService(ExtFuncsMixin, SQLAlchemyService):

@@ -361,6 +361,30 @@
       </div>
     </div>
   </div>
+  <div class="container chat-box">
+    <div class="row">
+        <div class="col-md-10">
+            <h5>GOP Request #{{ gop.id }} chat</h5>
+            <div class="panel panel-primary">
+                <div class="panel-body" id="chat">
+                    <ul class="chat" id="chat-body"></ul>
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input id="text" type="text" class="form-control input-sm" placeholder="Type your message here...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-warning btn-sm" id="btn-chat">
+                                Send</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  <!-- <h3>GOP Request #{{ gop.id }} chat</h3>
+  <textarea id="chat" cols="80" rows="20"></textarea><br><br>
+  <input id="text" size="80" placeholder="Enter your message here"><br><br> -->
   <div id="medical-details-popup-bg"></div>
   <div id="medical-details-popup">
     <div class="row">
@@ -436,6 +460,53 @@
   </div>
 {% endblock %}
 {% block page_js %}
+  <script type="text/javascript">
+    var chatSocket;
+    var msgTemplate = `
+      <li class="left clearfix">
+        <span class="chat-img pull-left">
+          <img src="http://placehold.it/50/55C1E7/fff&amp;text=U" alt="User Avatar" class="img-circle">
+        </span>
+        <div class="chat-body clearfix">
+            <div class="chat-header">
+                <strong class="primary-font">[[name]]</strong><small class="pull-right text-muted">
+                  <span class="glyphicon glyphicon-time"></span>[[datetime]]
+                </small>
+            </div>
+            <p>[[message]]</p>
+        </div>
+      </li>`;
+    $(document).ready(function(){
+        chatSocket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+        chatSocket.on('connect', function() {
+            chatSocket.emit('joined', {});
+        });
+        chatSocket.on('status', function(data) {
+            var msg = msgTemplate.replace('[[message]]',  '<span style="color: green;">' + data.msg + '<span>');
+            msg = msg.replace('[[datetime]]', 'now');
+            msg = msg.replace('[[name]]', data.name);
+            $('#chat-body').append(msg);
+            // $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
+            $('#chat').scrollTop($('#chat')[0].scrollHeight);
+        });
+        chatSocket.on('message', function(data) {
+            var msg = msgTemplate.replace('[[message]]', data.msg);
+            msg = msg.replace('[[datetime]]', 'now');
+            msg = msg.replace('[[name]]', data.name);
+            $('#chat-body').append(msg);
+            // $('#chat').val($('#chat').val() + data.msg + '\n');
+            $('#chat').scrollTop($('#chat')[0].scrollHeight);
+        });
+        $('#text').keypress(function(e) {
+            var code = e.keyCode || e.which;
+            if (code == 13) {
+                text = $('#text').val();
+                $('#text').val('');
+                chatSocket.emit('text', {msg: text});
+            }
+        });
+    });
+  </script>
   {% if current_user.user_type == 'payer' %}
     <div id="user-prompt-bg"></div>
     <div id="user-prompt" data-validated="false" data-set-url="{{ url_for('main.request_set_stamp_author', gop_id=gop.id) }}">
