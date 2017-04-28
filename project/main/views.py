@@ -159,7 +159,7 @@ def request_form():
 
         msg = 'New GOP request is added'
         url = url_for('main.request_page', gop_id=gop.id)
-        notify('New GOP request', msg, url)
+        notify('New GOP request', msg, url, user=gop.payer.user)
 
         gop_service.send_email(gop)
 
@@ -199,7 +199,8 @@ def request_page(gop_id):
 
             msg = 'GOP request is under review'
             url = url_for('main.request_page', gop_id=gop.id)
-            notify('Your GOP request is under review', msg, url)
+            notify('Your GOP request is under review', msg, url,
+                   user=gop.provider.user)
 
             gop.status = 'in_review'
             gop.timestamp_edited = datetime.now()
@@ -217,7 +218,8 @@ def request_page(gop_id):
 
             msg = 'GOP request status is changed to "%s"' % gop.status
             url = url_for('main.request_page', gop_id=gop.id)
-            notify('Your GOP request status is changed', msg, url)
+            notify('Your GOP request status is changed', msg, url,
+                   user=gop.provider.user)
 
             flash('The GOP request has been %s.' % form.status.data)
             return redirect(url_for('main.index'))
@@ -401,7 +403,8 @@ def request_page_edit(gop_id):
 
         msg = 'GOP request status is changed to "%s"' % gop.status
         url = url_for('main.request_page', gop_id=gop.id)
-        notify('The GOP request status is changed', msg, url)
+        notify('The GOP request status is changed', msg, url,
+               user=gop.provider.user)
 
         if gop.final:
             gop_service.send_email(gop)

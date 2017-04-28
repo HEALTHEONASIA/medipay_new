@@ -2,9 +2,11 @@ import os
 import random
 import string
 
-from flask import request, url_for
+from flask import request, session, url_for
+from flask_login import current_user
 from werkzeug.utils import secure_filename
 
+from .events import clients
 from .. import config, redis_store, socketio
 
 
@@ -136,11 +138,13 @@ def validate_email_address(data):
         return True
 
 
-def notify(title='New notification', message='Message', url=None):
+def notify(title='New notification', message='Message', url=None,
+           user=current_user):
     """Function to send socketio message"""
     try:
         socketio.emit('message',
-            {'title': title, 'message': message, 'url': url})
+                      {'title': title, 'message': message, 'url': url},
+                      room=user.id)
     except:
         pass
 

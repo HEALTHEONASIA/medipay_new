@@ -1,12 +1,19 @@
-from flask import session
+from flask import request, session
+from flask_login import current_user
 from flask_socketio import send, emit, join_room, leave_room
 
 from .. import redis_store, socketio
 
+clients = {}
 
 @socketio.on('hello')
 def handle_hello(message):
     print('received hello message: ' + str(message))
+    try:
+      if current_user.is_authenticated:
+          join_room(current_user.id)
+    except:
+        pass
 
 
 @socketio.on('disconnect')
