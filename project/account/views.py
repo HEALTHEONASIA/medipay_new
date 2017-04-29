@@ -8,8 +8,9 @@ from .forms import ProviderPayerSetupAddForm, ProviderPayerSetupEditForm
 from .forms import BillingCodeForm, SingleCsvForm, DoctorForm, UserSetupForm
 from .forms import UserSetupAdminForm, UserUpgradeForm, EditAccountForm
 from .. import models, db, mail
-from ..main.helpers import photo_file_name_santizer
+from ..main.helpers import photo_file_name_santizer,to_float_or_zero
 from ..models import login_required
+#from .helpers import to_float_or_zero
 
 @account.route('/settings', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
