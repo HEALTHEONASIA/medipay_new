@@ -13,3 +13,4 @@ project/static/uploads/*
 .idea/
 *config_mysql.py
 *config_mail.py
+wsgi_test.py
