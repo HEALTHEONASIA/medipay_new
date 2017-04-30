@@ -502,6 +502,7 @@
             $('#chat-body').append(msg);
             // $('#chat').val($('#chat').val() + data.msg + '\n');
             $('#chat').scrollTop($('#chat')[0].scrollHeight);
+            playSound('/static/sounds/message');
         });
         $('#text').keypress(function(e) {
             var code = e.keyCode || e.which;
