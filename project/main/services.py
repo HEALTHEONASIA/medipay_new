@@ -130,6 +130,9 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
     def set_chat_room(self, gop):
         session['room'] = 'gop' + str(gop.id)
         session['name'] = current_user.email
+        session['provider_user_id'] = gop.provider.user.id
+        session['payer_user_id'] = gop.payer.user.id
+        session['gop_id'] = gop.id
 
 
 class UserService(ExtFuncsMixin, SQLAlchemyService):

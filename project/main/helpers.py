@@ -6,7 +6,6 @@ from flask import request, session, url_for
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
-from .events import clients
 from .. import config, redis_store, socketio
 
 
@@ -138,13 +137,20 @@ def validate_email_address(data):
         return True
 
 
-def notify(title='New notification', message='Message', url=None,
-           user=current_user):
+def notify(title='New notification', message='Message',
+           url=None, user=current_user, user_id=None):
     """Function to send socketio message"""
     try:
+        # if the user's id is not passed,
+        # use the User object instead
+        if not user_id:
+            user_id = user.id
+
         socketio.emit('message',
-                      {'title': title, 'message': message, 'url': url},
-                      room=user.id)
+                      {'title': title,
+                       'message': message,
+                       'url': url},
+                      room=user_id)
     except:
         pass
 

@@ -1,8 +1,9 @@
-from flask import request, session
+from flask import request, session, url_for
 from flask_login import current_user
 from flask_socketio import send, emit, join_room, leave_room
 
 from .. import redis_store, socketio
+from .helpers import notify
 
 clients = {}
 
@@ -10,13 +11,10 @@ clients = {}
 def handle_hello(message):
     print('received hello message: ' + str(message['data']))
 
+    # create a room named with the user's id
+    # to be able to send notifications to that user
     if current_user.is_authenticated:
         join_room(current_user.id)
-
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    pass
 
 
 @socketio.on('check-notifications')
@@ -60,9 +58,32 @@ def text(message):
           'msg': message['msg']},
          room=room)
 
+    # notify the GOP request's provider
+    # and payer about a new chat message
+    title = 'New message'
+    msg = 'New chat message in a GOP request'
+    url = url_for('main.request_page', gop_id=session['gop_id'])
+
+    notify(title=title, message=msg, url=url,
+           user_id=session.get('provider_user_id'))
+    notify(title=title, message=msg, url=url,
+           user_id=session.get('payer_user_id'))
+
 
 @socketio.on('left', namespace='/chat')
 def left(message):
+    """Sent by clients when they leave a room.
+    A status message is broadcast to all people in the room."""
+    room = session.get('room')
+    leave_room(room)
+    emit('status',
+         {'name': session.get('name'),
+          'msg': 'has left the room.'},
+         room=room)
+
+
+@socketio.on('disconnect', namespace='/chat')
+def handle_chat_disconnect():
     """Sent by clients when they leave a room.
     A status message is broadcast to all people in the room."""
     room = session.get('room')
