@@ -44,7 +44,7 @@ def joined(message):
     join_room(room)
     emit('status',
          {'name': session.get('name'),
-          'msg': 'has entered the room.'},
+          'msg': '<span style="color: green;">has entered the room.</span>'},
          room=room)
 
 
@@ -80,7 +80,7 @@ def left(message):
     leave_room(room)
     emit('status',
          {'name': session.get('name'),
-          'msg': 'has left the room.'},
+          'msg': '<span style="color: red;">has left the room.</span>'},
          room=room)
 
 
@@ -92,5 +92,5 @@ def handle_chat_disconnect():
     leave_room(room)
     emit('status',
          {'name': session.get('name'),
-          'msg': 'has left the room.'},
+          'msg': '<span style="color: red;">has left the room.</span>'},
          room=room)

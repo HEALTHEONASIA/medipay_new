@@ -488,7 +488,7 @@
             chatSocket.emit('joined', {});
         });
         chatSocket.on('status', function(data) {
-            var msg = msgTemplate.replace('[[message]]',  '<span style="color: green;">' + data.msg + '<span>');
+            var msg = msgTemplate.replace('[[message]]', data.msg);
             msg = msg.replace('[[datetime]]', 'now');
             msg = msg.replace('[[name]]', data.name);
             $('#chat-body').append(msg);
