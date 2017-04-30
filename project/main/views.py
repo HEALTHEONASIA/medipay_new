@@ -401,10 +401,10 @@ def request_page_edit(gop_id):
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
-        msg = 'GOP request status is changed to "%s"' % gop.status
+        msg = 'GOP request status is changed to "%s" FINAL' % gop.status
         url = url_for('main.request_page', gop_id=gop.id)
         notify('The GOP request status is changed', msg, url,
-               user=gop.provider.user)
+               user=gop.payer.user)
 
         if gop.final:
             gop_service.send_email(gop)
