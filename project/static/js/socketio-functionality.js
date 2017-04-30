@@ -35,14 +35,19 @@ function notifyMe(title, message, url) {
 
 $.notifyDefaults({
   type: 'success',
-  timer: 10000
+  timer: 5000
 });
 
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 socket.on('connect', function() {
     socket.emit('hello', {data: 'I\'m connected!'});
     socket.on('message', function(data) {
-        $.notify({'title': data.title, 'message': data.message, 'url': data.url});
+        $.notify({
+          title: data.title,
+          message: data.message,
+          url: data.url,
+          target: '_blank'
+        });
         console.log(data);
         notifyMe(data.title, data.message, data.url);
         playSound('/static/sounds/arpeggio');
