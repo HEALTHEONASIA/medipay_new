@@ -141,12 +141,12 @@ def validate_email_address(data):
 def notify(title='New notification', message='Message', url=None,
            user=current_user):
     """Function to send socketio message"""
-    try:
-        socketio.emit('message',
+    # try:
+    socketio.emit('message',
                       {'title': title, 'message': message, 'url': url},
                       room=user.id)
-    except:
-        pass
+    # except:
+    #     pass
 
 
 def is_admin(user):
