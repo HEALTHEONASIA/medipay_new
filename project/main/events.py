@@ -65,9 +65,11 @@ def text(message):
     url = url_for('main.request_page', gop_id=session['gop_id'])
 
     notify(title=title, message=msg, url=url,
-           user_id=session.get('provider_user_id'))
+           user_id=session.get('provider_user_id'),
+           room_name=room)
     notify(title=title, message=msg, url=url,
-           user_id=session.get('payer_user_id'))
+           user_id=session.get('payer_user_id'),
+           room_name=room)
 
 
 @socketio.on('left', namespace='/chat')

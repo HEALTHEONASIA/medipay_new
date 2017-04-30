@@ -458,6 +458,12 @@
       </div>
     </div>
   </div>
+  <script type="text/javascript">
+      // define a global variable, that will prevent
+      // notifcations about new chat messages
+      // on the chat's page itself
+      var preventNtfForRoom = 'gop{{ gop.id }}';
+  </script>
 {% endblock %}
 {% block page_js %}
   <script type="text/javascript">

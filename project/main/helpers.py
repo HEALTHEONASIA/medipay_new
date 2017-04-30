@@ -138,7 +138,8 @@ def validate_email_address(data):
 
 
 def notify(title='New notification', message='Message',
-           url=None, user=current_user, user_id=None):
+           url=None, user=current_user, user_id=None,
+           room_name=None):
     """Function to send socketio message"""
     try:
         # if the user's id is not passed,
@@ -149,7 +150,8 @@ def notify(title='New notification', message='Message',
         socketio.emit('message',
                       {'title': title,
                        'message': message,
-                       'url': url},
+                       'url': url,
+                       'room_name': room_name},
                       room=user_id)
     except:
         pass
