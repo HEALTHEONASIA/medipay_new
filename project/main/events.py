@@ -8,7 +8,7 @@ clients = {}
 
 @socketio.on('hello')
 def handle_hello(message):
-    print('received hello message: ' + str(message))
+    print('received hello message: ' + str(message['data']))
     # try:
     if current_user.is_authenticated:
         join_room(current_user.id)

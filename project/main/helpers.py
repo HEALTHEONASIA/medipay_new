@@ -143,8 +143,8 @@ def notify(title='New notification', message='Message', url=None,
     """Function to send socketio message"""
     # try:
     socketio.emit('message',
-                      {'title': title, 'message': message, 'url': url},
-                      room=user.id)
+                  {'title': title, 'message': message, 'url': url},
+                  room=user.id)
     # except:
     #     pass
 
