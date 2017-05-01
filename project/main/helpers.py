@@ -1,8 +1,10 @@
 import os
 import random
 import string
+import io
+import csv
 
-from flask import request, session, url_for
+from flask import request, session, url_for, make_response
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
@@ -106,7 +108,7 @@ def photo_file_name_santizer(photo):
 
 
 def csv_ouput(csv_file_name, data):
-    si = StringIO.StringIO()
+    si = io.StringIO()
     cw = csv.writer(si)
     cw.writerows(data)
     output = make_response(si.getvalue())
