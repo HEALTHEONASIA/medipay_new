@@ -1,11 +1,14 @@
+import dateutil.parser
+import json
+
 from flask import request, render_template, session
 from flask_login import current_user
 from flask_mail import Message
 from flask_servicelayer import SQLAlchemyService
 
-from .. import db, models, mail
-from ..models import User
-from .helpers import is_admin, is_payer, is_provider, pass_generator
+from .. import db, models, mail, redis_store
+from ..models import Chat, ChatMessage, User
+from .helpers import is_admin, is_payer, is_provider, pass_generator, to_str
 
 
 class ExtFuncsMixin(object):
@@ -200,3 +203,31 @@ class TerminalService(ExtFuncsMixin, SQLAlchemyService):
             return self.get_for_admin(id)
 
         return None
+
+
+class ChatService(ExtFuncsMixin, SQLAlchemyService):
+    __model__ = models.Chat
+    __db__ = db
+
+    def save_for_user(self, chat, user_id):
+        """Function saves each user's history to MySQL"""
+        user_msg_list = '%suser%d' % (chat.name, user_id)
+        msg_list = redis_store.lrange(user_msg_list, 0, -1)
+
+        if msg_list:
+            for msg_json in msg_list:
+                msg_dict = json.loads(to_str(msg_json))
+                msg_dict['datetime'] = dateutil.parser.parse(msg_dict['datetime'])
+
+                chat_message = ChatMessage(chat=chat,
+                                           text=msg_dict['message'],
+                                           user_id=msg_dict['user_id'],
+                                           datetime=msg_dict['datetime'])
+                db.session.add(chat_message)
+
+            db.session.commit()
+            redis_store.delete(user_msg_list)
+
+    def save_from_redis(self, chat):
+        self.save_for_user(chat, chat.guarantee_of_payment.provider.user.id)
+        self.save_for_user(chat, chat.guarantee_of_payment.payer.user.id)

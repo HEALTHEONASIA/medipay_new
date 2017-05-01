@@ -70,6 +70,8 @@ class User(UserMixin, ColsMapMixin, db.Model):
     api_key = db.Column(db.String(128))
     premium = db.Column(db.SmallInteger)
 
+    messages = db.relationship('ChatMessage', backref='user', lazy='dynamic')
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -427,6 +429,8 @@ class GuaranteeOfPayment(ColsMapMixin ,db.Model):
                                       backref='guarantee_of_payment')
     claim = db.relationship('Claim', uselist=False,
                             backref='guarantee_of_payment')
+    chat = db.relationship('Chat', uselist=False,
+                            backref='guarantee_of_payment')
 
     def turnaround_time(self):
         if not self.timestamp_edited:
@@ -477,3 +481,20 @@ class ICDCode(db.Model):
     edc = db.Column(db.String(40))
     description = db.Column(db.String(80))
     common_term = db.Column(db.String(40))
+
+
+class Chat(ColsMapMixin, db.Model):
+    __tablename__ = 'chat'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(127))
+    gop_id = db.Column(db.Integer, db.ForeignKey('guarantee_of_payment.id'))
+    messages = db.relationship('ChatMessage', backref='chat', lazy='dynamic')
+
+
+class ChatMessage(ColsMapMixin, db.Model):
+    __tablename__ = 'chat_message'
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    datetime = db.Column(db.DateTime, default=datetime.now())

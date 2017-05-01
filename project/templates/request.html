@@ -488,19 +488,25 @@
             chatSocket.emit('joined', {});
         });
         chatSocket.on('status', function(data) {
+            if (data.messages.length > 0) {
+              for (var key in data.messages) {
+                var msg = msgTemplate.replace('[[message]]', data.messages[key].msg);
+                msg = msg.replace('[[datetime]]', data.messages[key].datetime);
+                msg = msg.replace('[[name]]', data.messages[key].name);
+                $('#chat-body').append(msg);
+              }
+            }
             var msg = msgTemplate.replace('[[message]]', data.msg);
-            msg = msg.replace('[[datetime]]', 'now');
+            msg = msg.replace('[[datetime]]', data.datetime);
             msg = msg.replace('[[name]]', data.name);
             $('#chat-body').append(msg);
-            // $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
             $('#chat').scrollTop($('#chat')[0].scrollHeight);
         });
         chatSocket.on('message', function(data) {
             var msg = msgTemplate.replace('[[message]]', data.msg);
-            msg = msg.replace('[[datetime]]', 'now');
+            msg = msg.replace('[[datetime]]', data.datetime);
             msg = msg.replace('[[name]]', data.name);
             $('#chat-body').append(msg);
-            // $('#chat').val($('#chat').val() + data.msg + '\n');
             $('#chat').scrollTop($('#chat')[0].scrollHeight);
             playSound('/static/sounds/message');
         });
@@ -512,6 +518,9 @@
                 chatSocket.emit('text', {msg: text});
             }
         });
+    });
+    $(window).unload(function() {
+        chatSocket.emit('left', {});
     });
   </script>
   {% if current_user.user_type == 'payer' %}
