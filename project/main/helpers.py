@@ -170,6 +170,7 @@ def is_provider(user):
 def is_payer(user):
     return user.get_type() == 'payer'
 
+
 def to_str(bytes_or_str):
     if isinstance(bytes_or_str, bytes):
         value = bytes_or_str.decode('utf-8')
