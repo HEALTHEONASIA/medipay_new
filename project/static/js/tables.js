@@ -16,7 +16,7 @@
             //     'aTargets': [0]
             // }],
             "order": [
-                [3, "desc"]
+                [0, "desc"]
             ]
         };
         table.dataTable(settings);
