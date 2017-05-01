@@ -104,7 +104,7 @@
           </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group" id="other-country" style="{% if form.other_country.data and form.country.data == 'Other' %}display: block;{% endif %}">
+              <div class="form-group" id="other-country">
                 <label>Other country</label>
                 {% for error in form.other_country.errors %}
                   <span class="help" style="color: #f55753;">[{{ error }}]</span>
@@ -274,7 +274,7 @@
       $('#api-key').fadeOut(function() {
         $('#api-key').text('');
       });
-      $.get({{ url_for('account.generate_api_key') }}, function(data) {
+      $.get('{{ url_for("account.generate_api_key") }}', function(data) {
         $('#api-key').fadeIn(function() {
           $('#api-key').text(data);
         });
