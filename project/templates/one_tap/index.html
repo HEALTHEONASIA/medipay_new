@@ -206,6 +206,9 @@
                     </tr>
                   </thead>
                   <tbody>
+                    <tr role="row">
+                       <td class="v-align-middle">Test Provider</td>
+                    </tr>
                   {% for provider in providers %}
                     <tr role="row">
                       <td class="v-align-middle">{{ provider.name }}</td>
@@ -508,7 +511,9 @@
           series: [
             [
               {% for value in amount_chart_data['values'] %}
-                {{ value }},
+                {% if value %}
+                    {{ value }},
+                {% endif %}
               {% endfor %}
             ]
           ]
