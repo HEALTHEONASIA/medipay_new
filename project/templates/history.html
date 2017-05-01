@@ -78,25 +78,6 @@
         </div>
       </div>
       {{ widget.page_number(pagination, url = 'main.history') }}
-      {% if pagination %}
-        <div id="pagination">
-          {%- for page in pagination.iter_pages() %}
-            {% if page %}
-              {% if page != pagination.page %}
-                <a href="{{ url_for('main.history', page=page) }}">{{ page }}</a>
-              {% else %}
-                <strong>{{ page }}</strong>
-              {% endif %}
-            {% else %}
-              <span>...</span>
-            {% endif %}
-          {%- endfor %}
-        </div>
-      {% endif %}
-    </div>
-  </div>
-{% endblock %}
-
 {% block page_js %}
 <script>
 (function($) {
