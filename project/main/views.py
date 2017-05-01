@@ -24,8 +24,9 @@ from .. import config, create_app, db, redis_store, models
 from .. import auth
 from ..auth.forms import LoginForm
 from ..auth.views import login_validation
-from ..models import BillingCode, Doctor, GuaranteeOfPayment, ICDCode
-from ..models import login_required, Member, Payer, Provider, User
+from ..models import BillingCode, Chat, ChatMessage, Doctor
+from ..models import GuaranteeOfPayment, ICDCode, login_required, Member
+from ..models import Payer, Provider, User
 
 
 gop_service = GuaranteeOfPaymentService()
@@ -227,7 +228,7 @@ def request_page(gop_id):
         context = {
             'gop': gop,
             'icd_codes': gop.icd_codes,
-            'form': form,
+            'form': form
         }
         return render_template('request.html', **context)
 
