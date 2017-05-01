@@ -352,6 +352,25 @@
             </div>
           </div>
           <h5>Cost Estimation</h5>
+          
+          {% if bill_codes and bill_codes.count() > 0 %}
+          <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                    <label>Load from billing codes</label>
+                    <div class="select-field-outer">
+                        <select class="form-control" id="billing-codes">
+                            <option value="0">Select billing code</option>
+                            {% for bill_code in bill_codes %}
+                                <option value="{{ bill_code.id }}">Bill Code #{{ bill_code.id }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+               </div>
+           </div>
+          {% endif %}
+          
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -414,19 +433,6 @@
               </div>
             </div>
           </div>
-          {% if bill_codes and bill_codes.count() > 0 %}
-            <div class="form-group">
-              <label>Load from billing codes</label>
-              <div class="select-field-outer">
-                <select class="form-control" id="billing-codes">
-                  <option value="0">Select billing code</option>
-                  {% for bill_code in bill_codes %}
-                    <option value="{{ bill_code.id }}">Bill Code #{{ bill_code.id }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-          {% endif %}
 
           <div class="form-group pull-right" style="padding-top:20px;">
             {{ form.submit(class_="btn btn-primary") }}
