@@ -15,7 +15,6 @@ from ..models import login_required
 @account.route('/settings', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
 def settings():
-    submission_error = 0
     if current_user.user_type == 'provider':
         form = ChangeProviderInfoForm()
         if form.validate_on_submit():
@@ -35,14 +34,8 @@ def settings():
             current_user.provider.street_number = form.street_number.data
             current_user.provider.state = form.state.data
             current_user.provider.postcode = form.postcode.data
-            
-            if form.pic_email.data == form.pic_alt_email.data:
-                submission_error = 1
-                flash('PIC and ALT email cannot be same.')
-            
-            if submission_error == 0:
-                db.session.add(current_user)
-                flash('Data has been updated.')
+            db.session.add(current_user)
+            flash('Data has been updated.')
 
         if request.method != 'POST':
             if current_user.provider.country:
@@ -86,14 +79,8 @@ def settings():
             current_user.payer.street_number = form.street_number.data
             current_user.payer.state = form.state.data
             current_user.payer.postcode = form.postcode.data
-            
-            if form.pic_email.data == form.pic_alt_email.data:
-                submission_error = 1
-                flash('PIC and ALT email cannot be same.')
-            
-            if submission_error == 0:
-                db.session.add(current_user)
-                flash('Data has been updated.')
+            db.session.add(current_user)
+            flash('Data has been updated.')
 
         if request.method != 'POST':
             if current_user.payer.country:

@@ -79,6 +79,10 @@ def validate_empty_fee(form, field):
     except ValueError:
         field.data = 0.0
 
+def validate_pic_and_alt_email_not_equal(form, field):
+    if form.pic_email.data.lower() == form.pic_alt_email.data.lower():
+        raise ValidationError('PIC and ALT email cannot be same')
+
 
 class ChangeProviderInfoForm(BaseForm):
     company = StringField('Company')
@@ -87,7 +91,8 @@ class ChangeProviderInfoForm(BaseForm):
     pic_email = StringField('PIC email', validators=[Required(),
                                                      validate_email_address])
     pic_alt_email = StringField('PIC alt. email',
-                                validators=[validate_email_address])
+                                validators=[validate_email_address,
+                                            validate_pic_and_alt_email_not_equal])
     tel = StringField('Telephone', validators=[validate_phone])
     country = SelectField('Country', validators=[Required()],
                           choices=[('Singapore', 'Singapore'),
@@ -117,7 +122,8 @@ class ChangePayerInfoForm(BaseForm):
     pic_email = StringField('PIC email', validators=[Required(),
                                                      validate_email_address])
     pic_alt_email = StringField('PIC alt. email',
-                                validators=[validate_email_address])
+                                validators=[validate_email_address,
+                                            validate_pic_and_alt_email_not_equal])
     tel = StringField('Telephone', validators=[validate_phone])
     country = SelectField('Country', validators=[Required()],
                           choices=[('Singapore', 'Singapore'),
