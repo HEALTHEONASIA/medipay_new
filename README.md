@@ -30,3 +30,5 @@ And configure your apache VirtualHost as per example:
 Apache here works as a reverse proxy to your gunicorn server.
 
 **WARNING:** eventlet version should be 0.17.4 (actually just not 0.18 and higher) as it's the most stable when working with SocketIO
+
+**WARNING 2:** app requires a running Redis server on localhost:6379
