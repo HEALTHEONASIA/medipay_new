@@ -165,7 +165,14 @@
               <hr class="Sidebar-HR-Style">
             </li>
             {% endif %}
+            <li class="active m-t-40">
+                <a href="{{ url_for('one_tap.index') }}">
+                  <span class="title Side-Bar-Menu-Items-Font-Family">1TAP DASHBOARD</span>
+                </a>
+                <span class="icon-thumbnail"><i class="pg-settings"></i></span>
+            </li>
             {% if current_user.role != 'admin' %}
+
               <li class="active m-t-40">
                 <a href="{{ url_for('account.settings') }}">
                   <span class="title Side-Bar-Menu-Items-Font-Family">SETTINGS</span>
