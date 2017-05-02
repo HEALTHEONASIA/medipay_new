@@ -1924,15 +1924,22 @@ def terminal_add():
 
 
 @api.route('/claim/check-new', methods=['GET'])
-@api_auth()
 def claim_check_new():
+    authorized, error, user = authorize_api_key()
+
+    if not authorized:
+        return error
+
     json_ = request.get_json()
 
     claims = models.Claim.query.filter_by(new_claim=1).all()
 
     claims_urls = []
     for claim in claims:
-        claims_urls.append({'redirect_url': 'https://1tapsystem.com/claim/%d' % claim.id})
+        claims_urls.append({
+            'redirect_url': request.url_root[:-1] + url_for('one_tap.claim',
+                                                            claim_id=claim.id)
+        })
         claim.new_claim = 0
         db.session.add(claim)
 
