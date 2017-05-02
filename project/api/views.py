@@ -1613,7 +1613,7 @@ def member_info_update():
 
     if member.photo != json['photo']:
         base64photo = json['photo'].replace('data:image/jpeg;base64,', '')
-        base64photo = base64.b64encode(base64photo)
+        base64photo = to_bytes(base64photo)
 
         filename = str(random.randint(100000, 999999)) + str(member.id) + '.jpg'
         filepath = os.path.join(config['development'].UPLOAD_FOLDER, filename)
