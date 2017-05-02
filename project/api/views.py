@@ -1893,8 +1893,12 @@ def terminal_edit_json():
 
 
 @api.route('/terminal/add', methods=['POST'])
-@api_auth()
 def terminal_add():
+    authorized, error, user = authorize_api_key()
+
+    if not authorized:
+        return error
+
     json_ = request.get_json()
 
     # find the terminal with the given device uid
