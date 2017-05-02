@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import random
@@ -12,7 +13,7 @@ from sqlalchemy import desc
 
 from .helpers import *
 from . import api
-from ..main.helpers import notify, to_bytes
+from ..main.helpers import notify
 from ..main.services import GuaranteeOfPaymentService
 from .. import config, db, models
 
@@ -1612,13 +1613,12 @@ def member_info_update():
 
     if member.photo != json['photo']:
         base64photo = json['photo'].replace('data:image/jpeg;base64,', '')
-        base64photo = to_bytes(base64photo)
 
         filename = str(random.randint(100000, 999999)) + str(member.id) + '.jpg'
         filepath = os.path.join(config['development'].UPLOAD_FOLDER, filename)
 
         with open(filepath, "wb+") as fh:
-            fh.write(base64photo.decode('base64'))
+            fh.write(base64.decodebytes(base64photo))
 
         filename = '/static/uploads/' + filename
 
