@@ -10,12 +10,12 @@ from flask_login import current_user, login_user
 from sqlalchemy import desc
 
 from .forms import ClaimForm, MemberForm, TerminalForm
-from .helpers import pass_generator, photo_file_name_santizer, percent_of
+from .helpers import pass_generator, percent_of
 from .helpers import patients_amount
 from . import one_tap
 from .. import config, db, models
 from ..main.forms import GOPForm
-from ..main.helpers import is_admin, is_payer, is_provider
+from ..main.helpers import is_admin, is_payer, is_provider, photo_file_name_santizer
 from ..main.services import MedicalDetailsService, MemberService, ClaimService
 from ..main.services import GuaranteeOfPaymentService, TerminalService
 from ..models import Claim, Member, Terminal, ICDCode, Provider, Payer
