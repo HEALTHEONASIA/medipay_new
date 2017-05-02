@@ -159,6 +159,10 @@ def request_form():
         exclude = ['doctor_name', 'status', 'icd_codes']
         gop_service.update_from_form(gop, form, exclude=exclude)
 
+        chat = Chat(name='gop%d' % gop.id, gop_id=gop.id)
+        db.session.add(chat)
+        db.session.commit()
+
         msg = 'New GOP request is added'
         url = url_for('main.request_page', gop_id=gop.id)
         notify('New GOP request', msg, url, user=gop.payer.user)

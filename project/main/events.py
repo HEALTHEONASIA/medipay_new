@@ -64,7 +64,10 @@ def joined(message):
        db.session.add(chat)
        db.session.commit(chat)
 
-    chat_service.save_from_redis(chat)
+    try:
+        chat_service.save_from_redis(chat)
+    except:
+        pass
 
     chat_messages = ChatMessage.query.order_by(ChatMessage.datetime)\
                                      .filter_by(chat_id=chat.id).all()
