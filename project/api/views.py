@@ -1,6 +1,8 @@
 import base64
+import grp
 import json
 import os
+import pwd
 import random
 import re
 import requests
@@ -1615,11 +1617,16 @@ def member_info_update():
         base64photo = json['photo'].replace('data:image/jpeg;base64,', '')
         base64photo = to_bytes(base64photo)
 
+        uid = pwd.getpwnam("medipay2").pw_uid
+        gid = grp.getgrnam("nodoby").gr_gid
+
         filename = str(random.randint(100000, 999999)) + str(member.id) + '.jpg'
         filepath = os.path.join(config['development'].UPLOAD_FOLDER, filename)
 
         with open(filepath, "wb") as fh:
             fh.write(base64.decodebytes(base64photo))
+
+        os.chown(filepath, uid, gid)
 
         filename = '/static/uploads/' + filename
 
