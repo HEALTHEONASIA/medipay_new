@@ -2026,7 +2026,7 @@ def claim_add_by_terminal():
     db.session.commit()
 
     notification = """A <a href="%s" target="_blank">new claim #%d</a>
-        has been added!""" % (url_for('main.claim', claim_id=claim.id),
+        has been added!""" % (url_for('one_tap.claim', claim_id=claim.id),
         claim.id)
     notify(notification)
 
