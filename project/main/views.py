@@ -608,6 +608,11 @@ def icd_code_search():
 
     pagination, icd_codes = icd_code_service.prepare_pagination(icd_codes)
 
+    try:
+        icd_codes = icd_codes.all()
+    except:
+        pass
+
     return render_template('icd-code-search-results.html', icd_codes=icd_codes,
                            query=query, pagination=pagination)
 
