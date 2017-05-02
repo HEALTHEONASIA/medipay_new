@@ -484,17 +484,20 @@
       </li>`;
     $(document).ready(function(){
         chatSocket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+        var chatHistoryLoaded = false;
+
         chatSocket.on('connect', function() {
             chatSocket.emit('joined', {});
         });
         chatSocket.on('status', function(data) {
-            if (data.messages.length > 0) {
+            if (data.messages.length > 0 && !chatHistoryLoaded) {
               for (var key in data.messages) {
                 var msg = msgTemplate.replace('[[message]]', data.messages[key].msg);
                 msg = msg.replace('[[datetime]]', data.messages[key].datetime);
                 msg = msg.replace('[[name]]', data.messages[key].name);
                 $('#chat-body').append(msg);
               }
+              chatHistoryLoaded = true;
             }
             var msg = msgTemplate.replace('[[message]]', data.msg);
             msg = msg.replace('[[datetime]]', data.datetime);
