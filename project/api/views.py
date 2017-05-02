@@ -1918,7 +1918,6 @@ def terminal_add():
     # returns the url on the current terminal's edit page
     # it will redirect the user of the 1TAP desktop app to this page
     return jsonify({
-        'redirect_url': 'https://1tapsystem.com/terminal/%d/edit' % terminal.id
         'redirect_url': request.url_root[:-1] + url_for('one_tap.terminal_edit'
                                                         terminal_id=terminal.id)
     })
