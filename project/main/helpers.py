@@ -3,6 +3,8 @@ import random
 import string
 import io
 import csv
+import grp
+import pwd
 
 from flask import request, session, url_for, make_response
 from flask_login import current_user
@@ -93,8 +95,13 @@ def photo_file_name_santizer(photo):
 
     if filename and allowed_file(filename):
         filename = str(random.randint(100000, 999999)) + filename
-        photo.data.save(
-            os.path.join(config['production'].UPLOAD_FOLDER, filename))
+        filepath = os.path.join(config['production'].UPLOAD_FOLDER, filename)
+        photo.data.save(filepath)
+
+        # Give the uploaded file read rights to everyone
+        uid = pwd.getpwnam("medipay2").pw_uid
+        gid = grp.getgrnam("nobody").gr_gid
+        os.chown(filepath, uid, gid)
 
     if not filename:
         filename = ''
