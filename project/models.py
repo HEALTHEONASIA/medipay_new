@@ -474,7 +474,7 @@ class MedicalDetails(ColsMapMixin, db.Model):
     treatment_plan = db.Column(db.Text)
 
 
-class ICDCode(db.Model):
+class ICDCode(ColsMapMixin, db.Model):
     __tablename__ = 'icd_code'
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(40))

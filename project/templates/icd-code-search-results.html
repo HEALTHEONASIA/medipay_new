@@ -1,10 +1,6 @@
+{% import "widget.html" as widget %}
 {% if icd_codes %}
-    {% set page_break_number = 10 %}
-    {% set page_number = 1 %}
     {% for icd_code in icd_codes %}
-        {% if loop.index is divisibleby(page_break_number + 1) %}
-            {% set page_number = page_number + 1 %}
-        {% endif %}
         <tr role="row" class="odd page-number-{{page_number}}">
             <td class="v-align-middle sorting_0">
               <span data-id="{{ icd_code.id }}">
@@ -35,26 +31,13 @@
             </td>
         </tr>
     {% endfor %}
-    
-    {% if icd_codes|length > page_break_number %}
-    {% set page_number = 1 %}
-        <tr role="row" class="odd icd-pagination-tr">
-            <td colspan=3>
-                <div class="icd-pagination pull-right">
-                    {% for icd_code in icd_codes %}
-                        {% if loop.first %}
-                            <a href="#" name="page-number-{{page_number}}" class="active page-number">{{page_number}}</a>
-                        {% endif %}
-                        
-                        {% if loop.index is divisibleby(page_break_number + 1) %}
-                            {% set page_number = page_number + 1 %}
-                            <a href="#" name="page-number-{{page_number}}" class="page-number">{{page_number}}</a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </td>
-        </tr>
-    {% endif %}
+    <tr role="row" class="odd" id="icd-code-pagination">
+      <td class="v-align-middle sorting_1" colspan="3">
+        <p style="text-align: center;">
+          {{ widget.page_number(pagination, query=query, url='main.icd_code_search') }}
+        </p>
+      </td>
+    </tr>
 {% else %}
     <tr role="row" class="odd">
         <td class="v-align-middle sorting_1" colspan="3">

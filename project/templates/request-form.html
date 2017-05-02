@@ -109,7 +109,7 @@
                     <tr role="row" class="odd">
                         <td class="v-align-middle" colspan="3">
                             <p style="text-align: center;">
-                                Search Data For Results
+                                Type something and press "Enter" to search
                             </p>
                         </td>
                         <td style="display:none;"></td>
@@ -686,30 +686,20 @@
           var query = $(this).val();
           if(event.keyCode == 13)
           {
-            if ($('#modalSlideUp2 input').val().length != 0) 
-            {
+            if ($('#modalSlideUp2 input').val().length != 0) {
                 $.get('/icd-code/search', {'query': query}, function(data) {
                     $('#modalSlideUp2 table tbody').html(data);
-                    
-                    $('#icd_basicTable tr').hide();
-                    $('.icd-pagination-tr').show();
-                    $('.page-number-1').show();
-                    
                 });
             }
           }
         });
-        
-        $(document).on('click','.page-number',function(e){
-            $('#icd_basicTable tr').hide();
-            $('.icd-pagination-tr').show();
-            $('.icd-pagination a').removeClass('active');
-            $(this).addClass('active');
-        
-            var $page_class = '.' + $(this).attr('name')
-            $($page_class).show();
+
+        $(document).on('click', '#icd-code-pagination a', function(e) {
+          e.preventDefault();
+          $.get($(this).attr('href'), function(data) {
+              $('#modalSlideUp2 table tbody').html(data);
+          });
         });
-                    
         $('#modalSlideUp2 table tbody').on('click', 'tr', function() {
           var $this = $(this);
           $this.toggleClass('selected');

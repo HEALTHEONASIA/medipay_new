@@ -1,11 +1,15 @@
-{% macro page_number(pagination = None, url = None, status = None) -%}
+{% macro page_number(pagination=None, url=None, status=None, query=None) -%}
     {% if pagination %}
         <div id="pagination">
             {%- for page in pagination.iter_pages() %}
                 {% if page %}
                     {% if page != pagination.page %}
-                        {% if status %}
+                        {% if status and query %}
+                            <a href="{{ url_for(url, page=page, status=status, query=query) }}">{{ page }}</a>
+                        {% elif status and not query %}
                             <a href="{{ url_for(url, page=page, status=status) }}">{{ page }}</a>
+                        {% elif query and not status %}
+                            <a href="{{ url_for(url, page=page, query=query) }}">{{ page }}</a>
                         {% else %}
                             <a href="{{ url_for(url, page=page) }}">{{ page }}</a>
                         {% endif %}

@@ -148,6 +148,11 @@ class MedicalDetailsService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
 
+class ICDCodeService(ExtFuncsMixin, SQLAlchemyService):
+    __model__ = models.ICDCode
+    __db__ = db
+
+
 class MemberService(ExtFuncsMixin, SQLAlchemyService):
     __model__ = models.Member
     __db__ = db

@@ -18,7 +18,7 @@ from .forms import GOPForm, GOPApproveForm
 from .helpers import csv_ouput, pass_generator, photo_file_name_santizer
 from .helpers import to_float_or_zero, validate_email_address
 from .helpers import prepare_gops_list, notify, is_admin, is_provider, is_payer
-from .services import GuaranteeOfPaymentService, UserService
+from .services import GuaranteeOfPaymentService, UserService, ICDCodeService
 from .services import MedicalDetailsService, MemberService
 from .. import config, create_app, db, redis_store, models
 from .. import auth
@@ -33,6 +33,7 @@ gop_service = GuaranteeOfPaymentService()
 medical_details_service = MedicalDetailsService()
 member_service = MemberService()
 user_service = UserService()
+icd_code_service = ICDCodeService()
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -589,19 +590,26 @@ def icd_code_search():
         return render_template('icd-code-search-results.html',
                                icd_codes=None, query=query)
 
-    icd_codes = ICDCode.query.all()
+    # icd_codes = ICDCode.query.all()
 
-    result = []
+    icd_codes = ICDCode.query.filter(ICDCode.id > 0)
     fields = ['code', 'description', 'common_term']
 
-    def find(query, obj, attr): return query in getattr(obj, attr).lower()
+    def find(model, obj, attrs, search):
+        search = '%{0}%'.format(search)
 
-    for icd_code in icd_codes:
-        if any([find(query, icd_code, field) for field in fields]):
-            result.append(icd_code)
+        expessions = []
+        for attr in attrs:
+            expessions.append(getattr(model, attr).ilike(search))
 
-    return render_template('icd-code-search-results.html', icd_codes=result,
-                           query=query)
+        return obj.filter(or_(*expessions))
+
+    icd_codes = find(ICDCode, icd_codes, fields, query)
+
+    pagination, icd_codes = icd_code_service.prepare_pagination(icd_codes)
+
+    return render_template('icd-code-search-results.html', icd_codes=icd_codes,
+                           query=query, pagination=pagination)
 
 
 @main.route('/requests/filter', methods=['GET'])
