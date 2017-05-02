@@ -100,14 +100,15 @@ def block_unauthenticated_url(filename):
 @main.route('/request', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_form():
-    payers = current_user.provider.payers
     form = GOPForm()
 
+    form.payer.choices = [('0', 'None')]
     form.payer.choices += [(p.id, p.company) for p \
                            in current_user.provider.payers]
 
     form.icd_codes.choices = [(i.id, i.code) for i in ICDCode.query.all()]
 
+    form.doctor_name.choices = [('0', 'None')]
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                  for d in current_user.provider.doctors]
 
@@ -167,7 +168,7 @@ def request_form():
         flash('Your GOP request has been sent.')
         return redirect(url_for('main.index'))
 
-    return render_template('request-form.html', form=form, payers=payers,
+    return render_template('request-form.html', form=form,
                            bill_codes=current_user.provider.billing_codes)
 
 
@@ -352,6 +353,7 @@ def request_page_edit(gop_id):
 
     form.icd_codes.choices = [(i.id, i.code) for i in ICDCode.query.all()]
 
+    form.doctor_name.choices = [('0', 'None')]
     form.doctor_name.choices += [(d.id, d.name + ' (%s)' % d.doctor_type) \
                                  for d in current_user.provider.doctors]
 
