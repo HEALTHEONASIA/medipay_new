@@ -1618,7 +1618,7 @@ def member_info_update():
         base64photo = to_bytes(base64photo)
 
         uid = pwd.getpwnam("medipay2").pw_uid
-        gid = grp.getgrnam("nodoby").gr_gid
+        gid = grp.getgrnam("nobody").gr_gid
 
         filename = str(random.randint(100000, 999999)) + str(member.id) + '.jpg'
         filepath = os.path.join(config['development'].UPLOAD_FOLDER, filename)
