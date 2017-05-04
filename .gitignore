@@ -5,6 +5,7 @@ __pycache__/*
 */*/*/__pycache__/*
 project/app.db
 migrations/*
+tools/*
 project/db_repository/*
 project/static/uploads/*
 */*.pyc
