@@ -15,3 +15,4 @@ project/static/uploads/*
 *config_mysql.py
 *config_mail.py
 wsgi_test.py
+dump.rdb
