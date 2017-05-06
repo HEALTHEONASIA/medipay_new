@@ -1,3 +1,6 @@
+import csv
+import io
+
 from flask import render_template, flash, redirect, request, url_for
 from flask_login import current_user
 from flask_mail import Message
@@ -8,9 +11,9 @@ from .forms import ProviderPayerSetupAddForm, ProviderPayerSetupEditForm
 from .forms import BillingCodeForm, SingleCsvForm, DoctorForm, UserSetupForm
 from .forms import UserSetupAdminForm, UserUpgradeForm, EditAccountForm
 from .. import models, db, mail
-from ..main.helpers import photo_file_name_santizer,to_float_or_zero
+from ..main.helpers import photo_file_name_santizer, to_float_or_zero
+from ..main.helpers import validate_email_address
 from ..models import login_required
-#from .helpers import to_float_or_zero
 
 @account.route('/settings', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
@@ -237,49 +240,56 @@ def settings_payer_csv():
         return redirect(url_for('main.payers'))
 
     form = SingleCsvForm()
+
     if form.validate_on_submit():
         csv_file = request.files['csv_file']
 
         stream = io.StringIO(csv_file.stream.read().decode("UTF8"),
                              newline=None)
-        reader = csv.reader(stream)
-        payers_num = 0
-        for idx, row in enumerate(reader):
-            if len(row) == 7:
-                if not validate_email_address(row[2]):
-                    flash('The pic email "%s" is wrong on line %d.' % (
-                        row[2], idx + 1))
-                    return render_template('settings-payers-csv.html',
-                                           form=form)
 
-                payer = models.Payer.query.filter_by(company=row[0],
-                                                     payer_type=row[1],
-                                                     country=row[6],
-                                                     pic_email=row[2]).first()
-                if payer:
-                    current_user.provider.payers.append(payer)
-                else:
-                    payer = models.Payer(company=row[0],
-                                         payer_type=row[1],
-                                         pic_email=row[2],
-                                         pic_alt_email=row[3],
-                                         pic=row[4],
-                                         tel=row[5],
-                                         country=row[6])
+        # reader = csv.reader(stream)
+        reader = csv.DictReader(stream, skipinitialspace=True)
 
-                current_user.provider.payers.append(payer)
-                db.session.add(payer)
-                db.session.add(current_user.provider)
-                payers_num += 1
-            else:
-                flash('Your csv file is wrong.')
+        success_count = 0
+
+        for idx, row in enumerate(reader, start=1):
+            if not validate_email_address(row['pic_email']):
+                flash('The pic email "%s" is wrong on line %d.' \
+                      % (row['pic_email'], idx))
                 return render_template('settings-payers-csv.html', form=form)
 
-        if not payers_num:
+            if 'id' in row and row['id']:
+                payer = models.Payer.query.get(row['id'])
+            else:
+                payer = None
+
+            if payer:
+                payer.company = row['company']
+                payer.payer_type = row['payer_type']
+                payer.country = row['country']
+                payer.pic = row['pic']
+                payer.pic_email = row['pic_email']
+                payer.pic_alt_email = row['pic_alt_email']
+                payer.tel = row['tel']
+            else:
+                payer = models.Payer(company=row['company'],
+                                     payer_type=row['payer_type'],
+                                     pic_email=row['pic_email'],
+                                     pic_alt_email=row['pic_alt_email'],
+                                     pic=row['pic'],
+                                     tel=row['tel'],
+                                     country=row['country'])
+
+            current_user.provider.payers.append(payer)
+            db.session.add(current_user.provider)
+
+            success_count += 1
+
+        if not success_count:
             flash('Your csv file is empty.')
             return render_template('settings-payers-csv.html', form=form)
 
-        flash('Added %d payers' % payers_num)
+        flash('Added %d payers' % success_count)
         return redirect(url_for('account.settings_payers'))
 
     return render_template('settings-payers-csv.html', form=form)
