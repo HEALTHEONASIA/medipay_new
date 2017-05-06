@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "widget.html" as widget %}
 {% block title %}Payers{% endblock %}
 {% block sidebar %}{{ super() }}{% endblock %}
 {% block breadcrumb %}
@@ -126,6 +127,7 @@
             </table>
           </div>
         </div>
+        {{ widget.page_number(pagination, url='account.payers') }}
         <div class="row m-t-10">
           <div class="col-md-12" style="text-align: center;">
             {% if user %}

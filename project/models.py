@@ -362,7 +362,7 @@ class MedicalRecord(db.Model):
     member_id = db.Column(db.Integer, db.ForeignKey('member.id'))
 
 
-class Payer(db.Model):
+class Payer(ColsMapMixin, db.Model):
     __tablename__ = 'payer'
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(60))

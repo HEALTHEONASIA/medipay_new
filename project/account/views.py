@@ -13,7 +13,12 @@ from .forms import UserSetupAdminForm, UserUpgradeForm, EditAccountForm
 from .. import models, db, mail
 from ..main.helpers import photo_file_name_santizer, to_float_or_zero
 from ..main.helpers import validate_email_address
+from ..main.services import PayerService
 from ..models import login_required
+
+
+payer_service = PayerService()
+
 
 @account.route('/settings', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
@@ -114,9 +119,15 @@ def settings():
 @account.route('/settings/payers')
 @login_required(types=['provider'])
 def settings_payers():
-    payers = current_user.provider.payers
+    # payers = current_user.provider.payers
 
-    return render_template('settings-payers.html', payers=payers)
+    payers = models.Payer.query.join(models.Payer.providers)\
+                               .filter(models.Provider.id==current_user.provider.id)
+
+    pagination, payers = payer_service.prepare_pagination(payers)
+
+    return render_template('settings-payers.html', payers=payers,
+                           pagination=pagination)
 
 
 @account.route('/settings/payer/add', methods=['GET', 'POST'])

@@ -143,6 +143,11 @@ class UserService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
 
+class PayerService(ExtFuncsMixin, SQLAlchemyService):
+    __model__ = models.Payer
+    __db__ = db
+
+
 class MedicalDetailsService(ExtFuncsMixin, SQLAlchemyService):
     __model__ = models.MedicalDetails
     __db__ = db
