@@ -119,8 +119,6 @@ def settings():
 @account.route('/settings/payers')
 @login_required(types=['provider'])
 def settings_payers():
-    # payers = current_user.provider.payers
-
     payers = models.Payer.query.join(models.Payer.providers)\
                                .filter(models.Provider.id==current_user.provider.id)
 
