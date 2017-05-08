@@ -34,12 +34,16 @@
           <table class="table table-hover dataTable no-footer reduce-padding" id="basicTable" role="grid">
             <thead>
               <tr role="row">
+<!--
                 <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="status: activate to sort column ascending">Status</th>
+-->
                 <th class="sorting_asc" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Patient: activate to sort column descending" aria-sort="ascending">Patient</th>
                 <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Payer: activate to sort column ascending">Payer</th>
                 <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">Created Time</th>
-                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Created Time: activate to sort column ascending">Edited Time</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Edited Time: activate to sort column ascending">Edited Time</th>
                 <th tabindex="0" rowspan="1" colspan="1">Time</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Last Status: activate to sort column ascending">Last Status</th>
+                <th class="sorting" tabindex="0" aria-controls="basicTable" rowspan="1" colspan="1" aria-label="Reason: activate to sort column ascending">Reason</th>
               </tr>
             </thead>
             <tbody>
@@ -47,6 +51,7 @@
               <!-- <tr role="row" class="odd"> -->
               <!-- <tr role="row" class="even"> -->
               <tr role="row">
+<!--
                 <td class="v-align-middle">
                   <a href="{{ url_for('main.request_page', gop_id=gop.id) }}">
                     <p>
@@ -56,6 +61,7 @@
                     </p>
                   </a>
                 </td>
+-->
                 <td class="v-align-middle sorting_1">
                   <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{{ gop.member.name }}</p></a>
                 </td>
@@ -70,6 +76,12 @@
                 </td>
                 <td class="v-align-middle">
                   <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.turnaround_time() %} {{ gop.turnaround_time() }} {% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.status %}{{ gop.status }}{% else %}Pending{% endif %}</p></a>
+                </td>
+                <td class="v-align-middle">
+                  <a href="{{ url_for('main.request_page', gop_id=gop.id) }}"><p>{% if gop.reason_decline %}{{ gop.reason_decline }}{% elif gop.reason_close %}{{ gop.reason_close }}{% else %}Unknown{% endif %}</p></a>
                 </td>
               </tr>
             {% endfor %}
