@@ -14,10 +14,16 @@ from ..models import db, User, Provider, Payer
 
 
 def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    '''
+    generates a random passoword to be sent to new payers registration
+    '''
     return ''.join(random.choice(chars) for _ in range(size))
 
 
 def login_validation(form):
+    '''
+    user login validation operation
+    '''
     user = User.query.filter_by(email=form.email.data, role='admin').first()
 
     if not user:
@@ -63,6 +69,9 @@ def login_validation(form):
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    '''
+    logging in a user
+    '''
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
 
@@ -77,6 +86,9 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    '''
+    logging out a user
+    '''
     logout_user()
 
     # if the user has the notification session variable
@@ -91,6 +103,9 @@ def logout():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    '''
+    register new payer and providers
+    '''
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
 
@@ -121,6 +136,9 @@ def register():
 
 @auth.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
+    '''
+    forgot password operation
+    '''
     form = ForgotPasswordForm()
 
     if form.validate_on_submit():
