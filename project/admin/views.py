@@ -18,6 +18,9 @@ user_service = UserService()
 @admin.route('/', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def index():
+    '''
+    admin home page
+    '''
     status = request.args.get('status',None)
 
     gops = models.GuaranteeOfPayment.query.filter(
@@ -88,6 +91,9 @@ def index():
 @admin.route('/requests/by/<by>')
 @login_required(roles=['admin'])
 def requests_sorted(by):
+    '''
+    admin home page sidebar sorting of gp requests on the basis of provider, payer, status and country
+    '''
     allowed = ['provider', 'payer', 'status', 'country']
 
     if by not in allowed:
@@ -105,6 +111,9 @@ def requests_sorted(by):
 @admin.route('/users')
 @login_required(roles=['admin'])
 def users():
+    '''
+    display a list of users associated with admin
+    '''
     users = models.User.query.filter(models.User.id > 0)
 
     pagination, users = user_service.prepare_pagination(users)
@@ -115,6 +124,9 @@ def users():
 @admin.route('/history')
 @login_required(roles=['admin'])
 def history():
+    '''
+    display a list of closed gop requests
+    '''
     gops = models.GuaranteeOfPayment.query.filter_by(closed=True)
     return render_template('history.html', gops=gops)
 
@@ -122,6 +134,9 @@ def history():
 @admin.route('/request/<int:gop_id>', methods=['GET', 'POST'])
 @login_required()
 def request_page(gop_id):
+    '''
+    view individual gop requests
+    '''
     gop = models.GuaranteeOfPayment.query.get(gop_id)
     icd_codes = gop.icd_codes
     return render_template('request.html', gop=gop, icd_codes=icd_codes)
@@ -130,6 +145,9 @@ def request_page(gop_id):
 @admin.route('/user/<int:user_id>/settings', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings(user_id):
+    '''
+    updates setting information for both provider and payer
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -232,6 +250,9 @@ def user_settings(user_id):
 @admin.route('/user/<int:user_id>/settings/payers')
 @login_required(roles=['admin'])
 def user_settings_payers(user_id):
+    '''
+    display a list of payers associated with the admin
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -246,6 +267,9 @@ def user_settings_payers(user_id):
 @admin.route('/user/<int:user_id>/settings/payer/add', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings_payer_add(user_id):
+    '''
+    add individual payer information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -302,6 +326,9 @@ def user_settings_payer_add(user_id):
             methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings_payer_edit(user_id, payer_id):
+    '''
+    edit individual payer information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -361,6 +388,9 @@ def user_settings_payer_edit(user_id, payer_id):
 @admin.route('/user/<int:user_id>/settings/payer/csv', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings_payer_csv(user_id):
+    '''
+    upload payer information via csv
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -422,6 +452,9 @@ def user_settings_payer_csv(user_id):
             methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_billing_code_add(user_id):
+    '''
+    add billing code information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -463,6 +496,9 @@ def user_billing_code_add(user_id):
             methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_billing_code_add_csv(user_id):
+    '''
+    upload billing code information via csv
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -520,6 +556,9 @@ def user_billing_code_add_csv(user_id):
 @admin.route('/user/<int:user_id>/settings/billing-codes')
 @login_required(roles=['admin'])
 def user_billing_codes(user_id):
+    '''
+    displays a list of billing code inforrmation
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -536,6 +575,9 @@ def user_billing_codes(user_id):
             methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_billing_code_edit(user_id, bill_id):
+    '''
+    edit billing code information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -593,6 +635,9 @@ def user_billing_code_edit(user_id, bill_id):
 @admin.route('/user/<int:user_id>/settings/doctors')
 @login_required(roles=['admin'])
 def user_doctors(user_id):
+    '''
+    displays a list of doctors associated with the admin
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -607,6 +652,9 @@ def user_doctors(user_id):
 @admin.route('/user/<int:user_id>/settings/doctor/add', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_doctor_add(user_id):
+    '''
+    add individual doctor information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -634,6 +682,9 @@ def user_doctor_add(user_id):
 @admin.route('/user/<int:user_id>/settings/doctor/csv', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_doctor_add_csv(user_id):
+    '''
+    upload doctor information via csv
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -677,6 +728,9 @@ def user_doctor_add_csv(user_id):
             methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_doctor_edit(user_id, doctor_id):
+    '''
+    edit a doctor information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -716,6 +770,9 @@ def user_doctor_edit(user_id, doctor_id):
 @admin.route('/user/<int:user_id>/setup', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_setup(user_id):
+    '''
+    displays a list of users associated with a admin
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -728,6 +785,9 @@ def user_setup(user_id):
 @admin.route('/user/<int:user_id>/settings/user-setup', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings_user_setup(user_id):
+    '''
+    update user setting information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
@@ -760,6 +820,9 @@ def user_settings_user_setup(user_id):
 @admin.route('/user/<int:user_id>/settings/account', methods=['GET', 'POST'])
 @login_required(roles=['admin'])
 def user_settings_account(user_id):
+    '''
+    updates user password information
+    '''
     user = models.User.query.get(user_id)
 
     if not user:
