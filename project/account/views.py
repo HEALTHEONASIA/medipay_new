@@ -23,6 +23,9 @@ payer_service = PayerService()
 @account.route('/settings', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
 def settings():
+    '''
+    updates setting information for both provider and payer
+    '''
     if current_user.user_type == 'provider':
         form = ChangeProviderInfoForm()
         if form.validate_on_submit():
@@ -119,6 +122,9 @@ def settings():
 @account.route('/settings/payers')
 @login_required(types=['provider'])
 def settings_payers():
+    '''
+    display a list of payer information associated with the provider
+    '''
     payers = models.Payer.query.join(models.Payer.providers)\
                                .filter(models.Provider.id==current_user.provider.id)
 
@@ -131,6 +137,9 @@ def settings_payers():
 @account.route('/settings/payer/add', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def settings_payer_add():
+    '''
+    add individual payer information
+    '''
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To add the payers you need to be the admin.')
@@ -185,6 +194,9 @@ def settings_payer_add():
 @account.route('/settings/payer/<int:payer_id>/edit', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def settings_payer_edit(payer_id):
+    '''
+    edit individual payer information
+    '''
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To edit the payers you need to be the admin.')
@@ -243,6 +255,9 @@ def settings_payer_edit(payer_id):
 @account.route('/settings/payer/csv', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def settings_payer_csv():
+    '''
+    upload payer information via csv upload
+    '''
     # only user_admin can edit its payers
     if current_user.role != 'user_admin':
         flash('To bulk upload the payers you need to upgrade your account.')
@@ -307,6 +322,9 @@ def settings_payer_csv():
 @account.route('/settings/billing-codes')
 @login_required(types=['provider'])
 def billing_codes():
+    '''
+    display the list of billing codes associated with the provider
+    '''
     bill_codes = current_user.provider.billing_codes
 
     return render_template('billing-codes.html', bill_codes=bill_codes)
@@ -315,6 +333,9 @@ def billing_codes():
 @account.route('/settings/billing-code/add', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def billing_code_add():
+    '''
+    add individual billing code information
+    '''
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To add the billing codes you need to be the admin.')
@@ -354,6 +375,9 @@ def billing_code_add():
 @account.route('/settings/billing-code/csv', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def billing_code_add_csv():
+    '''
+    upload billing code information via csv upload
+    '''
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To bulk upload the billing codes you need to be the admin.')
@@ -409,6 +433,9 @@ def billing_code_add_csv():
 @account.route('/settings/billing-code/<int:bill_id>', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def billing_code_edit(bill_id):
+    '''
+    edit individual billing code
+    '''
     # only user_admin can edit its billing codes
     if current_user.role != 'user_admin':
         flash('To edit the billing codes you need to be the admin.')
@@ -465,6 +492,9 @@ def billing_code_edit(bill_id):
 @account.route('/settings/doctors')
 @login_required(types=['provider'])
 def doctors():
+    '''
+    display the list of doctors associated with the provider
+    '''
     doctors = current_user.provider.doctors
 
     return render_template('doctors.html', doctors=doctors)
@@ -473,6 +503,9 @@ def doctors():
 @account.route('/settings/doctor/add', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def doctor_add():
+    '''
+    add individual doctor information
+    '''
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To add the doctors you need to be the admin.')
@@ -499,6 +532,9 @@ def doctor_add():
 @account.route('/settings/doctor/csv', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def doctor_add_csv():
+    '''
+    upload doctor information via csv upload
+    '''
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To bulk upload the doctors you need to be the admin.')
@@ -537,6 +573,9 @@ def doctor_add_csv():
 @account.route('/settings/doctor/<int:doctor_id>/edit', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def doctor_edit(doctor_id):
+    '''
+    edit individual doctor information
+    '''
     # only user_admin can edit its doctors
     if current_user.role != 'user_admin':
         flash('To edit the doctors you need to be the admin.')
@@ -576,6 +615,9 @@ def doctor_edit(doctor_id):
 @account.route('/setup', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def setup():
+    '''
+    performs 1tap system setup operaion
+    '''
     # only user_admin can edit its setup settings
     if current_user.role != 'user_admin':
         flash('To edit the system settings you need to be the admin.')
@@ -587,6 +629,9 @@ def setup():
 @account.route('/settings/user-setup', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def settings_user_setup():
+    '''
+    updates the user email and name
+    '''
     # only user_admin can edit its user setup settings
     if current_user.role != 'user_admin':
         flash('To edit the user settings you need to be the admin.')
@@ -612,6 +657,9 @@ def settings_user_setup():
 @account.route('/settings/account', methods=['GET', 'POST'])
 @login_required()
 def settings_account():
+    '''
+    performs update password operation
+    '''
     # only user_admin and admin can edit its account settings
     if current_user.role != 'user_admin' and current_user.role != 'admin':
         flash('To edit the account settings you need to be the admin.')
@@ -630,6 +678,9 @@ def settings_account():
 @account.route('/upgrade', methods=['GET', 'POST'])
 @login_required(types=['provider', 'payer'])
 def user_upgrade():
+    '''
+    upgrades the user to premium account
+    '''
     # user cannot upgrade the account twice
     if current_user.premium:
         flash('Your account is already upgraded to Premium.')
@@ -676,6 +727,9 @@ def user_upgrade():
 @account.route('/generate-api-key', methods=['GET'])
 @login_required()
 def generate_api_key():
+    '''
+    generates API keys for the user
+    '''
     api_key = pass_generator(size=16)
 
     current_user.api_key = api_key
