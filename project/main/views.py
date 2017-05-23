@@ -38,6 +38,9 @@ icd_code_service = ICDCodeService()
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    '''
+    renders the meipay home page
+    '''
     if not current_user.is_authenticated:
         form = LoginForm()
 
@@ -95,12 +98,18 @@ def index():
 @main.route('/static/uploads/<filename>')
 @login_required()
 def block_unauthenticated_url(filename):
+    '''
+    allows access to resources to only authenticated users
+    '''
     return send_from_directory(os.path.join('static', 'uploads'), filename)
 
 
 @main.route('/request', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_form():
+    '''
+    renders the gop request form
+    '''
     form = GOPForm()
 
     form.payer.choices = [('0', 'None')]
@@ -180,6 +189,9 @@ def request_form():
 @main.route('/request/<int:gop_id>', methods=['GET', 'POST'])
 @login_required()
 def request_page(gop_id):
+    '''
+    renders the specific gop request
+    '''
     # prevents request page from crashing when the gop_id is larger than a integer
     if gop_id > sys.maxsize:
         flash('Request out of range')
@@ -248,6 +260,9 @@ def request_page(gop_id):
 @main.route('/request/<int:gop_id>/set-stamp-author', methods=['GET'])
 @login_required()
 def request_set_stamp_author(gop_id):
+    '''
+    sets the name of the person who is handling the gop request within the team
+    '''
     if not is_payer(current_user):
         return 'ERROR'
 
@@ -272,6 +287,9 @@ def request_set_stamp_author(gop_id):
 @main.route('/request/<int:gop_id>/download', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_download(gop_id):
+    '''
+    download gop request in csv format for premium users
+    '''
     if not current_user.premium:
         flash('To download the GOP request you need to upgrade your account.')
         return redirect(url_for('account.user_upgrade'))
@@ -339,6 +357,9 @@ def request_page_download(gop_id):
 @main.route('/request/<int:gop_id>/edit', methods=['GET', 'POST'])
 @login_required(types=['provider'])
 def request_page_edit(gop_id):
+    '''
+    editing gop request operation
+    '''
     gop = gop_service.get_or_404(gop_id)
 
     # if no GOP is found or it is not the current user's GOP, 
@@ -483,6 +504,9 @@ def request_page_edit(gop_id):
 @main.route('/request/<int:gop_id>/resend', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_resend(gop_id):
+    '''
+    resend gop request operation
+    '''
     gop = GuaranteeOfPayment.query.get(gop_id)
 
     # if no GOP is found, redirect to the home page
@@ -504,6 +528,9 @@ def request_page_resend(gop_id):
 @main.route('/request/<int:gop_id>/close/<reason>', methods=['GET'])
 @login_required(types=['provider'])
 def request_page_close(gop_id, reason):
+    '''
+    close gop request operation
+    '''
     gop = gop_service.get_or_404(gop_id)
 
     # if no GOP is found, redirect to the home page
@@ -526,6 +553,9 @@ def request_page_close(gop_id, reason):
 @main.route('/history')
 @login_required()
 def history():
+    '''
+    renders the closed gop list
+    '''
     # if it is admin, show him all the closed requests
     if is_admin(current_user):
         return redirect(url_for('admin.history'))
@@ -545,6 +575,9 @@ def history():
 
 @main.route('/search', methods=['GET'])
 def search():
+    '''
+    operations performed by the search textbox
+    '''
     found = {
         'results': []
     }
@@ -584,6 +617,9 @@ def search():
 
 @main.route('/icd-code/search', methods=['GET'])
 def icd_code_search():
+    '''
+    gets the result of the icd code search results for the icd pop up menu
+    '''
     query = request.args.get('query').lower()
     
     if not query:
@@ -620,6 +656,9 @@ def icd_code_search():
 @main.route('/requests/filter', methods=['GET'])
 @login_required(roles=['admin'])
 def requests_filter():
+    '''
+    sorts the results of the gops on the basis of country, provider, payer and status
+    '''
     country = request.args.get('country')
     provider = request.args.get('provider')
     payer = request.args.get('payer')
@@ -658,6 +697,9 @@ def requests_filter():
 @main.route('/billing-code/<int:bill_id>/get', methods=['GET'])
 @login_required()
 def billing_code_get(bill_id):
+    '''
+    get specific billing code details in json format
+    '''
     if is_provider(current_user):
         return jsonify({})
 
@@ -677,6 +719,9 @@ def billing_code_get(bill_id):
 @main.route('/get-gops', methods=['GET'])
 @login_required()
 def get_gops():
+    '''
+    gets the list of gop's in json format and the results can be sorted on the basis of status, patient, payer and time
+    '''
     page = request.args.get('page')
     sort = request.args.get('sort')
 

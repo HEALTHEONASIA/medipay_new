@@ -15,8 +15,8 @@ from .. import config, redis_store, socketio
 
 
 def prepare_gop_dict(gop):
-    """The function takes the GOP model object
-    and convert it to the python dictionary"""
+    '''The function takes the GOP model object
+    and convert it to the python dictionary'''
 
     if not gop.timestamp_edited:
         timestamp_edited = None
@@ -67,8 +67,8 @@ def prepare_gop_dict(gop):
 
 
 def prepare_gops_list(gops):
-    """The function takes the GOP model objects list and convert it to the
-    python dictionary"""
+    '''The function takes the GOP model objects list and convert it to the
+    python dictionary'''
 
     if not gops:
         return []
@@ -83,15 +83,24 @@ def prepare_gops_list(gops):
 
 
 def allowed_file(filename):
+    '''
+    checks if the uploaded file contains only the required extensions
+    '''
     return '.' in filename and \
         filename.rsplit('.', 1)[1] in config['production'].ALLOWED_EXTENSIONS
 
 
 def pass_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    '''
+    generates a 6 digit random password
+    '''
     return ''.join(random.choice(chars) for _ in range(size))
 
 
 def photo_file_name_santizer(photo):
+    '''
+    stores the uploaded image file
+    '''
     filename = secure_filename(photo.data.filename)
 
     if filename and allowed_file(filename):
@@ -116,6 +125,9 @@ def photo_file_name_santizer(photo):
 
 
 def csv_ouput(csv_file_name, data):
+    '''
+    genrates the csv file format
+    '''
     si = io.StringIO()
     cw = csv.writer(si)
     cw.writerows(data)
@@ -126,6 +138,9 @@ def csv_ouput(csv_file_name, data):
 
 
 def to_float_or_zero(value):
+    '''
+    converts strings to float if valid float number, else defaults the value to 0.0
+    '''
     try:
         value = float(value)
     except ValueError:
@@ -134,7 +149,9 @@ def to_float_or_zero(value):
 
 
 def validate_email_address(data):
-    """Returns True or False"""
+    '''
+    return true if the email address is validated else false
+    '''
     if data:
         match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
           ,data)
@@ -150,7 +167,9 @@ def validate_email_address(data):
 def notify(title='New notification', message='Message',
            url=None, user=current_user, user_id=None,
            room_name=None):
-    """Function to send socketio message"""
+    '''
+    function to send socketio message
+    '''
     try:
         # if the user's id is not passed,
         # use the User object instead
@@ -168,18 +187,30 @@ def notify(title='New notification', message='Message',
 
 
 def is_admin(user):
+    '''
+    checks if the user is admin
+    '''
     return user.get_role() == 'admin'
 
 
 def is_provider(user):
+    '''
+    checks if the user is a provider
+    '''
     return user.get_type() == 'provider'
 
 
 def is_payer(user):
+    '''
+    checks if the user is a payer
+    '''
     return user.get_type() == 'payer'
 
 
 def to_str(bytes_or_str):
+    '''
+    converts the data to string
+    '''
     if isinstance(bytes_or_str, bytes):
         value = bytes_or_str.decode('utf-8')
     else:
@@ -188,6 +219,9 @@ def to_str(bytes_or_str):
 
 
 def to_bytes(bytes_or_str):
+    '''
+    converts the data to bytes
+    '''
     if isinstance(bytes_or_str, str):
         value = bytes_or_str.encode('utf-8')
     else:

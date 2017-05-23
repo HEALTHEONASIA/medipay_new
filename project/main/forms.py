@@ -28,12 +28,18 @@ class BaseForm(Form):
 
 
 def strip_filter(value):
+    '''
+    removes leading and trailing white space
+    '''
     if value is not None and hasattr(value, 'strip'):
         return value.strip()
     return value
 
 
 def validate_email_address(form, field):
+    '''
+    validates email address
+    '''
     if field.data:
         match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
           ,field.data)
@@ -46,6 +52,9 @@ def validate_email_address(form, field):
 
 
 def validate_numeric(form, field):
+    '''
+    validates numeric data type on the input field
+    '''
     if field.data:
         match = re.match(r"^[0-9]+$", field.data)
         if match == None:
@@ -53,6 +62,9 @@ def validate_numeric(form, field):
 
 
 def validate_phone(form, field):
+    '''
+    validates phone data type on the input field
+    '''
     if field.data:
         match = re.match(r"^\+?[0-9]+$", field.data)
         if match == None:
@@ -60,6 +72,9 @@ def validate_phone(form, field):
 
 
 def validate_payer_email_address(form, field):
+    '''
+    checks if email address is already registered in the system or not
+    '''
     if field.data:
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
@@ -70,6 +85,9 @@ def validate_payer_email_address(form, field):
 
 
 def validate_comma_sep_dec(form, field):
+    '''
+    removes comma and minus sign from fee input and stores the value if it is greater than 0
+    '''
     field.data = field.data.replace(',' ,'').replace('-','')
     try:
         field.data = float(field.data)
@@ -79,6 +97,9 @@ def validate_comma_sep_dec(form, field):
         field.data = 0.0
         
 def validate_empty_fee(form, field):
+    '''
+    validates empty fee field on the form
+    '''
     try:
         field.data = float(field.data)
         if field.data < 0:
@@ -88,6 +109,9 @@ def validate_empty_fee(form, field):
 
 
 class GOPForm(BaseForm):
+    '''
+    GOP request form
+    '''
     patient_medical_no = StringField('Patient medical no.',
                                      validators=[Required()])
     payer = SelectField('Payer Select', coerce=int, choices=[('0', 'None')])
@@ -169,11 +193,17 @@ class GOPForm(BaseForm):
     submit = SubmitField('Submit')
 
     def validate_national_id(self, field):
+        '''
+        checks if the id of the patient is present in the system or not
+        '''
         if field.data != self.current_national_id.data and \
           Member.query.filter_by(national_id=field.data).first():
             raise ValidationError('Patient ID already exists.')
 
     def validate_member_photo(self, field):
+        '''
+        validates the member image upload
+        '''
         if field.data:
             filename = secure_filename(field.data.filename)
             allowed = ['jpg', 'jpeg', 'png', 'gif']
@@ -182,11 +212,17 @@ class GOPForm(BaseForm):
 
 
 class GOPApproveForm(BaseForm):
+    '''
+    GOP approval form
+    '''
     status = HiddenField('Status')
     submit_approve = SubmitField('Approve')
     reason_decline = StringField('Reason decline')
     submit_decline = SubmitField('Decline')
 
     def validate_reason_decline(self, field):
+        '''
+        decine gop request field cannot be left empty
+        '''
         if self.status.data == 'declined' and not len(field.data):
             raise ValidationError('The reason is required when declining.')

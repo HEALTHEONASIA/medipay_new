@@ -12,11 +12,14 @@ from .helpers import is_admin, is_payer, is_provider, pass_generator, to_str
 
 
 class ExtFuncsMixin(object):
+    '''
+    base class for medipay operations
+    '''
     def __init__(self):
         self.columns = self.__model__.columns()
 
     def update_from_form(self, model, form, exclude=[]):
-        # fill the models from the form
+        '''fill the models from the form'''
         for col in model.columns():
             if col not in exclude and hasattr(form, col):
                 setattr(model, col, getattr(form, col).data)
@@ -32,7 +35,9 @@ class ExtFuncsMixin(object):
 
     @staticmethod
     def prepare_pagination(items):
-        # pagination
+        '''
+        restricts results of each page to 10
+        '''
         pagination = items.paginate(per_page=10)
 
         page = request.args.get('page')
@@ -131,6 +136,9 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
             pass
 
     def set_chat_room(self, gop):
+        '''
+        creates a chat room for the user
+        '''
         session['room'] = 'gop' + str(gop.id)
         session['name'] = current_user.email
         session['provider_user_id'] = gop.provider.user.id
@@ -220,7 +228,7 @@ class ChatService(ExtFuncsMixin, SQLAlchemyService):
     __db__ = db
 
     def save_for_user(self, chat, user_id):
-        """Function saves each user's history to MySQL"""
+        '''function saves each user's history to MySQL'''
         user_msg_list = '%suser%d' % (chat.name, user_id)
         msg_list = redis_store.lrange(user_msg_list, 0, -1)
 
@@ -239,5 +247,6 @@ class ChatService(ExtFuncsMixin, SQLAlchemyService):
             redis_store.delete(user_msg_list)
 
     def save_from_redis(self, chat):
+        '''function saves each user's history to Redis'''
         self.save_for_user(chat, chat.guarantee_of_payment.provider.user.id)
         self.save_for_user(chat, chat.guarantee_of_payment.payer.user.id)
