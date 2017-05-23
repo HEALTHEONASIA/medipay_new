@@ -16,8 +16,8 @@ from . import db, login_manager
 
 def login_required(roles=["any"], types=["any"],
                    deny_roles=[], deny_types=[]):
-    """Overwritten login_required decorator,
-    which includes roles checking"""
+    '''Overwrites login_required decorator,
+    which includes roles checking'''
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
@@ -37,6 +37,9 @@ def login_required(roles=["any"], types=["any"],
 
 
 def to_float_or_zero(value):
+    '''
+    converts string value to float, if it is a valid float number, else it stores the value as 0.00
+    '''
     try:
         value = float(value)
     except (ValueError, TypeError):
@@ -47,7 +50,7 @@ def to_float_or_zero(value):
 class ColsMapMixin(object):
     @classmethod
     def columns(cls):
-        """Return the actual columns of a SQLAlchemy-mapped object"""
+        '''Return the actual columns of a SQLAlchemy-mapped object'''
         return [prop.key for prop in \
             class_mapper(cls).iterate_properties \
             if isinstance(prop, ColumnProperty)]
@@ -78,20 +81,35 @@ class User(UserMixin, ColsMapMixin, db.Model):
 
     @password.setter
     def password(self, password):
+        '''
+        generates the hash of the password
+        '''
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
+        '''
+        password authentication method
+        '''
         return check_password_hash(self.password_hash, password)
 
     def get_role(self):
+        '''
+        gets the role of the user
+        '''
         return self.role
 
     def get_type(self):
+        '''
+        gets the type of the user
+        '''
         return self.user_type
 
 
 @login_manager.user_loader
 def load_user(user_id):
+    '''
+    gets current authenticated user
+    '''
     return User.query.get(int(user_id))
 
 
@@ -133,11 +151,17 @@ class Member(ColsMapMixin, db.Model):
                                             backref='member', lazy='dynamic')
 
     def age(self):
+        '''
+        obtains the age from date of birth
+        '''
         difference_in_years = relativedelta(datetime.now(),
                                             self.dob).years
         return difference_in_years
 
     def medical_record(self, provider=None):
+        '''
+        obtains the medical record of a member whos is a provider
+        '''
         if not provider and current_user and current_user.get_type() == 'provider':
             provider = current_user.provider
         else:
@@ -156,6 +180,9 @@ class Member(ColsMapMixin, db.Model):
             return medical_record
 
     def policy(self, payer=None):
+        '''
+        generates the policy of the user
+        '''
         if not payer and current_user and current_user.get_type() == 'payer':
             payer = current_user.payer
         else:
@@ -292,15 +319,18 @@ class Claim(ColsMapMixin, db.Model):
 
     @classmethod
     def for_months_filter(cls, query_object, months, _type='all'):
-        # the filter returns a query within a given month
-        # and for the whole range from today to that month
+        '''
+        the filter returns a query within a given month
+        and for the whole range from today to that month
 
-        # '_type' may be either 'all' or 'scalar'
-        # by 'all' it returns an objects list
-        # by 'scalar' it returns object's value summ
+        '_type' may be either 'all' or 'scalar'
+        by 'all' it returns an objects list
+        by 'scalar' it returns object's value summ
 
-        # select records whose date is between
-        # today and some month in the past
+        select records whose date is between
+        today and some month in the past
+        '''
+
         for_range = query_object.filter(cls.datetime and \
             cls.datetime.between(date_months_ago(months), date.today()))
 
@@ -320,16 +350,18 @@ class Claim(ColsMapMixin, db.Model):
 
     @classmethod
     def for_months(cls, months):
-        # returns a tuple of claims within a given month
-        # and for the whole range from today to that month
-
+        '''
+        returns a tuple of claims within a given month
+        and for the whole range from today to that month
+        '''
         return cls.for_months_filter(cls.query, months)
 
     @classmethod
     def amount_sum(cls, months=0):
-        # returns a tuple with a total amount, amount for the given
-        # month ago and for the whole range from today to the given month
-
+        '''
+        returns a tuple with a total amount, amount for the given
+        month ago and for the whole range from today to the given month
+        '''
         # base query which uses the SQL function 'sum'
         query = db.session.query(func.sum(cls.amount))
 
@@ -433,6 +465,9 @@ class GuaranteeOfPayment(ColsMapMixin ,db.Model):
                             backref='guarantee_of_payment')
 
     def turnaround_time(self):
+        '''
+        calculates the time difference between the last gop request operation
+        '''
         if not self.timestamp_edited:
             time_edited = datetime.now()
         else:
