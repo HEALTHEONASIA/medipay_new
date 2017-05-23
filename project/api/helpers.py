@@ -5,8 +5,8 @@ from .. import db, models
 
 # prepare models dictionaries
 def prepare_gop_dict(gop):
-    """The function takes the GOP model object
-    and convert it to the python dictionary"""
+    '''The function takes the GOP model object
+    and convert it to the python dictionary'''
 
     if not gop.timestamp_edited:
         timestamp_edited = None
@@ -54,6 +54,10 @@ def prepare_gop_dict(gop):
 
 
 def prepare_provider_dict(provider):
+    '''
+    The function takes the Provider model object
+    and convert it to the python dictionary
+    '''
     if not provider:
         return None
 
@@ -118,6 +122,10 @@ def prepare_provider_dict(provider):
 
 
 def prepare_payer_dict(payer):
+    '''
+    The function takes the Payer model object
+    and convert it to the python dictionary
+    '''
     if not payer:
         return None
 
@@ -159,6 +167,10 @@ def prepare_payer_dict(payer):
 
 
 def prepare_doctor_dict(doctor):
+    '''
+    The function takes the Doctor model object
+    and convert it to the python dictionary
+    '''
     if not doctor:
         return None
 
@@ -175,6 +187,10 @@ def prepare_doctor_dict(doctor):
 
 
 def prepare_billing_code_dict(billing_code):
+    '''
+    The function takes the Billing Code model object
+    and convert it to the python dictionary
+    '''
     if not billing_code:
         return None
 
@@ -195,6 +211,10 @@ def prepare_billing_code_dict(billing_code):
 
 
 def prepare_icd_code_dict(icd_code):
+    '''
+    The function takes the ICD model object
+    and convert it to the python dictionary
+    '''
     if not icd_code:
         return None
 
@@ -210,6 +230,10 @@ def prepare_icd_code_dict(icd_code):
 
 
 def prepare_user_dict(user):
+    '''
+    The function takes the User model object
+    and convert it to the python dictionary
+    '''
     if not user:
         return None
 
@@ -238,8 +262,10 @@ def prepare_user_dict(user):
 
 # prepare models lists
 def prepare_gops_list(gops):
-    """The function takes the GOP model objects list and convert it to the
-    python dictionary"""
+    '''
+    This function takes the GOP model objects list and convert 
+    it to the list of python dictionary
+    '''
 
     if not gops:
         return []
@@ -254,6 +280,10 @@ def prepare_gops_list(gops):
 
 
 def prepare_providers_list(providers):
+    '''
+    This function takes the Provider model objects list and convert 
+    it to the list of python dictionary
+    '''
     if not providers:
         return []
 
@@ -267,6 +297,10 @@ def prepare_providers_list(providers):
 
 
 def prepare_payers_list(payers):
+    '''
+    This function takes the Payer model objects list and convert 
+    it to the list of python dictionary
+    '''
     if not payers:
         return []
 
@@ -280,8 +314,10 @@ def prepare_payers_list(payers):
 
 
 def prepare_doctors_list(doctors):
-    """The function takes the GOP model objects list and convert it to the
-    python dictionary"""
+    '''
+    This function takes the Doctor model objects list and convert 
+    it to the list ofpython dictionary
+    '''
 
     if not doctors:
         return []
@@ -296,6 +332,10 @@ def prepare_doctors_list(doctors):
 
 
 def prepare_billing_codes_list(billing_codes):
+    '''
+    This function takes the Billing model objects list and convert 
+    it to the list ofpython dictionary
+    '''
     if not billing_codes:
         return []
 
@@ -309,6 +349,10 @@ def prepare_billing_codes_list(billing_codes):
 
 
 def prepare_icd_codes_list(icd_codes):
+    '''
+    This function takes the ICD model objects list and convert 
+    it to the list ofpython dictionary
+    '''
     if not icd_codes:
         return []
 
@@ -321,6 +365,10 @@ def prepare_icd_codes_list(icd_codes):
 
 
 def prepare_users_list(users):
+    '''
+    This function takes the User model objects list and convert 
+    it to the list ofpython dictionary
+    '''
     if not users:
         return []
 
@@ -333,6 +381,9 @@ def prepare_users_list(users):
 
 
 def from_post_to_dict(dest_dict, overwrite=False):
+    '''
+    Converts post data to python dictionary object
+    '''
     for key, value in dest_dict.iteritems():
         if not overwrite:
             # If it is the adding operation,
@@ -353,6 +404,9 @@ def from_post_to_dict(dest_dict, overwrite=False):
 
 
 def from_json_to_dict(json_dict, dest_dict, overwrite=False):
+    '''
+    Converts JSON data to python dictionary object
+    '''
     for key, value in dest_dict.iteritems():
         if not overwrite:
             # If it is the adding operation,
@@ -373,6 +427,9 @@ def from_json_to_dict(json_dict, dest_dict, overwrite=False):
 
 
 def authorize_api_key():
+    '''
+    Authenticates API key
+    '''
     api_key = request.args.get('api_key')
 
     if not api_key:
@@ -390,6 +447,9 @@ def authorize_api_key():
 
 
 def exclude_keys(keys, dest):
+    '''
+    Remove keys that are not needed in JSON response object 
+    '''
     if keys:
         if type(dest) is dict:
             for key in keys:

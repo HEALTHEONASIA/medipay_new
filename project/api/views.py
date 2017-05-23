@@ -35,6 +35,9 @@ def api_auth():
     return wrapper
 
 def validate_email_address(data):
+    '''
+    validates email address
+    '''
     if data:
         match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
           ,data)
@@ -49,7 +52,7 @@ def validate_email_address(data):
 @api.route('/requests', methods=['GET'])
 @api_auth()
 def requests():
-    """The function returns all the GOP requests"""
+    '''The function returns all the GOP requests'''
 
     if user.user_type == 'provider':
         gops = models.GuaranteeOfPayment.query.filter_by(
@@ -69,7 +72,7 @@ def requests():
 @api.route('/request/<int:gop_id>', methods=['GET'])
 @api_auth()
 def request_get(gop_id):
-    """The function returns the GOP by its ID"""
+    '''The function returns the GOP by its ID'''
 
     if user.user_type == 'provider':
         gop = models.GuaranteeOfPayment.query.filter_by(id=gop_id,
@@ -94,6 +97,9 @@ def request_get(gop_id):
 @api.route('/settings', methods=['GET'])
 @api_auth()
 def settings():
+    '''
+    returns all the setting for the user
+    '''
     if user.user_type == 'provider':
         exclude = [
             'billing_codes',
@@ -134,6 +140,9 @@ def settings():
 @api.route('/payers', methods=['GET'])
 @api_auth()
 def payers():
+    '''
+    returns the list of payers associated with the user
+    '''
     if user.user_type == 'provider':
         exclude = [
             'providers',
@@ -154,6 +163,9 @@ def payers():
 @api.route('/payer/<int:payer_id>', methods=['GET'])
 @api_auth()
 def payer_get(payer_id):
+    '''
+    returns the list of payers by ID
+    '''
     if user.user_type == 'provider':
         payer = models.Payer.query.filter(
             db.and_(models.Payer.providers.any(id=user.provider.id), 
@@ -179,6 +191,9 @@ def payer_get(payer_id):
 @api.route('/billing-codes', methods=['GET'])
 @api_auth()
 def billing_codes():
+    '''
+    returns a list of billing codes for a provider
+    '''
     if user.user_type == 'provider':
         billing_codes = user.provider.billing_codes
 
@@ -194,6 +209,9 @@ def billing_codes():
 @api.route('/billing-code/<int:billing_code_id>', methods=['GET'])
 @api_auth()
 def billing_code_get(billing_code_id):
+    '''
+    returns a list of billing codes for a provider by ID
+    '''
     if user.user_type == 'provider':
         billing_code = models.BillingCode.query.filter_by(id=billing_code_id,
                                                 provider=user.provider).first()
@@ -214,6 +232,9 @@ def billing_code_get(billing_code_id):
 @api.route('/icd-codes', methods=['GET'])
 @api_auth()
 def icd_codes():
+    '''
+    returns a list of icd codes
+    '''
     icd_codes = models.ICDCode.query.all()
 
     return jsonify(prepare_icd_codes_list(icd_codes))
@@ -222,6 +243,9 @@ def icd_codes():
 @api.route('/icd-code/<int:icd_code_id>', methods=['GET'])
 @api_auth()
 def icd_code_get(icd_code_id):
+    '''
+    returns a list of icd codes by ID
+    '''
     icd_code = models.ICDCode.query.get(icd_code_id)
 
     if not icd_code:
@@ -233,6 +257,9 @@ def icd_code_get(icd_code_id):
 @api.route('/doctors', methods=['GET'])
 @api_auth()
 def doctors():
+    '''
+    returns a list of doctors associated with providers
+    '''
     if user.user_type == 'provider':
         doctors = user.provider.doctors
 
@@ -248,6 +275,9 @@ def doctors():
 @api.route('/doctor/<int:doctor_id>', methods=['GET'])
 @api_auth()
 def doctor_get(doctor_id):
+    '''
+    returns a list of doctors associated with providers by ID
+    '''
     if user.user_type == 'provider':
         doctor = models.Doctor.query.filter_by(id=doctor_id,
                                                provider=user.provider).first()
@@ -268,6 +298,9 @@ def doctor_get(doctor_id):
 @api.route('/system-settings', methods=['GET'])
 @api_auth()
 def system_settings():
+    '''
+    returns system setting of provider
+    '''
     if user.user_type == 'provider':
         exclude = [
             'billing_codes',
@@ -302,6 +335,9 @@ def system_settings():
 @api.route('/user-settings', methods=['GET'])
 @api_auth()
 def user_settings():
+    '''
+    returns user setting of member
+    '''
     exclude = [
         'id',
         'payer_id',
@@ -327,6 +363,9 @@ def user_settings():
 @api.route('/request/add/json', methods=['POST'])
 @api_auth()
 def request_add_json():
+    '''
+    creates a gop request
+    '''
     if user.user_type != 'provider':
         return 'Error: you are not able to add the GOP requests'
 
@@ -461,6 +500,9 @@ def request_add_json():
 @api.route('/request/edit/json', methods=['POST'])
 @api_auth()
 def request_edit_json():
+    '''
+    edit a gop request
+    '''
     if user.user_type != 'provider':
         return 'Error: you are not able to edit the GOP requests'
 
@@ -588,6 +630,9 @@ def request_edit_json():
 @api.route('/request/set-status/json', methods=['POST'])
 @api_auth()
 def request_set_status_json():
+    '''
+    change the status of the gop request
+    '''
     if user.user_type != 'payer':
         return 'Error: you are not able to change a request status ' + \
             'as your account is not of payer type'
@@ -650,6 +695,9 @@ def request_set_status_json():
 @api.route('/settings/edit', methods=['POST'])
 @api_auth()
 def settings_edit():
+    '''
+    edit the setting of the user
+    '''
     if user.user_type == 'provider':
         provider = user.provider
 
@@ -746,6 +794,9 @@ def settings_edit():
 @api.route('/payer/add/json', methods=['POST'])
 @api_auth()
 def payer_add_json():
+    '''
+    add a new payer
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to add payers'
 
@@ -825,6 +876,9 @@ def payer_add_json():
 @api.route('/payer/edit/json', methods=['POST'])
 @api_auth()
 def payer_edit_json():
+    '''
+    edit a payer
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to edit payers'
 
@@ -895,6 +949,9 @@ def payer_edit_json():
 @api.route('/billing-code/add/json', methods=['POST'])
 @api_auth()
 def billing_code_add_json():
+    '''
+    add a new billing code 
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to add billing codes'
 
@@ -973,6 +1030,9 @@ def billing_code_add_json():
 @api.route('/doctor/add/json', methods=['POST'])
 @api_auth()
 def doctor_add_json():
+    '''
+    add a new doctor
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to add doctors'
 
@@ -1026,6 +1086,9 @@ def doctor_add_json():
 @api.route('/billing-code/edit/json', methods=['POST'])
 @api_auth()
 def billing_code_edit_json():
+    '''
+    edit a billing code
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to edit billing codes'
 
@@ -1105,6 +1168,9 @@ def billing_code_edit_json():
 @api.route('/doctor/edit/json', methods=['POST'])
 @api_auth()
 def doctor_edit_json():
+    '''
+    edit a doctor information
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to edit doctors'
 
@@ -1161,6 +1227,9 @@ def doctor_edit_json():
 @api.route('/system-settings/edit', methods=['POST'])
 @api_auth()
 def system_settings_edit():
+    '''
+    edit provider system setting
+    '''
     if user.user_type != 'provider' or user.role != 'user_admin':
         return 'Error: you are not able to edit the system settings'
 
@@ -1215,6 +1284,9 @@ def system_settings_edit():
 @api.route('/user-settings/edit', methods=['POST'])
 @api_auth()
 def user_settings_edit():
+    '''
+    edit user setting
+    '''
     if user.role != 'user_admin':
         return 'Error: you are not able to change user settings'
 
@@ -1249,6 +1321,9 @@ def user_settings_edit():
 @api.route('/account-settings/edit', methods=['POST'])
 @api_auth()
 def account_settings_edit():
+    '''
+    change user password
+    '''
     # put the found object's data in a dictionary
     user_dict = prepare_user_dict(user)
     # write the POST paramteres into the dictionary
@@ -1262,7 +1337,7 @@ def account_settings_edit():
 @api.route('/members', methods=['GET'])
 @api_auth()
 def members():
-    """The function returns all the members"""
+    '''The function returns all the members'''
 
     members = models.Member.query.all()
 
@@ -1273,7 +1348,7 @@ def members():
 @api.route('/member/<int:member_id>', methods=['GET'])
 @api_auth()
 def member_get(member_id):
-    """The function returns the member by its ID"""
+    '''The function returns the member by its ID'''
 
     member = models.Member.query.get(member_id)
 
@@ -1289,7 +1364,7 @@ def member_get(member_id):
 @api.route('/users', methods=['GET'])
 @api_auth()
 def users():
-    """The function returns all the users"""
+    '''The function returns all the users'''
 
     users = models.User.query.all()
 
@@ -1300,7 +1375,7 @@ def users():
 @api.route('/user/<int:user_id>', methods=['GET'])
 @api_auth()
 def user_get(user_id):
-    """The function returns the user by its ID"""
+    '''The function returns the user by its ID'''
 
     user = models.User.query.get(user_id)
 
@@ -1316,7 +1391,7 @@ def user_get(user_id):
 @api.route('/terminals', methods=['GET'])
 @api_auth()
 def terminals():
-    """The function returns all the terminals"""
+    '''The function returns all the terminals'''
 
     terminals = models.Terminal.query.all()
 
@@ -1327,7 +1402,7 @@ def terminals():
 @api.route('/terminal/<int:terminal_id>', methods=['GET'])
 @api_auth()
 def terminal_get(terminal_id):
-    """The function returns the terminal by its ID"""
+    '''The function returns the terminal by its ID'''
 
     terminal = models.Terminal.query.get(terminal_id)
 
@@ -1343,7 +1418,7 @@ def terminal_get(terminal_id):
 @api.route('/claim', methods=['GET'])
 @api_auth()
 def claim():
-    """The function returns all the claims"""
+    '''The function returns all the claims'''
 
     claims = models.Claim.query.all()
 
@@ -1354,7 +1429,7 @@ def claim():
 @api.route('/claim/<int:claim_id>', methods=['GET'])
 @api_auth()
 def claim_get(claim_id):
-    """The function returns the claim by its ID"""
+    '''The function returns the claim by its ID'''
 
     claim = models.Claim.query.get(claim_id)
 
@@ -1370,6 +1445,9 @@ def claim_get(claim_id):
 @api.route('/member/add/json', methods=['POST'])
 @api_auth()
 def member_add_json():
+    '''
+    add a member
+    '''
     json = request.get_json()
 
     members_list = []
@@ -1452,6 +1530,9 @@ def member_add_json():
 @api.route('/member/edit/json', methods=['POST'])
 @api_auth()
 def member_edit_json():
+    '''
+    edit a member
+    '''
     json = request.get_json()
 
     members_list = []
@@ -1510,7 +1591,7 @@ def member_edit_json():
 
 @api.route('/member/login', methods=['POST'])
 def member_login():
-    """Authorizes a member and returns a token"""
+    '''Authorizes a member and returns a token'''
     json = request.get_json()
 
     if not json:
@@ -1564,7 +1645,7 @@ def member_login():
 
 @api.route('/member/register', methods=['POST'])
 def member_register():
-    """Registers a new member"""
+    '''Registers a new member'''
     json = request.get_json()
 
     if not json:
@@ -1591,13 +1672,13 @@ def member_register():
 @api.route('/member/logout', methods=['POST'])
 @api_auth()
 def member_logout():
-    """Deletes a member's token from a database"""
+    '''Deletes a member's token from a database'''
     json = request.get_json()
 
 
 @api.route('/member/info/update', methods=['POST'])
 def member_info_update():
-    """Updates general member's info"""
+    '''Updates general member's info'''
     json = request.get_json()
 
     if not json:
@@ -1681,6 +1762,9 @@ def member_info_update():
 @api.route('/user/add/json', methods=['POST'])
 @api_auth()
 def user_add_json():
+    '''
+    add a user
+    '''
     json = request.get_json()
 
     users_list = []
@@ -1748,6 +1832,9 @@ def user_add_json():
 @api.route('/user/edit/json', methods=['POST'])
 @api_auth()
 def user_edit_json():
+    '''
+    edit a user
+    '''
     json = request.get_json()
 
     users_list = []
@@ -1807,6 +1894,9 @@ def user_edit_json():
 @api.route('/terminal/add/json', methods=['POST'])
 @api_auth()
 def terminal_add_json():
+    '''
+    add a terminal
+    '''
     json = request.get_json()
 
     terminals_list = []
@@ -1852,6 +1942,9 @@ def terminal_add_json():
 @api.route('/terminal/edit/json', methods=['POST'])
 @api_auth()
 def terminal_edit_json():
+    '''
+    edit a terminal
+    '''
     json = request.get_json()
 
     terminals_list = []
@@ -1894,6 +1987,9 @@ def terminal_edit_json():
 
 @api.route('/terminal/add', methods=['POST'])
 def terminal_add():
+    '''
+    add a terminal
+    '''
     authorized, error, user = authorize_api_key()
 
     if not authorized:
@@ -1925,6 +2021,9 @@ def terminal_add():
 
 @api.route('/claim/check-new', methods=['GET'])
 def claim_check_new():
+    '''
+    check for a new claim
+    '''
     authorized, error, user = authorize_api_key()
 
     if not authorized:
@@ -1950,6 +2049,9 @@ def claim_check_new():
 
 @api.route('/claim/add', methods=['POST'])
 def claim_add():
+    '''
+    add a new claim
+    '''
     authorized, error, user = authorize_api_key()
 
     if not authorized:
@@ -1988,6 +2090,9 @@ def claim_add():
 
 @api.route('/claim/add-by-terminal', methods=['POST'])
 def claim_add_by_terminal():
+    '''
+    add a claim fro terminal through the application
+    '''
     json = request.get_json()
 
     if 'user_id' not in json or 'terminal_uid' not in json:
@@ -2045,6 +2150,9 @@ def claim_add_by_terminal():
 @api.route('/claim/add/json', methods=['POST'])
 @api_auth()
 def claim_add_json():
+    '''
+    add multiple claims
+    '''
     json = request.get_json()
 
     claims_list = []
@@ -2108,6 +2216,9 @@ def claim_add_json():
 @api.route('/claim/edit/json', methods=['POST'])
 @api_auth()
 def claim_edit_json():
+    '''
+    edit multiple caims
+    '''
     json = request.get_json()
 
     claims_list = []
