@@ -21,12 +21,18 @@ class BaseForm(Form):
 
 
 def strip_filter(value):
+    '''
+    removes leading and trailing white space
+    '''
     if value is not None and hasattr(value, 'strip'):
         return value.strip()
     return value
 
 
 def validate_email_address(form, field):
+    '''
+    validates email address
+    '''
     if field.data:
         match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
           ,field.data)
@@ -39,6 +45,9 @@ def validate_email_address(form, field):
 
 
 def validate_numeric(form, field):
+    '''
+    validates numeric data type on the input field
+    '''
     if field.data:
         match = re.match(r"^[0-9]+$", field.data)
         if match == None:
@@ -46,6 +55,9 @@ def validate_numeric(form, field):
 
 
 def validate_phone(form, field):
+    '''
+    validates phone data type on the input field
+    '''
     if field.data:
         match = re.match(r"^\+?[0-9]+$", field.data)
         if match == None:
@@ -53,6 +65,9 @@ def validate_phone(form, field):
 
 
 def validate_payer_email_address(form, field):
+    '''
+    checks if email address is already registered in the system or not
+    '''
     if field.data:
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
@@ -63,6 +78,9 @@ def validate_payer_email_address(form, field):
 
 
 def validate_comma_sep_dec(form, field):
+    '''
+    removes comma and minus sign from fee input and stores the value if it is greater than 0
+    '''
     field.data = field.data.replace(',' ,'').replace('-','')
     try:
         field.data = float(field.data)
@@ -72,6 +90,9 @@ def validate_comma_sep_dec(form, field):
         field.data = 0.0
         
 def validate_empty_fee(form, field):
+    '''
+    validates empty fee field on the form
+    '''
     try:
         field.data = float(field.data)
         if field.data < 0:
@@ -80,11 +101,17 @@ def validate_empty_fee(form, field):
         field.data = 0.0
 
 def validate_pic_and_alt_email_not_equal(form, field):
+    '''
+    checks if both the email address provided are different or not
+    '''
     if form.pic_email.data.lower() == form.pic_alt_email.data.lower():
         raise ValidationError('PIC and ALT email cannot be same')
 
 
 class ChangeProviderInfoForm(BaseForm):
+    '''
+    Add provider information form
+    '''
     company = StringField('Company')
     provider_type = StringField('Provider Type')
     pic = StringField('PIC')
@@ -113,6 +140,9 @@ class ChangeProviderInfoForm(BaseForm):
 
 
 class ChangePayerInfoForm(BaseForm):
+    '''
+    Add payer information form
+    '''
     company = StringField('Company')
     payer_type = SelectField('Type', validators=[Required()],
                              choices=[('Insurer', 'Insurer'),
@@ -144,6 +174,9 @@ class ChangePayerInfoForm(BaseForm):
 
 
 class ProviderPayerSetupEditForm(BaseForm):
+    '''
+    Edit payer from provider form
+    '''
     company = StringField('Name', validators=[Required()])
     payer_type = SelectField('Type', validators=[Required()],
                              choices=[('Insurer', 'Insurer'),
@@ -170,11 +203,17 @@ class ProviderPayerSetupEditForm(BaseForm):
     submit = SubmitField('Save')
 
     def validate_pic_email(self, field):
+        '''
+        checks if the provider email address is already registered in the system or not
+        '''
         if User.query.filter_by(
           email=field.data, user_type='provider').first():
             raise ValidationError('Email already registered.')
 
     def validate_company(self, field):
+        '''
+        checks if the provider name is already registered or not
+        '''
         provider = Provider.query.filter_by(
             user_id=int(self.current_user_id.data)).first()
         count = 0
@@ -186,7 +225,13 @@ class ProviderPayerSetupEditForm(BaseForm):
 
 
 class ProviderPayerSetupAddForm(ProviderPayerSetupEditForm):
+    '''
+    Add payer from provider form
+    '''
     def validate_company(self, field):
+        '''
+        checks if the payer name is already registered or not
+        '''
         provider = Provider.query.filter_by(
             user_id=int(self.current_user_id.data)).first()
         count = 0
@@ -198,6 +243,9 @@ class ProviderPayerSetupAddForm(ProviderPayerSetupEditForm):
 
 
 class EditAccountForm(BaseForm):
+    '''
+    Change password form for members
+    '''
     old_password = PasswordField('Old password', validators=[Required()])
     password = PasswordField('Password', validators=[
         Required(), EqualTo('password2', message='Passwords must match.')])
@@ -205,11 +253,17 @@ class EditAccountForm(BaseForm):
     submit = SubmitField('Save')
 
     def validate_old_password(self, field):
+        '''
+        validates the old password before changing it to the new password
+        '''
         if not current_user.verify_password(field.data):
               raise ValidationError('The password is wrong.')
 
 
 class EditAccountAdminForm(BaseForm):
+    '''
+    Chnage password form for admin
+    '''
     password = PasswordField('Password', validators=[
         Required(), EqualTo('password2', message='Passwords must match.')])
     password2 = PasswordField('Confirm password', validators=[Required()])
@@ -217,6 +271,9 @@ class EditAccountAdminForm(BaseForm):
 
 
 class UserSetupForm(BaseForm):
+    '''
+    User setup form
+    '''
     name = StringField('Name')
     email = StringField('Email', validators=[Required(), Email(),
                                              Length(1, 64)])
@@ -224,6 +281,9 @@ class UserSetupForm(BaseForm):
     submit = SubmitField('Save')
 
     def validate_email(self, field):
+        '''
+        checks if the user's email address already registered in the system or not
+        '''
         payer = Payer.query.filter_by(pic_email=field.data).first()
         user = User.query.filter_by(email=field.data).first()
         # if there's a user with the given email and it's not the current one
@@ -233,6 +293,9 @@ class UserSetupForm(BaseForm):
 
 
 class UserSetupAdminForm(UserSetupForm):
+    '''
+    Admin User setup form
+    '''
     role = RadioField('Role', validators=[Required()],
                       choices=[('user_admin', 'Admin'),
                                ('user', 'User')])
@@ -242,6 +305,9 @@ class UserSetupAdminForm(UserSetupForm):
 
 
 class BillingCodeForm(BaseForm):
+    '''
+    Billing code form
+    '''
     room_and_board = StringField('Room and board', validators=[Required(),
                                                       validate_comma_sep_dec])
     doctor_visit_fee = StringField('Doctor_visit_fee',
@@ -260,6 +326,9 @@ class BillingCodeForm(BaseForm):
 
 
 class DoctorForm(BaseForm):
+    '''
+    Add Doctor form
+    '''
     name = StringField('Name', validators=[Required()])
     department = StringField('Department', validators=[Required()])
     photo = FileField('Photo')
@@ -277,6 +346,9 @@ class DoctorForm(BaseForm):
     submit = SubmitField('Save')
 
     def validate_photo(self, field):
+        '''
+        validates the doctor image upload
+        '''
         if field.data:
             filename = secure_filename(field.data.filename)
             allowed = ['jpg', 'jpeg', 'png', 'gif']
@@ -285,16 +357,25 @@ class DoctorForm(BaseForm):
 
 
 class SingleCsvForm(BaseForm):
+    '''
+    CSV upload form
+    '''
     csv_file = FileField('Csv file', validators=[Required()])
     submit = SubmitField('Save')
 
     def validate_csv_file(self, field):
+        '''
+        validates if the file uploaded is a csv or not
+        '''
         filename = secure_filename(field.data.filename)
         if not ('.' in filename and filename.rsplit('.', 1)[1] == 'csv'):
           raise ValidationError("Only '.csv' files are allowed.")
 
 
 class UserUpgradeForm(BaseForm):
+    '''
+    Upgrade to premium users form
+    '''
     email = StringField('Email', validators=[Required(), Email(),
                                              Length(1, 64)])
     submit = SubmitField('Request upgrade to Premium')
