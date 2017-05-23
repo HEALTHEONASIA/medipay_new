@@ -19,12 +19,18 @@ class BaseForm(Form):
 
 
 def strip_filter(value):
+    '''
+    removes leading and trailing white space
+    '''
     if value is not None and hasattr(value, 'strip'):
         return value.strip()
     return value
 
 
 def validate_email_address(form, field):
+    '''
+    validates email address
+    '''
     if field.data:
         match = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"\
           ,field.data)
@@ -34,6 +40,9 @@ def validate_email_address(form, field):
 
 
 class LoginForm(BaseForm):
+    '''
+    Login form
+    '''
     email = StringField('Email', validators=[Required(), Length(1, 64),
                                              validate_email_address])
     password = PasswordField('Password', validators=[Required()])
@@ -43,6 +52,9 @@ class LoginForm(BaseForm):
 
 
 class RegistrationForm(BaseForm):
+    '''
+    Registration form
+    '''
     email = StringField('Email', validators=[Required(), Length(1, 64),
                                              Email()])
     password = PasswordField('Password', validators=[Length(8, 32),
@@ -55,16 +67,25 @@ class RegistrationForm(BaseForm):
     submit = SubmitField('Register')
 
     def validate_email(self, field):
+        '''
+        checks if the email address is already registered in the system or not
+        '''
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
 
 
 class ForgotPasswordForm(BaseForm):
+    '''
+    Forgot password form
+    '''
     email = StringField('Email', validators=[Required(), Length(1, 64),
                                              Email()])
     submit = SubmitField('Submit')
 
     def validate_email(self, field):
+        '''
+        checks if the email address is already registered in the system or not
+        '''
         if not User.query.filter_by(email=field.data).first():
             raise ValidationError('The email is not found.')
 
