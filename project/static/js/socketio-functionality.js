@@ -59,6 +59,6 @@ socket.on('connect', function() {
 });
 
 // Handling loss of internet connection
-socket.on('disconnect', function() {
-    alert('Loss of internet connection. Please reconnect with a active internet connection'); 
-});
+// socket.on('disconnect', function() {
+//     alert('Loss of internet connection. Please reconnect with a active internet connection'); 
+// });
