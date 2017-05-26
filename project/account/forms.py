@@ -13,8 +13,17 @@ from ..models import Payer, Member, User, Provider
 
 
 class BaseForm(Form):
+    '''
+    Base Class for all other form classes in the account section
+    '''
     class Meta:
+        '''
+        Meta properties for binding fields for all oter form classes in the account section
+        '''
         def bind_field(self, form, unbound_field, options):
+            '''
+            Removes trailing and leading spcaes from all fields submitted in form
+            '''
             filters = unbound_field.kwargs.get('filters', [])
             filters.append(strip_filter)
             return unbound_field.bind(form=form, filters=filters, **options)

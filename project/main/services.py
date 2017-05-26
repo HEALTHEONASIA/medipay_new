@@ -28,9 +28,15 @@ class ExtFuncsMixin(object):
         self.__db__.session.commit()
 
     def all_for_admin(self):
+        '''
+        obtains the id for all the admin registed in the system. Used as a decorator in the view section
+        '''
         return self.__model__.query.filter(self.__model__.id != False)
 
     def get_for_admin(self, id):
+        '''
+        obtains the admin id
+        '''
         return self.get(id)
 
     @staticmethod
@@ -54,10 +60,16 @@ class ExtFuncsMixin(object):
 
 
 class ClaimService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for obtaining claims data
+    '''
     __model__ = models.Claim
     __db__ = db
 
     def all_for_user(self, user):
+        '''
+        get claim id requested by specific user 
+        '''
         if is_provider(user):
             return self._find(provider_id=user.provider.id)
 
@@ -71,6 +83,9 @@ class ClaimService(ExtFuncsMixin, SQLAlchemyService):
         return None
 
     def get_for_user(self, id, user):
+        '''
+        get all claim id from the all the users
+        '''
         if is_provider(user):
             return user.provider.claims.filter_by(id=id).first()
 
@@ -86,13 +101,22 @@ class ClaimService(ExtFuncsMixin, SQLAlchemyService):
 
 
 class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for obtaining GOP data
+    '''
     __model__ = models.GuaranteeOfPayment
     __db__ = db
 
     def get_open_all(self):
+        '''
+        obtain all open GOP requests
+        '''
         return self.__model__.query.filter_by(closed=False)
 
     def filter_for_user(self, query, user):
+        '''
+        obtain all GOP requests for a particular user
+        '''
         if is_provider(user):
             return query.filter_by(provider=user.provider)
         elif is_payer(user):
@@ -101,6 +125,9 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
             return query
 
     def send_email(self, gop):
+        '''
+        creates a random password for unregistered payer and sends a notification email
+        '''
         user = None
         rand_pass = None
 
@@ -147,30 +174,48 @@ class GuaranteeOfPaymentService(ExtFuncsMixin, SQLAlchemyService):
 
 
 class UserService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for obtaining user data
+    '''
     __model__ = models.User
     __db__ = db
 
 
 class PayerService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for obtaining payer data
+    '''
     __model__ = models.Payer
     __db__ = db
 
 
 class MedicalDetailsService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for additional medical details data
+    '''
     __model__ = models.MedicalDetails
     __db__ = db
 
 
 class ICDCodeService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for ICD codes data
+    '''
     __model__ = models.ICDCode
     __db__ = db
 
 
 class MemberService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for member data
+    '''
     __model__ = models.Member
     __db__ = db
 
     def all_for_user(self, user):
+        '''
+        obtains claim id for all users
+        '''
         if is_provider(user):
             return user.provider.members
 
@@ -185,6 +230,9 @@ class MemberService(ExtFuncsMixin, SQLAlchemyService):
         return None
 
     def get_for_user(self, id, user):
+        '''
+        obtains claim id for specific user
+        '''
         if is_provider(user):
             return user.provider.members.filter_by(id=id).first()
 
@@ -201,10 +249,16 @@ class MemberService(ExtFuncsMixin, SQLAlchemyService):
 
 
 class TerminalService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for terminal data
+    '''
     __model__ = models.Terminal
     __db__ = db
 
     def all_for_user(self, user):
+        '''
+        obtains all terminal id for all users
+        '''
         if is_provider(user):
             return user.provider.terminals
 
@@ -214,6 +268,9 @@ class TerminalService(ExtFuncsMixin, SQLAlchemyService):
         return None
 
     def get_for_user(self, id, user):
+        '''
+        obtains terminal id for specific user
+        '''
         if is_provider(user):
             return self.first(id=id, provider_id=user.provider.id)
 
@@ -224,6 +281,9 @@ class TerminalService(ExtFuncsMixin, SQLAlchemyService):
 
 
 class ChatService(ExtFuncsMixin, SQLAlchemyService):
+    '''
+    helper class for chat rooms service
+    '''
     __model__ = models.Chat
     __db__ = db
 

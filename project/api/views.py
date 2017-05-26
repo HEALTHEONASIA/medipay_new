@@ -24,6 +24,9 @@ gop_service = GuaranteeOfPaymentService()
 
 
 def api_auth():
+    '''
+    decorator for authenticate api for all functions present in the api view
+    '''
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):

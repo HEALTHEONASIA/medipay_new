@@ -54,6 +54,9 @@ def handle_notifications(data):
 
 @socketio.on_error_default
 def default_error_handler(e):
+    '''
+    undefined default handler for sockets errors
+    '''
     pass
 
 
